@@ -11,6 +11,10 @@
 - Release 앱과 Sparkle의 framework, Installer.xpc, Updater.app, Autoupdate 서명 무결성을 확인했습니다. Developer ID, hardened runtime, arm64/x86_64를 포함합니다. 배포본에는 Debug의 library-validation 예외나 파일 쓰기 권한이 없습니다.
 - ZIP·DMG 초안은 `dist/pending-notarization/`에 생성했습니다. DMG 이미지 체크섬 검증이 통과했습니다.
 - 공증은 `OneButtonNotary` 키체인 프로필 설정 대기 상태입니다. 완료 전 초안은 업데이트 피드에 등록하지 않습니다. 현재 `appcast.xml`은 유효한 빈 피드입니다.
+- 공개 GitHub raw feed를 인증 없이 내려받아 저장소 파일과 일치하는지 확인했습니다. Developer ID Release 앱의 **업데이트 → 업데이트 확인…**을 실제로 눌러 Sparkle의 **최신 버전입니다.** 안내를 확인했습니다. 아직 최신 릴리스가 없는 빈 피드 확인이며, 버전 교체 설치 테스트와는 다릅니다. 결과: `.test-artifacts/sparkle-ui-smoke.log`.
+- 비공개 테스트 폴더에서 현재 ZIP의 appcast 생성, 버전/URL/크기 검증, 키체인 공개키와 앱 공개키 일치, Sparkle `sign_update --verify`의 EdDSA 검증이 통과했습니다. 최종 공증 후 ZIP을 다시 만들면 반드시 서명과 검증을 다시 수행해야 합니다.
+- 잘못된 다운로드 URL과 파일 크기를 넣은 피드를 `PYTHONOPTIMIZE=1`에서도 거부하는 음성 테스트가 통과했습니다.
+- 저장소: `https://github.com/mindw96/DesktopButton`, 구현 커밋 `7c57eb3`, `main` 푸시 완료. 공증된 릴리스와 업데이트 enclosure는 아직 공개하지 않았습니다.
 
 공증·Gatekeeper 설치·Sparkle 실제 버전 교체의 완료 여부는 아래 배포 기록에 별도로 기록합니다. 아래 항목은 0.1.0 초기 구현의 검증 기록입니다.
 
