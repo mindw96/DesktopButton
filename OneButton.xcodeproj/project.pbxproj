@@ -1,0 +1,643 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		15E31B9F6764C23914D41B96 /* DesktopLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */; };
+		2082C1705890DABAB96BA8B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63842E1D00E6609C235902CE /* Assets.xcassets */; };
+		285E54B5CAD2EC7F9CEACD1E /* DesktopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E094051639952B86E9D408 /* DesktopLayout.swift */; };
+		3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */; };
+		3AFFF553114B7C5BF399CD7B /* FullscreenFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F02D73D08D8402916988BA /* FullscreenFixture.swift */; };
+		52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11E832FE1770C6DD4FB160 /* UpdateController.swift */; };
+		5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */; };
+		669C0C3216E24EBB6B9B1D1A /* DesktopAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B3DFE00EBF48B8403907E9 /* DesktopAccess.swift */; };
+		6832DCD2B7350623666A4519 /* DesktopStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */; };
+		7F8B48DC200F457FCDCB15A0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B5A8C8D814BC9DF170EE8637 /* Sparkle */; };
+		A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
+		ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */; };
+		DB6D45E30DC4B47A9E1C2948 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E34ED6AAFD47F3FF945C3AB1 /* Sparkle */; };
+		FC24CA3AA470C72446F382A8 /* DesktopItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E541D4C250D7360E431D7C /* DesktopItem.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		86093A91CB1E6D2DE4A6E9F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0B5D1AA5251D57802FA6591D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED34A937A7D7C86CA18F5366;
+			remoteInfo = OneButton;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateControllerTests.swift; sourceTree = "<group>"; };
+		07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStore.swift; sourceTree = "<group>"; };
+		1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButtonFullscreenFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayoutTests.swift; sourceTree = "<group>"; };
+		32F2A6C13853F568D6098F4B /* OneButton.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButton.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		389B8DADC2FB256DD12851A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3F1D8BC4FF3525A3C658ACB7 /* OneButton.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneButton.entitlements; sourceTree = "<group>"; };
+		49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopMenuView.swift; sourceTree = "<group>"; };
+		51B3DFE00EBF48B8403907E9 /* DesktopAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopAccess.swift; sourceTree = "<group>"; };
+		63842E1D00E6609C235902CE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6FF63755C35E570F37208359 /* OneButton.Debug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneButton.Debug.entitlements; sourceTree = "<group>"; };
+		737A92DA2A83497EF7134274 /* OneButtonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OneButtonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B11E832FE1770C6DD4FB160 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
+		C3E094051639952B86E9D408 /* DesktopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayout.swift; sourceTree = "<group>"; };
+		C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStoreTests.swift; sourceTree = "<group>"; };
+		E5E541D4C250D7360E431D7C /* DesktopItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopItem.swift; sourceTree = "<group>"; };
+		F2F02D73D08D8402916988BA /* FullscreenFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenFixture.swift; sourceTree = "<group>"; };
+		F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneButtonApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0ED78E646C6EA4BB1C55A8C1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB6D45E30DC4B47A9E1C2948 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		78A0C004D7990CAB8BE978D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F8B48DC200F457FCDCB15A0 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		15837939F4A1D2D3C1FF17DA /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		1624306E9091ABF96E0FE76B /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				1BE068CC2D6CC8AF4A26E3F9 /* FullscreenFixture */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		1BE068CC2D6CC8AF4A26E3F9 /* FullscreenFixture */ = {
+			isa = PBXGroup;
+			children = (
+				F2F02D73D08D8402916988BA /* FullscreenFixture.swift */,
+			);
+			path = FullscreenFixture;
+			sourceTree = "<group>";
+		};
+		3F289A59D93D7DF011AF47F6 /* OneButtonTests */ = {
+			isa = PBXGroup;
+			children = (
+				2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */,
+				C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */,
+				01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */,
+			);
+			path = OneButtonTests;
+			sourceTree = "<group>";
+		};
+		42B171935C6006A90E673A95 /* OneButton */ = {
+			isa = PBXGroup;
+			children = (
+				63842E1D00E6609C235902CE /* Assets.xcassets */,
+				389B8DADC2FB256DD12851A4 /* Info.plist */,
+				6FF63755C35E570F37208359 /* OneButton.Debug.entitlements */,
+				3F1D8BC4FF3525A3C658ACB7 /* OneButton.entitlements */,
+				15837939F4A1D2D3C1FF17DA /* App */,
+				F619EAE4D96DFC75C8F5B232 /* Models */,
+				6FE26E290FA33DB0CB2FA629 /* Services */,
+				C4B6D9CA941AFC7A2A6A8CA2 /* Stores */,
+				A76381A4A7EF729313D0EBBA /* Views */,
+			);
+			path = OneButton;
+			sourceTree = "<group>";
+		};
+		6FDAA736F983EE798B109433 = {
+			isa = PBXGroup;
+			children = (
+				42B171935C6006A90E673A95 /* OneButton */,
+				3F289A59D93D7DF011AF47F6 /* OneButtonTests */,
+				1624306E9091ABF96E0FE76B /* Tests */,
+				8CD27A44E83738EE8B7DC0B7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6FE26E290FA33DB0CB2FA629 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				51B3DFE00EBF48B8403907E9 /* DesktopAccess.swift */,
+				8B11E832FE1770C6DD4FB160 /* UpdateController.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		8CD27A44E83738EE8B7DC0B7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				32F2A6C13853F568D6098F4B /* OneButton.app */,
+				1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */,
+				737A92DA2A83497EF7134274 /* OneButtonTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A76381A4A7EF729313D0EBBA /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C4B6D9CA941AFC7A2A6A8CA2 /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
+		F619EAE4D96DFC75C8F5B232 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E5E541D4C250D7360E431D7C /* DesktopItem.swift */,
+				C3E094051639952B86E9D408 /* DesktopLayout.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		01EA0D55340FF55713B43386 /* OneButtonFullscreenFixture */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCDF96949C7C90CD2EFBD55D /* Build configuration list for PBXNativeTarget "OneButtonFullscreenFixture" */;
+			buildPhases = (
+				FE91287F581F45857EADBE23 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OneButtonFullscreenFixture;
+			packageProductDependencies = (
+			);
+			productName = OneButtonFullscreenFixture;
+			productReference = 1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9CFF23C3979977BFE9C683AD /* OneButtonTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 44B390B545231C5DD253BAFA /* Build configuration list for PBXNativeTarget "OneButtonTests" */;
+			buildPhases = (
+				EBACD83FB80A2E5579D9E208 /* Sources */,
+				0ED78E646C6EA4BB1C55A8C1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C8A6E302D35A720FF1CDC55B /* PBXTargetDependency */,
+			);
+			name = OneButtonTests;
+			packageProductDependencies = (
+				E34ED6AAFD47F3FF945C3AB1 /* Sparkle */,
+			);
+			productName = OneButtonTests;
+			productReference = 737A92DA2A83497EF7134274 /* OneButtonTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		ED34A937A7D7C86CA18F5366 /* OneButton */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AFFB02D350AB5F2C9EF007B7 /* Build configuration list for PBXNativeTarget "OneButton" */;
+			buildPhases = (
+				7295CFEE5E58AEEC718B9F93 /* Sources */,
+				EA437820A9C777CB3D28387A /* Resources */,
+				78A0C004D7990CAB8BE978D1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OneButton;
+			packageProductDependencies = (
+				B5A8C8D814BC9DF170EE8637 /* Sparkle */,
+			);
+			productName = OneButton;
+			productReference = 32F2A6C13853F568D6098F4B /* OneButton.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0B5D1AA5251D57802FA6591D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					01EA0D55340FF55713B43386 = {
+						ProvisioningStyle = Manual;
+					};
+					9CFF23C3979977BFE9C683AD = {
+						ProvisioningStyle = Manual;
+					};
+					ED34A937A7D7C86CA18F5366 = {
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = F9A072176D177D9F79796566 /* Build configuration list for PBXProject "OneButton" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6FDAA736F983EE798B109433;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				687FF74E28100169CACDD4EA /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8CD27A44E83738EE8B7DC0B7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				ED34A937A7D7C86CA18F5366 /* OneButton */,
+				9CFF23C3979977BFE9C683AD /* OneButtonTests */,
+				01EA0D55340FF55713B43386 /* OneButtonFullscreenFixture */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EA437820A9C777CB3D28387A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2082C1705890DABAB96BA8B2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7295CFEE5E58AEEC718B9F93 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				669C0C3216E24EBB6B9B1D1A /* DesktopAccess.swift in Sources */,
+				FC24CA3AA470C72446F382A8 /* DesktopItem.swift in Sources */,
+				285E54B5CAD2EC7F9CEACD1E /* DesktopLayout.swift in Sources */,
+				3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */,
+				6832DCD2B7350623666A4519 /* DesktopStore.swift in Sources */,
+				A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */,
+				52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBACD83FB80A2E5579D9E208 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				15E31B9F6764C23914D41B96 /* DesktopLayoutTests.swift in Sources */,
+				5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */,
+				ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FE91287F581F45857EADBE23 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3AFFF553114B7C5BF399CD7B /* FullscreenFixture.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C8A6E302D35A720FF1CDC55B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED34A937A7D7C86CA18F5366 /* OneButton */;
+			targetProxy = 86093A91CB1E6D2DE4A6E9F4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0012C290C898B86C2ADC258C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.onebutton.desktop.fullscreen-fixture";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		012B40ED82E622E49822D5DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OneButton.app/Contents/MacOS/OneButton";
+			};
+			name = Debug;
+		};
+		06B98C2E8EFF7FFF82C59094 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6767903597CCD3A78D66988E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.onebutton.desktop.fullscreen-fixture";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		871F81A9D5AF93B26B94E8E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OneButton.app/Contents/MacOS/OneButton";
+			};
+			name = Release;
+		};
+		98022D8BCD226973CF3A0496 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = OneButton/OneButton.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = OneButton/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
+				PRODUCT_NAME = OneButton;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		AD9B3CC0F0DD8D7BF6187DAE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F3FD0B6AC853C3401B5CC9A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = OneButton/OneButton.Debug.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = OneButton/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
+				PRODUCT_NAME = OneButton;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		44B390B545231C5DD253BAFA /* Build configuration list for PBXNativeTarget "OneButtonTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				012B40ED82E622E49822D5DE /* Debug */,
+				871F81A9D5AF93B26B94E8E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AFFB02D350AB5F2C9EF007B7 /* Build configuration list for PBXNativeTarget "OneButton" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3FD0B6AC853C3401B5CC9A7 /* Debug */,
+				98022D8BCD226973CF3A0496 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F9A072176D177D9F79796566 /* Build configuration list for PBXProject "OneButton" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06B98C2E8EFF7FFF82C59094 /* Debug */,
+				AD9B3CC0F0DD8D7BF6187DAE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FCDF96949C7C90CD2EFBD55D /* Build configuration list for PBXNativeTarget "OneButtonFullscreenFixture" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0012C290C898B86C2ADC258C /* Debug */,
+				6767903597CCD3A78D66988E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		687FF74E28100169CACDD4EA /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B5A8C8D814BC9DF170EE8637 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 687FF74E28100169CACDD4EA /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+		E34ED6AAFD47F3FF945C3AB1 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 687FF74E28100169CACDD4EA /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 0B5D1AA5251D57802FA6591D /* Project object */;
+}

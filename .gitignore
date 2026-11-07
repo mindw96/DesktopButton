@@ -1,0 +1,13 @@
+.DS_Store
+build/
+.build/
+.test-artifacts/
+dist/
+*.p8
+*.p12
+*.mobileprovision
+*.provisionprofile
+.env
+.env.*
+*.xcuserstate
+xcuserdata/
