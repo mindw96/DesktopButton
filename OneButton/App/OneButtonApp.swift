@@ -16,17 +16,18 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     private let popover = NSPopover()
     private var store: DesktopStore!
     private var updateController: UpdateController!
+    private var loginItemController: LoginItemController!
     private var popoverSize: PopoverSize!
     private var updateReminderObservation: AnyCancellable?
     private var sizeObservation: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         var defaults = UserDefaults.standard
-        var shouldStartUpdater = true
+        var allowsSystemServices = true
         #if DEBUG
         let isUITesting = ProcessInfo.processInfo.arguments.contains("--ui-testing")
         let isRunningUnitTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-        shouldStartUpdater = !isUITesting && !isRunningUnitTests
+        allowsSystemServices = !isUITesting && !isRunningUnitTests
         if isUITesting {
             let suite = "OneButton.UITests"
             defaults = UserDefaults(suiteName: suite)!
@@ -37,7 +38,8 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         #endif
         store = DesktopStore(defaults: defaults)
         popoverSize = PopoverSize(defaults: defaults)
-        updateController = UpdateController(isEnabled: shouldStartUpdater)
+        updateController = UpdateController(isEnabled: allowsSystemServices)
+        loginItemController = LoginItemController(allowsChanges: allowsSystemServices)
         updateController.onWillPresentUpdate = { [weak self] in
             self?.popover.performClose(nil)
         }
@@ -47,6 +49,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         popover.contentViewController = NSHostingController(rootView: DesktopMenuView(
             store: store,
             updateController: updateController,
+            loginItemController: loginItemController,
             popoverSize: popoverSize,
             defaults: defaults
         ) { [weak self] in
@@ -93,8 +96,13 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     }
 
     func popoverDidShow(_ notification: Notification) {
+        loginItemController.refresh()
         popover.contentViewController?.view.window?.makeKey()
         Task { await store.refresh() }
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        loginItemController?.refresh()
     }
 
     func applicationWillTerminate(_ notification: Notification) {

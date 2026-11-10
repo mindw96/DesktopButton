@@ -263,6 +263,21 @@ func openMenu(_ app: AXUIElement) throws {
     _ = until(2) { menuItem(app) != nil }
     if menuItem(app) == nil, relayedMenuItem(app) == nil {
         if let bar = elementValue(app, kAXMenuBarAttribute) { try hoverObserved(bar) }
+        if menuItem(app) == nil, relayedMenuItem(app) == nil, overflowControl() == nil {
+            for screen in NSScreen.screens {
+                guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { continue }
+                let bounds = CGDisplayBounds(number.uint32Value)
+                guard let revealMenu = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved,
+                                              mouseCursorPosition: CGPoint(x: bounds.midX, y: bounds.minY + 1),
+                                              mouseButton: .left) else {
+                    throw SmokeFailure(description: "Could not reveal a hidden menu bar")
+                }
+                revealMenu.flags = []
+                revealMenu.post(tap: .cghidEventTap)
+                pumpRunLoop(1)
+                if menuItem(app) != nil || relayedMenuItem(app) != nil || overflowControl() != nil { break }
+            }
+        }
         if menuItem(app) == nil, relayedMenuItem(app) == nil, let overflow = overflowControl() {
             try hoverObserved(overflow)
             // Moving to another monitor can relocate its menu controls; resolve them again before clicking.
@@ -465,7 +480,7 @@ final class Smoke {
         let documentURL = fixture.appendingPathComponent("OneButton Smoke \(UUID().uuidString.prefix(8)).txt")
         try Data("OneButton text document smoke test.\n".utf8).write(to: documentURL)
 
-        var process = try launch("OneButton", arguments: ["--ui-testing", "--reset-test-state"])
+        var process = try launch("OneButton", arguments: ["--ui-testing", "--reset-test-state"], activates: true)
         var app = AXUIElementCreateApplication(process.processIdentifier)
         try openMenu(app)
         if !until(6, { identified("desktop.connect", in: app) != nil }) {
@@ -478,6 +493,22 @@ final class Smoke {
         try openMenu(app)
         try require(until(4) { identified("desktop.connect", in: app) != nil }, "Popup did not reopen")
         print("PASS: first launch, menu open, Escape, reopen")
+
+        try press(identified("desktop.settings", in: app), "settings menu")
+        var loginToggle: AXUIElement?
+        try require(until(4) {
+            loginToggle = identified("desktop.login-at-launch", in: app)
+            return loginToggle != nil
+        }, "Login-at-launch toggle missing from settings")
+        guard let loginToggle else { throw SmokeFailure(description: "Login-at-launch toggle disappeared") }
+        try require(value(loginToggle, kAXEnabledAttribute) as? Bool == false,
+                    "Login-at-launch toggle must be disabled in UI test mode")
+        screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-settings.png"))
+        try key(53, to: process.processIdentifier)
+        try require(until(3) { identified("desktop.login-at-launch", in: app) == nil }, "Escape did not close settings")
+        if identified("desktop.connect", in: app) == nil { try openMenu(app) }
+        try require(until(4) { identified("desktop.connect", in: app) != nil }, "Popup was not available after closing settings")
+        print("PASS: settings exposes login-at-launch, UI test mode disables changes, Escape closes settings")
 
         try press(identified("desktop.connect", in: app), "connect")
         try require(until(5) { labeled("연결", in: app) != nil }, "Folder picker did not appear")
@@ -558,7 +589,7 @@ final class Smoke {
         print("PASS: real grip drags increase/decrease width and height, grid adapts to four columns")
 
         stop(process)
-        process = try launch("OneButton", arguments: ["--ui-testing"])
+        process = try launch("OneButton", arguments: ["--ui-testing"], activates: true)
         app = AXUIElementCreateApplication(process.processIdentifier)
         try openMenu(app)
         if !until(6, { labeled("문서 2.txt", in: app) != nil }) {

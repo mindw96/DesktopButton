@@ -4,6 +4,7 @@ import SwiftUI
 struct DesktopMenuView: View {
     @ObservedObject var store: DesktopStore
     @ObservedObject var updateController: UpdateController
+    @ObservedObject var loginItemController: LoginItemController
     @ObservedObject var popoverSize: PopoverSize
     let dismiss: () -> Void
     @State private var selection: URL?
@@ -12,10 +13,12 @@ struct DesktopMenuView: View {
     @State private var resizeStart: (point: CGPoint, size: CGSize)?
     @GestureState private var isResizing = false
 
-    init(store: DesktopStore, updateController: UpdateController, popoverSize: PopoverSize,
+    init(store: DesktopStore, updateController: UpdateController, loginItemController: LoginItemController,
+         popoverSize: PopoverSize,
          defaults: UserDefaults = .standard, dismiss: @escaping () -> Void) {
         self.store = store
         self.updateController = updateController
+        self.loginItemController = loginItemController
         self.popoverSize = popoverSize
         self.dismiss = dismiss
         _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
@@ -41,6 +44,14 @@ struct DesktopMenuView: View {
                 .accessibilityHidden(true)
         }
         .onExitCommand { dismiss() }
+        .alert("자동 실행 설정을 변경하지 못했습니다", isPresented: Binding(
+            get: { loginItemController.errorMessage != nil },
+            set: { if !$0 { loginItemController.dismissError() } }
+        )) {
+            Button("확인", role: .cancel) { loginItemController.dismissError() }
+        } message: {
+            Text(loginItemController.errorMessage ?? "")
+        }
         .onMoveCommand { direction in moveSelection(direction) }
         .onChange(of: isResizing) { active in
             gridIsFocused = !active && layout == .grid
@@ -277,6 +288,31 @@ struct DesktopMenuView: View {
             .help("OneButton 앱 업데이트 및 자동 업데이트 설정")
             .accessibilityLabel("앱 업데이트")
             .accessibilityIdentifier("desktop.updates")
+            Menu {
+                Toggle(loginItemController.status == .requiresApproval
+                       ? "로그인 시 자동 실행 (승인 필요)" : "로그인 시 자동 실행", isOn: Binding(
+                    get: { loginItemController.isRegistered },
+                    set: { loginItemController.setEnabled($0) }
+                ))
+                .disabled(!loginItemController.allowsChanges)
+                .accessibilityIdentifier("desktop.login-at-launch")
+                if loginItemController.status == .requiresApproval {
+                    Text("시스템 설정에서 허용해야 실행됩니다.")
+                    Button("로그인 항목 설정 열기…") {
+                        dismiss()
+                        loginItemController.openSystemSettings()
+                    }
+                }
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 11))
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("설정")
+            .accessibilityLabel("설정")
+            .accessibilityIdentifier("desktop.settings")
             Button("종료") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q", modifiers: .command)
                 .accessibilityIdentifier("desktop.quit")

@@ -31,8 +31,8 @@ targets:
         CODE_SIGN_ENTITLEMENTS: OneButton/OneButton.entitlements
         ENABLE_APP_SANDBOX: YES
         GENERATE_INFOPLIST_FILE: NO
-        MARKETING_VERSION: "0.2.1"
-        CURRENT_PROJECT_VERSION: "3"
+        MARKETING_VERSION: "0.2.2"
+        CURRENT_PROJECT_VERSION: "4"
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
       configs:
         Debug:
