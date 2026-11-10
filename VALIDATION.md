@@ -25,7 +25,13 @@ e95192885bca4b439a42c6090e0c5975c5aade0d40837780c949d5672825db00  OneButton-0.2.
 
 [GitHub Release v0.2.1](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.1)을 공개했습니다. 릴리스 소스 커밋은 `77c96a8`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 재다운로드하여 로컬 최종본과 byte 단위 및 SHA-256 일치를 확인했습니다. 공개 ZIP 앱의 코드 서명·staple·Gatekeeper(`accepted / Notarized Developer ID`)와 공개 DMG의 staple 검증도 통과했습니다. ZIP과 DMG의 실행 파일·Info.plist 일치 및 Applications 바로가기를 확인했습니다.
 
-공개 Sparkle 피드와 실제 업데이트 설치 결과는 아래에 이어 기록합니다.
+공개 Sparkle 피드(`12c9e48`)를 인증 없이 읽어 저장소 파일과 일치하는지 확인했습니다. build 3, 버전 0.2.1, 최소 OS, 공개 ZIP URL·크기를 대조하고 공개 ZIP의 EdDSA 서명을 실제 검증했습니다.
+
+**실제 0.2.0 → 0.2.1 업데이트 설치도 통과했습니다.** 원래 공개 ZIP의 SHA-256을 대조한 뒤 별도의 `build/upgrade-0.2.1/OneButton.app` 복사본에서 수동 업데이트를 실행했습니다. 공개 피드의 0.2.1 안내 → 다운로드 → 설치 및 재실행을 거쳤고, 이전 PID `82326` 종료와 같은 앱·실행 파일 경로의 새 PID `82358`, 디스크의 `0.2.1 / build 3`을 확인했습니다. 업데이트된 앱의 실행 파일·Info.plist가 공개 ZIP과 일치하며 코드 서명·staple·Gatekeeper 검증도 통과했습니다. 새 팝업의 폴더명·크기 조절 컨트롤과 **앱 업데이트 확인… → 최신 버전입니다.** 표시를 확인했습니다.
+
+재실행 버튼 직후 접근성 응답은 기존 프로세스 종료로 끊겼습니다. 이를 제품 실패로 판단하지 않고 별도의 검증으로 실제 교체·재실행을 확인했습니다. 근거: `.test-artifacts/upgrade-0.2.1-run.log`, `upgrade-0.2.1-verify.log`, `upgrade-0.2.1-verified.json`. 사용자 설치 경로를 덮어쓰지 않았으며 테스트 복사본만 종료했습니다.
+
+미검증 범위: Intel Mac 및 macOS 13–26의 실제 실행, 모든 모니터·Spaces 조합, VoiceOver 음성 출력, iCloud 클라우드 전용 파일. 앱 배포 대상은 macOS 13 이상이며 Universal 바이너리를 제공합니다.
 
 ## 0.2.0 공증 및 배포 완료 (2026-11-10)
 
