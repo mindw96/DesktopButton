@@ -35,10 +35,11 @@ VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/C
 BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Contents/Info.plist")
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$BUILD" =~ ^[0-9]+$ ]] || exit 65
 codesign --verify --deep --strict --verbose=2 "$APP"
-lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/OneButton"
 codesign -d --entitlements :- "$APP" > "$ROOT/build/release-entitlements.plist" 2>/dev/null
-python3 -E - "$ROOT/build/release-entitlements.plist" <<'PY'
-import plistlib, sys
+python3 -E - "$ROOT/build/release-entitlements.plist" "$APP/Contents/MacOS/OneButton" <<'PY'
+import plistlib, subprocess, sys
+architectures = subprocess.check_output(['lipo', '-archs', sys.argv[2]], text=True).split()
+assert {'arm64', 'x86_64'}.issubset(architectures), 'Missing Universal architecture'
 with open(sys.argv[1], 'rb') as file:
     entitlements = plistlib.load(file)
 assert entitlements.get('com.apple.security.app-sandbox') is True

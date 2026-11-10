@@ -119,7 +119,7 @@ SPARKLE_BIN="$PWD/build/SourcePackages/artifacts/sparkle/Sparkle/bin"
 codesign --verify --deep --strict --verbose=2 "$APP"
 xcrun stapler validate "$APP"
 spctl --assess --type execute --verbose=2 "$APP"
-lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/OneButton"
+lipo -archs "$APP/Contents/MacOS/OneButton" # arm64와 x86_64가 모두 포함되어야 합니다.
 xcrun stapler validate "dist/OneButton-$VERSION.dmg"
 hdiutil verify "dist/OneButton-$VERSION.dmg"
 (cd dist && shasum -a 256 -c SHA256SUMS)
