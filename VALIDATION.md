@@ -16,7 +16,13 @@
 1d6b4b51a82a9eeb77fa91d35ebd54ea66602de8498d5e3ba502130713a97c89  FolderInBar-0.3.0.dmg
 ```
 
-[GitHub Release v0.3.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.3.0)을 공개했습니다. 릴리스 소스 커밋은 `55f7657`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 재다운로드해 로컬 최종본과 일치를 확인했고, 공개 앱의 서명·staple·Gatekeeper와 공개 DMG의 staple 검증이 통과했습니다. 공개 피드와 기존 OneButton의 실제 업데이트 결과는 아래에 이어 기록합니다. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
+[GitHub Release v0.3.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.3.0)을 공개했습니다. 릴리스 소스 커밋은 `55f7657`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 재다운로드해 로컬 최종본과 일치를 확인했고, 공개 앱의 서명·staple·Gatekeeper와 공개 DMG의 staple 검증이 통과했습니다. 공개 피드(`1fb9631`)의 build 5·0.3.0·최소 OS·ZIP URL·크기와 실제 공개 ZIP의 EdDSA 서명을 검증했습니다.
+
+**실제 OneButton 0.2.2 → Folder In Bar 0.3.0 업데이트가 통과했습니다.** 공개 0.2.2 ZIP 해시를 확인한 격리 복사본에서 공개 피드 안내 → 다운로드 → 설치 및 재실행을 실행했습니다. 기존 `OneButton.app` 디렉터리 안에 build 5, 새 CFBundleName/DisplayName, `Contents/MacOS/Folder In Bar`, 유효한 새 AppIcon이 설치됐으며 이전 PID `97323`이 종료되고 새 PID `97368`이 실행됐습니다. 업데이트된 앱은 새 이름으로 “최신 버전”을 표시했습니다. 설치된 실행 파일·Info.plist·아이콘은 공개 ZIP과 같고 코드 서명·staple·Gatekeeper도 통과했습니다.
+
+기존 `desktopBookmark`, `desktopLayout`, `popoverWidth`, `popoverHeight` 네 키가 모두 존재하며 업데이트 전후 값이 같은 것을 확인했습니다. 북마크 내용과 선택 폴더 경로는 로그에 남기지 않았습니다. 로그인 항목은 전후 모두 **꺼짐**으로 관찰됐으며 토글하지 않았습니다. 따라서 켜진 로그인 항목의 이름 변경 이전이나 실제 재로그인 성공을 검증했다는 의미는 아닙니다. 사용자 설치 경로를 바꾸지 않고 격리 복사본만 업데이트·종료했습니다.
+
+첫 메뉴 자동화 시도는 등록 타이밍 때문에 항목을 찾지 못했습니다. 앱 시작 후 메뉴 등록 대기와 명시적 활성화를 거쳐 재검사했고 전체 흐름이 통과했습니다. 근거: `.test-artifacts/rename-upgrade-run-2.log`, `.test-artifacts/rename-upgrade-0.3.0-2026-11-10T16-10-49Z/upgrade-result.json`. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
 
 ## 0.2.2 로그인 시 자동 실행 (2026-11-11)
 
