@@ -3,12 +3,12 @@
     <channel>
         <title>OneButton</title>
         <item>
-            <title>0.2.1</title>
-            <pubDate>Wed, 11 Nov 2026 00:23:05 +0900</pubDate>
-            <sparkle:version>3</sparkle:version>
-            <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
+            <title>0.2.2</title>
+            <pubDate>Wed, 11 Nov 2026 00:36:41 +0900</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/mindw96/DesktopButton/releases/download/v0.2.1/OneButton-0.2.1.zip" length="1241715" type="application/octet-stream" sparkle:edSignature="MQuLnGPoI7aGreLBx4eI6698na6ooEkW1kIXONg7c8bNd6zNiXRpFebhXcI0cqlbmEVRzAdoPWHdg0hnVLNQCA=="/>
+            <enclosure url="https://github.com/mindw96/DesktopButton/releases/download/v0.2.2/OneButton-0.2.2.zip" length="1256277" type="application/octet-stream" sparkle:edSignature="IotuJnrB0WtWD0apHS793LiOI0H7taAxcAwzliImxzlz02eAsI0yZDpSUHZw9SqePeDpTvyH+PBrDbWiYV9gAQ=="/>
         </item>
     </channel>
 </rss>

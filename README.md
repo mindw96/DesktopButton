@@ -2,15 +2,15 @@
 
 메뉴 막대에서 선택한 폴더의 파일을 목록이나 아이콘 격자로 확인하고, 한 번 클릭해 기본 앱으로 여는 macOS 앱입니다. 전체 화면에서도 메뉴 막대를 표시해 사용할 수 있습니다.
 
-앱 이름은 **OneButton**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 소스 버전은 **0.2.2 (build 4)**이고 공개 다운로드는 **0.2.1**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
+앱 이름은 **OneButton**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 공개 버전은 **0.2.2 (build 4)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
 
 ## 다운로드와 설치
 
-**[OneButton 0.2.1 다운로드](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.1)** — macOS 13 이상, Apple Silicon 및 Intel 지원. 앱과 DMG는 Developer ID 서명 및 Apple 공증을 완료했습니다.
+**[OneButton 0.2.2 다운로드](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.2)** — macOS 13 이상, Apple Silicon 및 Intel 지원. 앱과 DMG는 Developer ID 서명 및 Apple 공증을 완료했습니다.
 
-- [DMG 설치 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.2.1/OneButton-0.2.1.dmg)을 열고 `OneButton.app`을 `Applications`로 드래그하세요.
-- [ZIP 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.2.1/OneButton-0.2.1.zip)에는 같은 공증 앱이 들어 있습니다.
-- [SHA256SUMS](https://github.com/mindw96/DesktopButton/releases/download/v0.2.1/SHA256SUMS)로 다운로드 무결성을 확인할 수 있습니다.
+- [DMG 설치 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.2.2/OneButton-0.2.2.dmg)을 열고 `OneButton.app`을 `Applications`로 드래그하세요.
+- [ZIP 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.2.2/OneButton-0.2.2.zip)에는 같은 공증 앱이 들어 있습니다.
+- [SHA256SUMS](https://github.com/mindw96/DesktopButton/releases/download/v0.2.2/SHA256SUMS)로 다운로드 무결성을 확인할 수 있습니다.
 
 최초 배포본을 설치한 뒤에는 앱의 업데이트 메뉴에서 새 버전을 확인할 수 있습니다. 공개 Sparkle 피드는 [appcast.xml](https://raw.githubusercontent.com/mindw96/DesktopButton/main/appcast.xml)입니다.
 

@@ -18,7 +18,9 @@ a77f24a37e6cb7f61df2f809fcad331a681458117dc345cdfdfdf0f304f0e86a  OneButton-0.2.
 
 실제 UI 회귀 검사도 통과했습니다. 새 설정 메뉴와 테스트 모드의 로그인 항목 변경 차단, 폴더 선택·파일 열기, 목록·격자 전환, 키보드 이동, 팝업 크기 조절·재실행 복원, 다른 앱 전체화면 위에서 열기·크기 조절·닫기를 확인했습니다. 초기 메뉴 탐색 실패는 테스트 시작·재실행 시 테스트 앱을 활성화하도록 보완한 뒤 해결했습니다. 결과: `.test-artifacts/login-item-ui-3.log`.
 
-공개 다운로드·피드 검증 결과는 배포 완료 후 추가합니다.
+[GitHub Release v0.2.2](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.2)을 공개했습니다. 릴리스 소스 커밋은 `d6428c5`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 다시 내려받아 로컬 최종본과 일치하는지 확인했습니다. 공개 ZIP 앱의 코드 서명·staple·Gatekeeper(`accepted / Notarized Developer ID`)와 공개 DMG의 staple도 통과했습니다. ZIP과 DMG의 앱 실행 파일·Info.plist 및 Applications 바로가기도 대조했습니다.
+
+Sparkle 피드의 공개 상태는 최종 확인 후 기록합니다.
 
 ## 0.2.1 폴더 표시와 팝업 크기 조절 (2026-11-11)
 
