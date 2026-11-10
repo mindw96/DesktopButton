@@ -23,7 +23,9 @@ fce0a80fdd6166e5f5173e3f2541b19891bc29ef9258f031b09d15a5bc95da9f  OneButton-0.2.
 e95192885bca4b439a42c6090e0c5975c5aade0d40837780c949d5672825db00  OneButton-0.2.1.dmg
 ```
 
-공개 다운로드와 실제 업데이트 설치 결과는 배포 완료 후 이 항목에 추가합니다.
+[GitHub Release v0.2.1](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.1)을 공개했습니다. 릴리스 소스 커밋은 `77c96a8`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 재다운로드하여 로컬 최종본과 byte 단위 및 SHA-256 일치를 확인했습니다. 공개 ZIP 앱의 코드 서명·staple·Gatekeeper(`accepted / Notarized Developer ID`)와 공개 DMG의 staple 검증도 통과했습니다. ZIP과 DMG의 실행 파일·Info.plist 일치 및 Applications 바로가기를 확인했습니다.
+
+공개 Sparkle 피드와 실제 업데이트 설치 결과는 아래에 이어 기록합니다.
 
 ## 0.2.0 공증 및 배포 완료 (2026-11-10)
 
