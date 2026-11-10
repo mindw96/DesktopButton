@@ -22,7 +22,7 @@
 
 기존 `desktopBookmark`, `desktopLayout`, `popoverWidth`, `popoverHeight` 네 키가 모두 존재하며 업데이트 전후 값이 같은 것을 확인했습니다. 북마크 내용과 선택 폴더 경로는 로그에 남기지 않았습니다. 로그인 항목은 전후 모두 **꺼짐**으로 관찰됐으며 토글하지 않았습니다. 따라서 켜진 로그인 항목의 이름 변경 이전이나 실제 재로그인 성공을 검증했다는 의미는 아닙니다. 사용자 설치 경로를 바꾸지 않고 격리 복사본만 업데이트·종료했습니다.
 
-첫 메뉴 자동화 시도는 등록 타이밍 때문에 항목을 찾지 못했습니다. 앱 시작 후 메뉴 등록 대기와 명시적 활성화를 거쳐 재검사했고 전체 흐름이 통과했습니다. 근거: `.test-artifacts/rename-upgrade-run-2.log`, `.test-artifacts/rename-upgrade-0.3.0-2026-11-10T16-10-49Z/upgrade-result.json`. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
+첫 메뉴 자동화 시도는 등록 타이밍 때문에 항목을 찾지 못했습니다. 앱 시작 후 메뉴 등록 대기와 명시적 활성화를 거쳐 재검사했고 전체 흐름이 통과했습니다. 근거: `.test-artifacts/rename-upgrade-run-2.log`, `.test-artifacts/rename-upgrade-0.3.0-2026-11-10T16-10-49Z/rename-upgrade-result.json`. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
 
 ## 0.2.2 로그인 시 자동 실행 (2026-11-11)
 
