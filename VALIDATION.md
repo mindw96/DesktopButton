@@ -16,7 +16,7 @@
 1d6b4b51a82a9eeb77fa91d35ebd54ea66602de8498d5e3ba502130713a97c89  FolderInBar-0.3.0.dmg
 ```
 
-공개 다운로드와 기존 OneButton의 실제 업데이트 결과는 배포 완료 후 추가합니다. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
+[GitHub Release v0.3.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.3.0)을 공개했습니다. 릴리스 소스 커밋은 `55f7657`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 재다운로드해 로컬 최종본과 일치를 확인했고, 공개 앱의 서명·staple·Gatekeeper와 공개 DMG의 staple 검증이 통과했습니다. 공개 피드와 기존 OneButton의 실제 업데이트 결과는 아래에 이어 기록합니다. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
 
 ## 0.2.2 로그인 시 자동 실행 (2026-11-11)
 
