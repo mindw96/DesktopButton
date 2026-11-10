@@ -4,17 +4,17 @@
 
 메뉴 막대에서 선택한 폴더의 파일을 목록이나 아이콘 격자로 확인하고, 한 번 클릭해 기본 앱으로 여는 macOS 앱입니다. 전체 화면에서도 메뉴 막대를 표시해 사용할 수 있습니다.
 
-앱 이름은 **폴더인바(Folder In Bar)**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 공개 버전은 **0.3.0 (build 5)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
+앱 이름은 **폴더인바(Folder In Bar)**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 공개 버전은 **0.4.0 (build 6)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
 
 기존 OneButton의 폴더 연결과 앱 설정을 이어서 사용할 수 있습니다. 배포 앱과 실행 파일의 이름은 `Folder In Bar`입니다. 0.4.0부터 기존 `OneButton.app`을 자동 업데이트하면 첫 실행에서 같은 위치의 `Folder In Bar.app`으로 이름을 바꾸고 다시 실행합니다. 기존 폴더 연결, 보기 모드, 팝업 크기와 로그인 자동 실행 설정을 유지합니다. 같은 이름의 앱이 이미 있거나 설치 위치에 쓰기 권한이 없으면 덮어쓰지 않고 기존 이름으로 사용할 수 있도록 안내합니다.
 
 ## 다운로드와 설치
 
-**[Folder In Bar 0.3.0 다운로드](https://github.com/mindw96/DesktopButton/releases/tag/v0.3.0)** — macOS 13 이상, Apple Silicon 및 Intel 지원. 앱과 DMG는 Developer ID 서명 및 Apple 공증을 완료했습니다.
+**[Folder In Bar 0.4.0 다운로드](https://github.com/mindw96/DesktopButton/releases/tag/v0.4.0)** — macOS 13 이상, Apple Silicon 및 Intel 지원. 앱과 DMG는 Developer ID 서명 및 Apple 공증을 완료했습니다.
 
-- [DMG 설치 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.3.0/FolderInBar-0.3.0.dmg)을 열고 `Folder In Bar.app`을 `Applications`로 드래그하세요.
-- [ZIP 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.3.0/FolderInBar-0.3.0.zip)에는 같은 공증 앱이 들어 있습니다.
-- [SHA256SUMS](https://github.com/mindw96/DesktopButton/releases/download/v0.3.0/SHA256SUMS)로 다운로드 무결성을 확인할 수 있습니다.
+- [DMG 설치 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.4.0/FolderInBar-0.4.0.dmg)을 열고 `Folder In Bar.app`을 `Applications`로 드래그하세요.
+- [ZIP 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.4.0/FolderInBar-0.4.0.zip)에는 같은 공증 앱이 들어 있습니다.
+- [SHA256SUMS](https://github.com/mindw96/DesktopButton/releases/download/v0.4.0/SHA256SUMS)로 다운로드 무결성을 확인할 수 있습니다.
 
 최초 배포본을 설치한 뒤에는 앱의 업데이트 메뉴에서 새 버전을 확인할 수 있습니다. 공개 Sparkle 피드는 [appcast.xml](https://raw.githubusercontent.com/mindw96/DesktopButton/main/appcast.xml)입니다.
 

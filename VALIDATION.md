@@ -26,7 +26,7 @@ Dock 정책을 regular에서 accessory로 바꾼 뒤 팝업이 다른 앱의 전
 a16d940315f7499eae72fb0e6507dfea402678d8df6b0ec62b76b53bf955bc9f  FolderInBar-0.4.0.dmg
 ```
 
-GitHub 공개 다운로드와 구버전 실제 업데이트 결과는 공개 후 추가합니다.
+[GitHub Release v0.4.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.4.0)을 공개했습니다. 릴리스 소스 커밋은 `215c1b7`입니다. 공개 ZIP·DMG·SHA256SUMS를 인증 없이 다시 내려받아 로컬 최종본과 바이트·해시가 같고, 공개 앱의 서명·staple·Gatekeeper와 공개 DMG의 staple이 유효한 것을 확인했습니다. 구버전 실제 업데이트 결과는 다음 검증 후 추가합니다.
 
 ## 0.3.0 폴더인바 이름과 앱 아이콘 (2026-11-11)
 
