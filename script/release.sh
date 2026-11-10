@@ -49,6 +49,27 @@ assert not entitlements.get('com.apple.security.get-task-allow')
 assert not entitlements.get('com.apple.security.files.user-selected.read-write')
 PY
 
+# The rename helper is deliberately independent of the main app sandbox.
+HELPER="$APP/Contents/Helpers/FolderNameMigrationHelper.app"
+codesign --verify --strict --verbose=2 "$HELPER"
+python3 - "$APP" "$HELPER" <<'PYHELPER'
+import pathlib, plistlib, re, subprocess, sys
+app, helper = map(pathlib.Path, sys.argv[1:])
+info = plistlib.loads((helper / 'Contents/Info.plist').read_bytes())
+assert info['CFBundleIdentifier'] == 'com.onebutton.desktop.name-migration'
+assert info['LSUIElement'] is True
+architectures = subprocess.check_output(['lipo', '-archs', str(helper / 'Contents/MacOS' / info['CFBundleExecutable'])], text=True).split()
+assert {'arm64', 'x86_64'}.issubset(architectures), 'Helper must also be Universal'
+entitlements = subprocess.run(['codesign', '-d', '--entitlements', ':-', str(helper)], capture_output=True, check=True).stdout
+assert not (plistlib.loads(entitlements) if entitlements else {}), 'Helper must not carry extra entitlements'
+def team(path):
+    result = subprocess.run(['codesign', '-d', '--verbose=4', str(path)], capture_output=True, text=True, check=True)
+    match = re.search(r'^TeamIdentifier=(.+)$', result.stderr, re.M)
+    assert match and match[1] != 'not set'
+    return match[1]
+assert team(app) == team(helper), 'Helper and parent must use the same signing team'
+PYHELPER
+
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ROOT/build/notarization.zip"
 xcrun notarytool submit "$ROOT/build/notarization.zip" \
   --keychain-profile "$NOTARYTOOL_PROFILE" --wait

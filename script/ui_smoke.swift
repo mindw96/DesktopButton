@@ -205,7 +205,8 @@ func verifyLayout(grid: Bool, itemNames: [String], columns expectedColumns: Int?
         return zip(frames, frames.dropFirst()).allSatisfy { previous, next in
             abs(previous.minX - next.minX) < 2 && previous.maxY <= next.minY + 2
         } && frames.allSatisfy { $0.width > 240 && $0.height < 60 }
-    }, grid ? "File buttons are not arranged in the expected icon grid" : "File buttons are not arranged in a vertical list")
+    }, (grid ? "File buttons are not arranged in the expected icon grid" : "File buttons are not arranged in a vertical list")
+        + "; observed fixture frames: \(frames)")
     return columns
 }
 
@@ -301,6 +302,42 @@ func openMenu(_ app: AXUIElement) throws {
     }
     // macOS 27's menu relay acknowledges AXPress without opening this status item.
     try clickObserved(current)
+}
+
+func dockItem(for process: NSRunningApplication) -> AXUIElement? {
+    guard let target = process.bundleURL?.resolvingSymlinksInPath().path,
+          let dock = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first else { return nil }
+    return find([AXUIElementCreateApplication(dock.processIdentifier)], maxDepth: 4) { item in
+        guard value(item, kAXRoleAttribute) as? String == "AXDockItem",
+              let rawURL = value(item, kAXURLAttribute) else { return false }
+        let url = (rawURL as? URL) ?? (rawURL as? String).flatMap { URL(string: $0) }
+        return url?.isFileURL == true && url?.resolvingSymlinksInPath().path == target
+    }
+}
+
+func reopenFromDock(_ process: NSRunningApplication) throws {
+    var item: AXUIElement?
+    try require(until(6) {
+        item = dockItem(for: process)
+        return item != nil
+    }, "The running test app's exact bundle URL did not appear in the Dock")
+    try press(item, "running test app's Dock icon")
+    try require(!process.isTerminated
+                && NSRunningApplication.runningApplications(withBundleIdentifier: "com.onebutton.desktop")
+                    .map(\.processIdentifier) == [process.processIdentifier],
+                "Dock reopen did not preserve the single existing test process")
+}
+
+func toggleDockIcon(in app: AXUIElement, process: NSRunningApplication,
+                    expecting policy: NSApplication.ActivationPolicy) throws {
+    try press(identified("desktop.settings", in: app), "settings menu for Dock visibility")
+    try require(until(4) { identified("desktop.show-in-dock", in: app) != nil }, "Dock visibility toggle missing")
+    try press(identified("desktop.show-in-dock", in: app), "Dock visibility toggle")
+    try require(until(6) { process.activationPolicy == policy }, "Dock toggle did not change the OS activation policy")
+    if identified("desktop.show-in-dock", in: app) != nil {
+        try key(53, to: process.processIdentifier)
+        try require(until(3) { identified("desktop.show-in-dock", in: app) == nil }, "Dock settings did not close")
+    }
 }
 
 func ownedOnscreenWindow(_ pid: pid_t) -> CGWindowID? {
@@ -494,6 +531,8 @@ final class Smoke {
 
         var process = try launch("Folder In Bar", arguments: ["--ui-testing", "--reset-test-state"], activates: true)
         var app = AXUIElementCreateApplication(process.processIdentifier)
+        try require(until(5) { process.activationPolicy == .accessory && dockItem(for: process) == nil },
+                    "A fresh test launch must remain an accessory app without a Dock icon")
         try openMenu(app)
         if !until(6, { identified("desktop.connect", in: app) != nil }) {
             screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-first-failure.png"))
@@ -521,6 +560,22 @@ final class Smoke {
         if identified("desktop.connect", in: app) == nil { try openMenu(app) }
         try require(until(4) { identified("desktop.connect", in: app) != nil }, "Popup was not available after closing settings")
         print("PASS: settings exposes login-at-launch, UI test mode disables changes, Escape closes settings")
+
+        try toggleDockIcon(in: app, process: process, expecting: .regular)
+        if identified("desktop.connect", in: app) != nil { try key(53, to: process.processIdentifier) }
+        try require(until(3) { identified("desktop.connect", in: app) == nil }, "Popup did not dismiss before Dock reopen")
+        try reopenFromDock(process)
+        try require(until(6) { identified("desktop.connect", in: app) != nil }, "Dock reopen did not show the existing app's popup")
+        guard let dockOpenedWindow = ownedOnscreenWindow(process.processIdentifier) else {
+            throw SmokeFailure(description: "Dock-opened popup has no onscreen window")
+        }
+        try reopenFromDock(process)
+        pumpRunLoop(1)
+        try require(identified("desktop.connect", in: app) != nil
+                    && ownedOnscreenWindow(process.processIdentifier) == dockOpenedWindow,
+                    "Dock reopen closed or replaced an already visible popup")
+        screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-dock-reopen.png"))
+        print("PASS: default Dock icon hidden, toggle enables a regular app, Dock reopen shows and preserves the popup")
 
         try press(identified("desktop.connect", in: app), "connect")
         try require(until(5) { labeled("연결", in: app) != nil }, "Folder picker did not appear")
@@ -576,7 +631,12 @@ final class Smoke {
         print("PASS: Return opens the fixture folder in Finder")
 
         try openMenu(app)
-        try verifyLayout(grid: false, itemNames: layoutNames, in: app)
+        do {
+            try verifyLayout(grid: false, itemNames: layoutNames, in: app)
+        } catch {
+            screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-list-layout-failure.png"))
+            throw error
+        }
         try press(identified("desktop.view.grid", in: app), "icon view")
         try verifyLayout(grid: true, itemNames: layoutNames, columns: 3, in: app)
         screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-grid.png"))
@@ -603,6 +663,8 @@ final class Smoke {
         stop(process)
         process = try launch("Folder In Bar", arguments: ["--ui-testing"], activates: true)
         app = AXUIElementCreateApplication(process.processIdentifier)
+        try require(until(6) { process.activationPolicy == .regular && dockItem(for: process) != nil },
+                    "Dock icon preference did not restore after relaunch")
         try openMenu(app)
         if !until(6, { labeled("문서 2.txt", in: app) != nil }) {
             screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-restore-failure.png"))
@@ -617,6 +679,11 @@ final class Smoke {
         }, "Popup size was not restored after relaunch")
         try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
         print("PASS: sandbox bookmark, folder name, popup size and icon-view preference restoration after relaunch")
+        try toggleDockIcon(in: app, process: process, expecting: .accessory)
+        try require(until(6) { dockItem(for: process) == nil }, "Dock icon remained after disabling it")
+        if identified("desktop.item.\(openName)", in: app) == nil { try openMenu(app) }
+        try require(until(4) { identified("desktop.item.\(openName)", in: app) != nil }, "Popup unavailable after hiding the Dock icon")
+        print("PASS: Dock preference survives restart, disabling it restores accessory policy and removes the icon")
         try press(identified("desktop.item.\(openName)", in: app), "fixture folder icon")
         try closeOpenedFixtureFolder(named: openName)
         try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Click-open did not close popup")
@@ -637,6 +704,16 @@ final class Smoke {
 
         let fullscreenURL = root.appendingPathComponent("build/Build/Products/Debug/OneButtonFullscreenFixture.app")
         if FileManager.default.fileExists(atPath: fullscreenURL.path) {
+          for showsDockIcon in [false, true] {
+            if showsDockIcon {
+                try openMenu(app)
+                try toggleDockIcon(in: app, process: process, expecting: .regular)
+                if labeled("문서 2.txt", in: app) == nil { try openMenu(app) }
+                try press(identified("desktop.view.list", in: app), "list view before Dock-enabled fullscreen check")
+                try key(53, to: process.processIdentifier)
+                try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Popup did not close before fullscreen check")
+            }
+            let screenshotSuffix = showsDockIcon ? "-dock" : ""
             let host = try launch("OneButtonFullscreenFixture", activates: true)
             let hostAX = AXUIElementCreateApplication(host.processIdentifier)
             try require(until(5) { identified("fixture.fullscreen", in: hostAX) != nil }, "Fullscreen fixture button missing")
@@ -659,20 +736,53 @@ final class Smoke {
             pumpRunLoop(1)
             try openMenu(app)
             try require(until(6) { labeled("문서 2.txt", in: app) != nil }, "Popup failed above fullscreen fixture")
-            try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Opening popup switched away from fullscreen Space")
-            try require(ownedOnscreenWindow(process.processIdentifier) != nil, "Popup is not on screen")
-            screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-fullscreen-popup.png"))
+            var leftFullscreenSpace = false
+            let popupBecameVisible = until(6) {
+                if ownedOnscreenWindow(host.processIdentifier) == nil {
+                    leftFullscreenSpace = true
+                    return true
+                }
+                return ownedOnscreenWindow(process.processIdentifier) != nil
+            }
+            try require(!leftFullscreenSpace, "Opening popup switched away from fullscreen Space")
+            if !popupBecameVisible,
+               let windows = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as? [[String: Any]] {
+                let owned = windows.filter { $0[kCGWindowOwnerPID as String] as? Int32 == process.processIdentifier }
+                print("DIAGNOSTIC: app CG window count", owned.count,
+                      "AX window frames", children(app, kAXWindowsAttribute).compactMap { try? observedFrame($0) })
+                for window in owned {
+                    print("DIAGNOSTIC: popup window", window[kCGWindowNumber as String] ?? "unknown",
+                          "onscreen", window[kCGWindowIsOnscreen as String] ?? false,
+                          "bounds", window[kCGWindowBounds as String] ?? "unknown",
+                          "layer", window[kCGWindowLayer as String] ?? "unknown")
+                }
+            }
+            try require(popupBecameVisible, "Popup is not on screen after waiting while fullscreen fixture remained visible")
+            let popupFrame = try observedWindowFrame(process.processIdentifier)
+            try require(displayBounds.contains(CGPoint(x: popupFrame.midX, y: popupFrame.midY))
+                        && hostFrame.intersects(popupFrame), "Popup appeared on a different display from the fullscreen fixture")
+            guard let fullscreenGrip = identified("desktop.resize", in: app) else {
+                throw SmokeFailure(description: "Fullscreen popup resize grip is missing")
+            }
+            let fullscreenGripFrame = try observedFrame(fullscreenGrip)
+            try require(popupFrame.contains(CGPoint(x: fullscreenGripFrame.midX, y: fullscreenGripFrame.midY)),
+                        "Onscreen app window does not contain the popup's resize grip")
+            print("PASS: fullscreen popup and resize grip occupy the fixture display; popup \(popupFrame), fixture \(hostFrame)")
+            screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-fullscreen-popup\(screenshotSuffix).png"))
             try press(identified("desktop.view.grid", in: app), "icon view above fullscreen")
             try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Changing to grid switched away from fullscreen Space")
             try resizePopup(by: CGSize(width: 40, height: 30), in: app, pid: process.processIdentifier)
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Resizing popup switched away from fullscreen Space")
             try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
-            screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-fullscreen-grid.png"))
+            screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-fullscreen-grid\(screenshotSuffix).png"))
             try key(53, to: process.processIdentifier)
             try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Fullscreen popup did not close")
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Closing popup switched away from fullscreen Space")
-            print("PASS: popup opens, changes layout, resizes and closes without leaving another app's fullscreen Space")
+            print("PASS: popup opens, changes layout, resizes and closes without leaving another app's fullscreen Space (Dock \(showsDockIcon ? "on" : "off"))")
+            stop(host)
+            pumpRunLoop(1)
+          }
         } else {
             print("SKIP: fullscreen fixture app is not built")
         }

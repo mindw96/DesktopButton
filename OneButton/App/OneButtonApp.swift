@@ -17,6 +17,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     private var store: DesktopStore!
     private var updateController: UpdateController!
     private var loginItemController: LoginItemController!
+    private var dockIconController: DockIconController!
     private var popoverSize: PopoverSize!
     private var updateReminderObservation: AnyCancellable?
     private var sizeObservation: AnyCancellable?
@@ -40,6 +41,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         popoverSize = PopoverSize(defaults: defaults)
         updateController = UpdateController(isEnabled: allowsSystemServices)
         loginItemController = LoginItemController(allowsChanges: allowsSystemServices)
+        dockIconController = DockIconController(defaults: defaults)
         updateController.onWillPresentUpdate = { [weak self] in
             self?.popover.performClose(nil)
         }
@@ -50,6 +52,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
             store: store,
             updateController: updateController,
             loginItemController: loginItemController,
+            dockIconController: dockIconController,
             popoverSize: popoverSize,
             defaults: defaults
         ) { [weak self] in
@@ -79,25 +82,44 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
             button.toolTip = version.map { "Folder In Bar \($0) 업데이트 사용 가능" } ?? "Folder In Bar — 연결한 폴더 열기"
             button.setAccessibilityLabel(label)
         }
+        if allowsSystemServices {
+            AppNameMigration.runIfNeeded(defaults: defaults, loginItem: loginItemController)
+        }
     }
 
     @objc private func togglePopover(_ sender: Any?) {
         if popover.isShown {
             popover.performClose(nil)
-        } else if let button = statusItem?.button {
-            if let window = button.window, let screen = window.screen {
-                let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
-                let visible = screen.visibleFrame
-                popoverSize.fit(in: CGSize(width: visible.width - 24, height: visible.height - 60),
-                                fromLeadingEdge: anchor.midX >= visible.midX)
-            }
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        } else {
+            showPopover()
         }
+    }
+
+    private func showPopover() {
+        guard !popover.isShown, let button = statusItem?.button else { return }
+        if let window = button.window, let screen = window.screen {
+            let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
+            let visible = screen.visibleFrame
+            popoverSize.fit(in: CGSize(width: visible.width - 24, height: visible.height - 60),
+                            fromLeadingEdge: anchor.midX >= visible.midX)
+        }
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        showPopover()
+        return false
     }
 
     func popoverDidShow(_ notification: Notification) {
         loginItemController.refresh()
-        popover.contentViewController?.view.window?.makeKey()
+        if let window = popover.contentViewController?.view.window {
+            // Keep the popover available above other apps' fullscreen windows after Dock policy changes.
+            window.collectionBehavior.subtract([.moveToActiveSpace, .primary, .auxiliary,
+                                                .fullScreenPrimary, .fullScreenNone])
+            window.collectionBehavior.formUnion([.canJoinAllSpaces, .canJoinAllApplications, .fullScreenAuxiliary])
+            window.makeKey()
+        }
         Task { await store.refresh() }
     }
 

@@ -5,6 +5,7 @@ struct DesktopMenuView: View {
     @ObservedObject var store: DesktopStore
     @ObservedObject var updateController: UpdateController
     @ObservedObject var loginItemController: LoginItemController
+    @ObservedObject var dockIconController: DockIconController
     @ObservedObject var popoverSize: PopoverSize
     let dismiss: () -> Void
     @State private var selection: URL?
@@ -14,11 +15,13 @@ struct DesktopMenuView: View {
     @GestureState private var isResizing = false
 
     init(store: DesktopStore, updateController: UpdateController, loginItemController: LoginItemController,
+         dockIconController: DockIconController,
          popoverSize: PopoverSize,
          defaults: UserDefaults = .standard, dismiss: @escaping () -> Void) {
         self.store = store
         self.updateController = updateController
         self.loginItemController = loginItemController
+        self.dockIconController = dockIconController
         self.popoverSize = popoverSize
         self.dismiss = dismiss
         _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
@@ -44,13 +47,16 @@ struct DesktopMenuView: View {
                 .accessibilityHidden(true)
         }
         .onExitCommand { dismiss() }
-        .alert("자동 실행 설정을 변경하지 못했습니다", isPresented: Binding(
-            get: { loginItemController.errorMessage != nil },
-            set: { if !$0 { loginItemController.dismissError() } }
+        .alert("설정을 변경하지 못했습니다", isPresented: Binding(
+            get: { loginItemController.errorMessage != nil || dockIconController.errorMessage != nil },
+            set: { if !$0 { loginItemController.dismissError(); dockIconController.dismissError() } }
         )) {
-            Button("확인", role: .cancel) { loginItemController.dismissError() }
+            Button("확인", role: .cancel) {
+                loginItemController.dismissError()
+                dockIconController.dismissError()
+            }
         } message: {
-            Text(loginItemController.errorMessage ?? "")
+            Text(dockIconController.errorMessage ?? loginItemController.errorMessage ?? "")
         }
         .onMoveCommand { direction in moveSelection(direction) }
         .onChange(of: isResizing) { active in
@@ -289,6 +295,12 @@ struct DesktopMenuView: View {
             .accessibilityLabel("앱 업데이트")
             .accessibilityIdentifier("desktop.updates")
             Menu {
+                Toggle("Dock에 아이콘 표시", isOn: Binding(
+                    get: { dockIconController.showsIcon },
+                    set: { dockIconController.setShowsIcon($0) }
+                ))
+                .accessibilityIdentifier("desktop.show-in-dock")
+                Divider()
                 Toggle(loginItemController.status == .requiresApproval
                        ? "로그인 시 자동 실행 (승인 필요)" : "로그인 시 자동 실행", isOn: Binding(
                     get: { loginItemController.isRegistered },

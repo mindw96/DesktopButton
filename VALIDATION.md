@@ -1,5 +1,33 @@
 # Folder In Bar 검증 기록
 
+## 0.4.0 실제 앱 파일명 이전과 Dock 표시 (2026-11-11)
+
+버전 **0.4.0 (build 6)**입니다. 기존 Sparkle 설치 경로가 `OneButton.app`이면 새 앱의 첫 실행에서 같은 폴더의 `Folder In Bar.app`으로 이름을 바꿉니다. 메인 앱의 sandbox, bundle ID, 서명 팀, Sparkle 키·피드와 기존 설정 키를 유지합니다. **설정 → Dock에 아이콘 표시**를 추가하고 선택을 저장하며 Dock 클릭으로 기존 팝업을 엽니다.
+
+- 단위 테스트 **31개 통과, 실패 0, 런타임 경고 0**. 결과: `.test-artifacts/migration-dock-unit-shipping.xcresult`. 이전 작업의 실행 지연을 피하려고 제품 소스·테스트·리소스·프로젝트 해시를 확인한 전체 임시 복사본에서 실행했습니다.
+- 파일시스템 검증 **7개 통과**: inode·내용 보존, 검사 후 동명 대상 생성, 원본 교체, 원본 symlink, dangling 대상 symlink, 사용자 지정 앱명 제외, 디렉터리 목록 읽기 없이 검색·쓰기 권한만으로 rename. 검사 코드는 `FolderNameMigrationHelper/Tests/MigrationFileSystemChecks.swift`입니다.
+- 별도 고유 bundle ID의 Developer ID 서명·sandbox 테스트 앱에서 로그인 enabled → 동일 파일시스템 이름 변경 → 새 경로 실행 후 enabled 유지와 BTM 대상 URL 갱신을 확인했습니다. 재등록 없이 같은 BTM UUID가 유지됐고, 테스트 등록은 마지막에 해제했습니다. 실제 로그아웃은 수행하지 않았습니다.
+- UI 검증 중 이미 `.accessory`인 앱에 같은 정책을 다시 적용하면 오류 안내가 발생할 수 있음을 확인했습니다. 정책이 이미 일치할 때 호출을 생략하도록 수정하고 accessory/regular/prohibited 상태의 회귀 테스트를 추가했습니다.
+- 실제 실행에서 sandbox 호출자의 NSWorkspace 실행 인자가 무시되는 것을 확인했습니다. Helper가 자신의 enclosing bundle과 서명으로 대상을 직접 찾고, 메인 앱이 helper 실행 성공 후 스스로 종료하도록 수정했습니다. Helper는 관리자 권한이나 Automation 권한을 요구하지 않습니다.
+
+Dock 정책을 regular에서 accessory로 바꾼 뒤 팝업이 다른 앱의 전체 화면에 나타나지 않는 문제를 실제로 재현했습니다. 팝업 backing window에 다른 앱의 전체 화면·Spaces에 참여하는 정책을 지정하여 해결했습니다. 앱을 강제로 활성화하거나 전체 화면을 나가는 우회는 사용하지 않았습니다.
+
+최종 UI 회귀 검사에서 Dock 기본 숨김·표시 토글·실제 Dock 클릭·같은 팝업 유지·재실행 복원·다시 숨기기, 폴더 연결·목록·격자·파일 열기·크기 조절·복원을 확인했습니다. **Dock off/on 각각 다른 앱의 전체 화면에서 팝업 열기·격자 전환·실제 크기 조절·Esc 닫기와 전체 화면 유지가 통과했습니다.** 로그: `.test-artifacts/dock-native-ui-6.log`.
+
+서명 앱의 격리 복사본에서 `OneButton.app`이 사라지고 `Folder In Bar.app`의 새 프로세스가 실행됐으며, 기존 bookmark·보기·크기·Dock 설정의 동등성과 연결 폴더의 실제 파일 읽기를 확인했습니다. 저장한 NSRunningApplication 종료 상태가 갱신되지 않은 사례를 관찰하여 검증 코드와 helper 모두 커널 PID 상태를 확인하도록 보완했습니다. 결과: `.test-artifacts/migration-success-diagnostic.log`, `migration-local-result.json`.
+
+최종 Release Universal archive/export와 앱·DMG 공증, staple, Gatekeeper, Sparkle EdDSA 검증이 통과했습니다. 메인 앱의 sandbox·읽기 전용 폴더 권한과 helper의 별도 서명·동일 Team·추가 entitlement 없음·Universal 아키텍처를 확인했습니다. ZIP과 DMG의 메인 앱·helper·아이콘·metadata가 일치하며 Applications 바로가기도 확인했습니다. 배포 로그는 `.test-artifacts/release-0.4.0-shipping.log`입니다.
+
+- 앱 공증: `408c7655-7066-480f-bc3c-c0a39c5f71f0` — Accepted, issues 없음.
+- DMG 공증: `a340805f-54a6-4566-8a89-2200d6b66ce4` — Accepted, issues 없음.
+
+```text
+915c4973070cc95597ec0f50bca02009a2c8426498da0d902f8fc514f51437c0  FolderInBar-0.4.0.zip
+a16d940315f7499eae72fb0e6507dfea402678d8df6b0ec62b76b53bf955bc9f  FolderInBar-0.4.0.dmg
+```
+
+GitHub 공개 다운로드와 구버전 실제 업데이트 결과는 공개 후 추가합니다.
+
 ## 0.3.0 폴더인바 이름과 앱 아이콘 (2026-11-11)
 
 새 이름은 **폴더인바(Folder In Bar)**, 버전 **0.3.0 (build 5)**입니다. 앱 표시 이름·실행 파일·신규 설치 번들·메뉴 안내를 변경하고, 파란 폴더와 메뉴 막대를 결합한 아이콘을 추가했습니다. macOS AppIcon 10개 표현(16–1024px)을 빌드에 포함했습니다. 생성 원본과 프롬프트는 `docs/branding/`에 있습니다.

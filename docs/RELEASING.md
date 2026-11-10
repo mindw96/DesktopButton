@@ -1,6 +1,6 @@
 # Folder In Bar 배포 안내
 
-앱 이름은 **폴더인바(Folder In Bar)**, bundle ID는 `com.onebutton.desktop`, GitHub 저장소는 `mindw96/DesktopButton`입니다. 현재 소스는 **0.3.0 (build 5)**이며, 실제 공증·검증·Release 공개 상태는 [VALIDATION.md](../VALIDATION.md)를 기준으로 확인합니다.
+앱 이름은 **폴더인바(Folder In Bar)**, bundle ID는 `com.onebutton.desktop`, GitHub 저장소는 `mindw96/DesktopButton`입니다. 현재 소스는 **0.4.0 (build 6)**이며, 실제 공증·검증·Release 공개 상태는 [VALIDATION.md](../VALIDATION.md)를 기준으로 확인합니다.
 
 기존 사용자의 설정·업데이트 연결을 유지하기 위해 bundle ID, Sparkle 키·피드, 공증 프로필 `OneButtonNotary`와 내부 Xcode 프로젝트·scheme 이름 `OneButton`은 유지합니다. 앱 번들과 실행 파일은 `Folder In Bar`, 배포 ZIP·DMG 파일은 공백 없는 `FolderInBar-VERSION`을 사용합니다.
 
@@ -65,7 +65,7 @@ Sparkle 기본 구성, 키 관리, 서명 및 앱 배포 원칙은 [공식 Spark
 
 ## 3. 버전과 소스 준비
 
-1. `project.yml`의 `MARKETING_VERSION`과 `CURRENT_PROJECT_VERSION`을 올립니다. 예를 들어 `0.2.2 / 4` 다음 배포를 `0.3.0 / 5`로 지정합니다.
+1. `project.yml`의 `MARKETING_VERSION`과 `CURRENT_PROJECT_VERSION`을 올립니다. 예를 들어 `0.3.0 / 5` 다음 배포를 `0.4.0 / 6`로 지정합니다.
 2. `MARKETING_VERSION`은 숫자 세 부분(`x.y.z`), build는 증가하는 정수로 유지합니다. Sparkle은 표시 버전보다 **build 번호**로 신버전을 판단합니다.
 3. `xcodegen generate`를 실행하고 생성된 프로젝트와 `Package.resolved` 변경을 확인합니다.
 4. README의 개발 검증을 실행하고 결과를 `VALIDATION.md`에 기록합니다.
@@ -90,8 +90,8 @@ SIGN_IDENTITY="$SIGN_IDENTITY" \
 스크립트는 다음 순서로 실행됩니다.
 
 1. Keychain 공증 프로필의 인증을 확인합니다.
-2. Release를 `arm64 + x86_64` Universal 앱으로 archive하고 Developer ID 방식으로 export합니다. 이 과정에서 Sparkle 내부 helper와 XPC 서비스도 배포용으로 서명합니다.
-3. 앱 코드 서명, 아키텍처, 샌드박스와 네트워크 권한을 검증합니다. Debug의 library validation 예외, `get-task-allow`, 사용자 선택 파일 쓰기 권한이 Release에 있으면 중단합니다.
+2. Release를 `arm64 + x86_64` Universal 앱으로 archive하고 Developer ID 방식으로 export합니다. 이 과정에서 Sparkle 내부 helper와 XPC 서비스, `Contents/Helpers/FolderNameMigrationHelper.app`도 같은 팀으로 배포 서명합니다.
+3. 앱 코드 서명, 아키텍처, 샌드박스와 네트워크 권한을 검증합니다. 이름 변경 helper의 Universal 아키텍처·같은 서명 팀·추가 entitlement 없음도 확인합니다. Debug의 library validation 예외, `get-task-allow`, 사용자 선택 파일 쓰기 권한이 Release에 있으면 중단합니다.
 4. 앱을 공증에 제출하고 결과를 기다린 뒤 앱에 ticket을 staple하고 Gatekeeper 검증을 수행합니다.
 5. staple된 앱으로 최종 ZIP과 `/Applications` 바로가기를 포함한 DMG를 만듭니다. DMG 자체도 Developer ID 서명·공증·staple·이미지 검증을 거칩니다.
 6. 최종 ZIP을 Sparkle의 전용 Keychain 계정으로 서명해 appcast를 생성하고 앱 metadata와 대조합니다. 현재 스크립트는 이번 ZIP 한 개로 피드를 생성하며 이전 버전 목록과 delta를 자동 보관하지 않습니다.
@@ -220,3 +220,13 @@ python3 script/verify_appcast.py "$VERIFY_DIR/appcast.xml" \
 ```
 
 raw feed에 이전 내용이 보이면 전파 후 다시 확인합니다. 공개 피드의 enclosure가 이번 Release URL을 가리키며 실제 받은 파일의 크기·버전과 일치하는지 확인하고, 실행 중인 앱의 **앱 업데이트 확인…**으로 마지막 점검을 수행합니다. 결과와 남은 검증 항목을 `VALIDATION.md`에 기록하고 commit·push합니다.
+
+## 기존 앱 이름 변경 검증
+
+0.4.0부터 새 앱의 첫 실행에서 기존 `OneButton.app` 경로를 감지합니다. Sparkle는 기존 경로에 설치하므로, 메인 앱이 번들 안의 이름 변경 helper를 `NSWorkspace`로 실행하고, 실행 성공을 확인한 뒤 스스로 종료합니다. Helper는 자신의 상위 번들·서명 팀과 정확히 일치하는 실행 중 앱이 있다면 종료를 기다리고, 같은 폴더 안에서 `RENAME_EXCL`로 이름을 변경합니다. 대상 충돌·권한 오류에서는 덮어쓰거나 관리자 권한을 요청하지 않습니다.
+
+구버전 0.2.2 및 0.3.0부터 실제 업데이트를 확인할 때 기존 경로의 부재, 새 경로의 프로세스, 보안 범위 북마크 복원과 실제 폴더 읽기, 로그인 등록의 상태와 새 경로를 함께 확인하세요. 로그인 등록은 이동 전에 해제하지 않습니다. 새 프로세스는 5분 이내의 일회성 기록에 한해서 기존 enabled 등록이 사라졌을 때만 복구하며, 기존 off 또는 승인 대기를 자동으로 켜지 않습니다. 실제 로그아웃·로그인을 수행하지 않은 경우 다음 로그인 시 실행까지 검증했다고 기록하지 않습니다.
+
+샌드박스 앱이 호출한 `NSWorkspace.OpenConfiguration.arguments`는 macOS가 무시합니다. 따라서 메인 앱에서 경로나 PID 인자를 넘기지 않고 helper가 자신의 상위 앱 경로에 일치하는 실행 프로세스를 직접 찾습니다. [Apple API 문서](https://developer.apple.com/documentation/appkit/nsworkspace/openconfiguration/arguments)
+
+Helper는 다른 앱에 종료 Apple Event를 보내지 않습니다. 이름 변경 전 검사 또는 rename이 실패하면 검증된 원본 앱을 재실행하며, 원본 파일 교체가 감지된 경우에는 자동 실행하지 않습니다.
