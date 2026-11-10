@@ -3,6 +3,19 @@ import XCTest
 @testable import OneButton
 
 final class DesktopLayoutTests: XCTestCase {
+    func testResizedGridUsesMatchingColumnsForKeyboardNavigation() {
+        XCTAssertEqual(DesktopLayout.columnCount(for: 300), 2)
+        XCTAssertEqual(DesktopLayout.columnCount(for: 340), 3)
+        XCTAssertEqual(DesktopLayout.columnCount(for: 500), 4)
+        XCTAssertEqual(DesktopLayout.columnCount(for: 700), 6)
+        XCTAssertEqual(DesktopLayout.grid.selectionIndex(from: 1, direction: .down, itemCount: 10,
+                                                         columnCount: 4), 5)
+        XCTAssertEqual(DesktopLayout.grid.selectionIndex(from: 8, direction: .up, itemCount: 10,
+                                                         columnCount: 4), 4)
+        XCTAssertEqual(DesktopLayout.grid.selectionIndex(from: 7, direction: .down, itemCount: 10,
+                                                         columnCount: 4), 9)
+    }
+
     func testGridArrowsFollowRowsAndColumns() {
         XCTAssertEqual(DesktopLayout.grid.selectionIndex(from: 1, direction: .down, itemCount: 8), 4)
         XCTAssertEqual(DesktopLayout.grid.selectionIndex(from: 7, direction: .up, itemCount: 8), 4)

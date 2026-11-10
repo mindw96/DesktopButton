@@ -64,7 +64,7 @@ final class DesktopStore: ObservableObject {
             openError = nil
             errorMessage = nil
         } catch {
-            errorMessage = "바탕화면을 연결하지 못했습니다.\n\(error.localizedDescription)"
+            errorMessage = "폴더를 연결하지 못했습니다.\n\(error.localizedDescription)"
         }
     }
 

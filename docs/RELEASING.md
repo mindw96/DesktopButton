@@ -1,6 +1,6 @@
 # OneButton 배포 안내
 
-앱 이름은 **OneButton**, bundle ID는 `com.onebutton.desktop`, GitHub 저장소는 `mindw96/DesktopButton`입니다. 현재 소스는 **0.2.0 (build 2)**이며, 실제 공증·검증·Release 공개 상태는 [VALIDATION.md](../VALIDATION.md)를 기준으로 확인합니다.
+앱 이름은 **OneButton**, bundle ID는 `com.onebutton.desktop`, GitHub 저장소는 `mindw96/DesktopButton`입니다. 현재 소스는 **0.2.1 (build 3)**이며, 실제 공증·검증·Release 공개 상태는 [VALIDATION.md](../VALIDATION.md)를 기준으로 확인합니다.
 
 이 문서는 `script/release.sh`의 동작과 후속 공개 절차를 설명합니다. 공증 프로필이 준비되지 않았거나 공증에 실패한 산출물은 배포 준비가 끝난 파일로 취급하지 않습니다.
 

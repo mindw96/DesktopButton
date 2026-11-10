@@ -19,6 +19,8 @@
 		7F8B48DC200F457FCDCB15A0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B5A8C8D814BC9DF170EE8637 /* Sparkle */; };
 		A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
 		ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */; };
+		CA832DBD62E32F3210E04E51 /* PopoverSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */; };
+		D2EB8CA2F2216032D1FD0DAA /* PopoverSizeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */; };
 		DB6D45E30DC4B47A9E1C2948 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E34ED6AAFD47F3FF945C3AB1 /* Sparkle */; };
 		FC24CA3AA470C72446F382A8 /* DesktopItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E541D4C250D7360E431D7C /* DesktopItem.swift */; };
 /* End PBXBuildFile section */
@@ -49,6 +51,8 @@
 		8B11E832FE1770C6DD4FB160 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		C3E094051639952B86E9D408 /* DesktopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayout.swift; sourceTree = "<group>"; };
 		C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStoreTests.swift; sourceTree = "<group>"; };
+		CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverSizeTests.swift; sourceTree = "<group>"; };
+		DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverSize.swift; sourceTree = "<group>"; };
 		E5E541D4C250D7360E431D7C /* DesktopItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopItem.swift; sourceTree = "<group>"; };
 		F2F02D73D08D8402916988BA /* FullscreenFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenFixture.swift; sourceTree = "<group>"; };
 		F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneButtonApp.swift; sourceTree = "<group>"; };
@@ -103,6 +107,7 @@
 			children = (
 				2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */,
 				C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */,
+				CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */,
 				01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */,
 			);
 			path = OneButtonTests;
@@ -174,6 +179,7 @@
 			children = (
 				E5E541D4C250D7360E431D7C /* DesktopItem.swift */,
 				C3E094051639952B86E9D408 /* DesktopLayout.swift */,
+				DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -304,6 +310,7 @@
 				3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */,
 				6832DCD2B7350623666A4519 /* DesktopStore.swift in Sources */,
 				A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */,
+				CA832DBD62E32F3210E04E51 /* PopoverSize.swift in Sources */,
 				52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -314,6 +321,7 @@
 			files = (
 				15E31B9F6764C23914D41B96 /* DesktopLayoutTests.swift in Sources */,
 				5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */,
+				D2EB8CA2F2216032D1FD0DAA /* PopoverSizeTests.swift in Sources */,
 				ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -477,7 +485,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OneButton/OneButton.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OneButton/Info.plist;
@@ -485,7 +493,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
 				PRODUCT_NAME = OneButton;
 				SDKROOT = macosx;
@@ -559,7 +567,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OneButton/OneButton.Debug.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OneButton/Info.plist;
@@ -567,7 +575,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
 				PRODUCT_NAME = OneButton;
 				SDKROOT = macosx;

@@ -4,14 +4,19 @@ import SwiftUI
 struct DesktopMenuView: View {
     @ObservedObject var store: DesktopStore
     @ObservedObject var updateController: UpdateController
+    @ObservedObject var popoverSize: PopoverSize
     let dismiss: () -> Void
     @State private var selection: URL?
     @FocusState private var gridIsFocused: Bool
     @AppStorage private var layout: DesktopLayout
+    @State private var resizeStart: (point: CGPoint, size: CGSize)?
+    @GestureState private var isResizing = false
 
-    init(store: DesktopStore, updateController: UpdateController, defaults: UserDefaults = .standard, dismiss: @escaping () -> Void) {
+    init(store: DesktopStore, updateController: UpdateController, popoverSize: PopoverSize,
+         defaults: UserDefaults = .standard, dismiss: @escaping () -> Void) {
         self.store = store
         self.updateController = updateController
+        self.popoverSize = popoverSize
         self.dismiss = dismiss
         _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
     }
@@ -28,7 +33,7 @@ struct DesktopMenuView: View {
             Divider()
             footer
         }
-        .frame(width: 340)
+        .frame(width: popoverSize.size.width, height: popoverSize.size.height)
         .background {
             Button("선택한 파일 열기") { openSelection() }
                 .keyboardShortcut(.defaultAction)
@@ -37,6 +42,13 @@ struct DesktopMenuView: View {
         }
         .onExitCommand { dismiss() }
         .onMoveCommand { direction in moveSelection(direction) }
+        .onChange(of: isResizing) { active in
+            gridIsFocused = !active && layout == .grid
+            if !active {
+                resizeStart = nil
+                popoverSize.save()
+            }
+        }
         .onAppear {
             if selection == nil { selection = store.items.first?.id }
         }
@@ -49,17 +61,22 @@ struct DesktopMenuView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(systemName: "desktopcomputer")
+            Image(systemName: "folder")
                 .font(.title3)
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("바탕화면").font(.headline)
+                Text(store.folderURL?.lastPathComponent ?? "폴더 연결")
+                    .font(.headline)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .help(store.folderURL?.path ?? "연결할 폴더를 선택해 주세요.")
+                    .accessibilityIdentifier("desktop.folder.name")
                 Text(store.folderURL == nil ? "OneButton" : "\(store.items.count)개 항목")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Spacer()
+            Spacer(minLength: 4)
             HStack(spacing: 2) {
                 layoutButton(.list, symbol: "list.bullet", label: "목록 보기")
                 layoutButton(.grid, symbol: "square.grid.2x2", label: "아이콘 보기")
@@ -82,7 +99,6 @@ struct DesktopMenuView: View {
             .disabled(!store.hasConnection || store.isLoading || store.isChoosingFolder)
         }
         .padding(16)
-        .help(store.folderURL?.path ?? "바탕화면 파일을 메뉴 막대에서 열어 보세요.")
     }
 
     private func layoutButton(_ value: DesktopLayout, symbol: String, label: String) -> some View {
@@ -104,25 +120,28 @@ struct DesktopMenuView: View {
     @ViewBuilder
     private var content: some View {
         if !store.hasConnection {
-            VStack(spacing: 14) {
-                Image(systemName: "folder.badge.plus")
-                    .font(.system(size: 36, weight: .light))
-                    .foregroundStyle(.secondary)
-                    .accessibilityHidden(true)
-                Text("바탕화면을 가까이").font(.headline)
-                Text("폴더를 한 번 연결하면\n여기서 파일을 바로 열 수 있어요.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                Button("바탕화면 연결…") { chooseFolder() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(store.isChoosingFolder)
-                    .accessibilityIdentifier("desktop.connect")
+            ScrollView {
+                VStack(spacing: 14) {
+                    Image(systemName: "folder.badge.plus")
+                        .font(.system(size: 36, weight: .light))
+                        .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+                    Text("폴더를 가까이").font(.headline)
+                    Text("폴더를 한 번 연결하면\n여기서 파일을 바로 열 수 있어요.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("폴더 연결…") { chooseFolder() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(store.isChoosingFolder)
+                        .accessibilityIdentifier("desktop.connect")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 30)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 30)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if store.items.isEmpty {
             VStack(spacing: 10) {
                 Image(systemName: store.folderURL != nil ? "tray" : "folder.badge.questionmark")
@@ -131,7 +150,7 @@ struct DesktopMenuView: View {
                     .accessibilityHidden(true)
                 Text(emptyMessage).font(.callout).foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity, minHeight: 160)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollViewReader { scroll in
                 Group {
@@ -146,7 +165,7 @@ struct DesktopMenuView: View {
                     } else {
                         ScrollView {
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8),
-                                                     count: DesktopLayout.gridColumnCount), spacing: 8) {
+                                                     count: gridColumnCount), spacing: 8) {
                                 ForEach(store.items) { item in
                                     itemButton(item)
                                 }
@@ -165,15 +184,16 @@ struct DesktopMenuView: View {
                 .onChange(of: layout) { _ in
                     if let selection { scroll.scrollTo(selection) }
                 }
+                .onChange(of: gridColumnCount) { _ in
+                    if let selection { scroll.scrollTo(selection) }
+                }
             }
-            .frame(height: contentHeight)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
-    private var contentHeight: CGFloat {
-        if layout == .list { return min(CGFloat(store.items.count) * 40 + 12, 330) }
-        let rows = (store.items.count + DesktopLayout.gridColumnCount - 1) / DesktopLayout.gridColumnCount
-        return min(CGFloat(rows) * 106 + 16, 330)
+    private var gridColumnCount: Int {
+        DesktopLayout.columnCount(for: popoverSize.size.width)
     }
 
     private func itemButton(_ item: DesktopItem) -> some View {
@@ -201,7 +221,7 @@ struct DesktopMenuView: View {
     private var emptyMessage: String {
         if store.isLoading { return "파일 목록을 불러오는 중…" }
         if store.folderURL == nil { return "폴더 연결과 접근 권한을 확인해 주세요." }
-        return "바탕화면에 표시할 파일이 없어요."
+        return "폴더에 표시할 파일이 없어요."
     }
 
     private func errorBanner(_ message: String) -> some View {
@@ -223,14 +243,15 @@ struct DesktopMenuView: View {
 
     private var footer: some View {
         HStack {
+            if popoverSize.resizesFromLeadingEdge { resizeHandle }
             if store.hasConnection {
-                Button("바탕화면 다시 연결…") { chooseFolder() }
+                Button("폴더 다시 연결…") { chooseFolder() }
                     .disabled(store.isChoosingFolder || store.openingURL != nil)
                     .accessibilityIdentifier("desktop.reconnect")
             }
             Spacer()
             Menu {
-                Button("업데이트 확인…") {
+                Button("앱 업데이트 확인…") {
                     dismiss()
                     updateController.checkForUpdates()
                 }
@@ -246,21 +267,61 @@ struct DesktopMenuView: View {
                 ))
                 .disabled(!updateController.automaticallyChecksForUpdates)
             } label: {
-                Label(updateController.availableUpdateVersion == nil ? "업데이트" : "업데이트 있음",
-                      systemImage: updateController.availableUpdateVersion == nil
-                        ? "arrow.triangle.2.circlepath" : "arrow.down.circle.fill")
+                Text(updateController.availableUpdateVersion == nil ? "앱 업데이트" : "새 버전 있음")
+                    .font(.system(size: 11))
             }
             .menuStyle(.borderlessButton)
+            .controlSize(.mini)
+            .font(.system(size: 11))
             .fixedSize()
+            .help("OneButton 앱 업데이트 및 자동 업데이트 설정")
+            .accessibilityLabel("앱 업데이트")
             .accessibilityIdentifier("desktop.updates")
             Button("종료") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q", modifiers: .command)
                 .accessibilityIdentifier("desktop.quit")
+            if !popoverSize.resizesFromLeadingEdge { resizeHandle }
         }
         .font(.caption)
         .buttonStyle(.borderless)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+    }
+
+    private var resizeHandle: some View {
+        Image(systemName: popoverSize.resizesFromLeadingEdge
+              ? "arrow.up.right.and.arrow.down.left" : "arrow.up.left.and.arrow.down.right")
+            .font(.system(size: 10))
+            .foregroundStyle(.secondary)
+            .frame(width: 22, height: 22)
+            .contentShape(Rectangle())
+            .help("모서리를 드래그하여 창의 폭과 높이를 조절하세요.")
+            .gesture(DragGesture(minimumDistance: 0)
+                .updating($isResizing) { _, active, _ in active = true }
+                .onChanged { _ in
+                    // Screen coordinates stay stable while the popover repositions itself.
+                    if resizeStart == nil { resizeStart = (NSEvent.mouseLocation, popoverSize.size) }
+                    guard let start = resizeStart else { return }
+                    popoverSize.resize(to: PopoverSize.draggedSize(
+                        from: start.size, start: start.point, current: NSEvent.mouseLocation,
+                        fromLeadingEdge: popoverSize.resizesFromLeadingEdge
+                    ))
+                }
+            )
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("창 크기 조절")
+            .accessibilityValue("너비 \(Int(popoverSize.size.width)), 높이 \(Int(popoverSize.size.height))")
+            .accessibilityIdentifier("desktop.resize")
+            .accessibilityAction(named: "너비 늘리기") { adjustSize(width: 40) }
+            .accessibilityAction(named: "너비 줄이기") { adjustSize(width: -40) }
+            .accessibilityAction(named: "높이 늘리기") { adjustSize(height: 40) }
+            .accessibilityAction(named: "높이 줄이기") { adjustSize(height: -40) }
+    }
+
+    private func adjustSize(width: CGFloat = 0, height: CGFloat = 0) {
+        popoverSize.resize(to: CGSize(width: popoverSize.size.width + width,
+                                     height: popoverSize.size.height + height))
+        popoverSize.save()
     }
 
     private func chooseFolder() {
@@ -282,7 +343,8 @@ struct DesktopMenuView: View {
     private func moveSelection(_ direction: MoveCommandDirection) {
         let current = store.items.firstIndex(where: { $0.id == selection })
         guard let next = layout.selectionIndex(from: current, direction: direction,
-                                               itemCount: store.items.count) else { return }
+                                               itemCount: store.items.count,
+                                               columnCount: gridColumnCount) else { return }
         selection = store.items[next].id
     }
 }

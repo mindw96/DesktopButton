@@ -16,7 +16,9 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     private let popover = NSPopover()
     private var store: DesktopStore!
     private var updateController: UpdateController!
+    private var popoverSize: PopoverSize!
     private var updateReminderObservation: AnyCancellable?
+    private var sizeObservation: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         var defaults = UserDefaults.standard
@@ -34,6 +36,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         }
         #endif
         store = DesktopStore(defaults: defaults)
+        popoverSize = PopoverSize(defaults: defaults)
         updateController = UpdateController(isEnabled: shouldStartUpdater)
         updateController.onWillPresentUpdate = { [weak self] in
             self?.popover.performClose(nil)
@@ -44,29 +47,33 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         popover.contentViewController = NSHostingController(rootView: DesktopMenuView(
             store: store,
             updateController: updateController,
+            popoverSize: popoverSize,
             defaults: defaults
         ) { [weak self] in
             self?.popover.performClose(nil)
         })
+        sizeObservation = popoverSize.$size.sink { [weak self] size in
+            self?.popover.contentSize = size
+        }
 
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.autosaveName = "OneButton"
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "desktopcomputer", accessibilityDescription: "OneButton 바탕화면")
+            button.image = NSImage(systemSymbolName: "folder", accessibilityDescription: "OneButton 폴더")
             button.image?.isTemplate = true
-            button.toolTip = "OneButton — 바탕화면 파일 열기"
-            button.setAccessibilityLabel("OneButton 바탕화면")
+            button.toolTip = "OneButton — 연결한 폴더 열기"
+            button.setAccessibilityLabel("OneButton 폴더")
             button.target = self
             button.action = #selector(togglePopover)
         }
         statusItem = item
         updateReminderObservation = updateController.$availableUpdateVersion.sink { [weak item] version in
             guard let button = item?.button else { return }
-            let label = version.map { "OneButton 업데이트 \($0) 사용 가능" } ?? "OneButton 바탕화면"
-            button.image = NSImage(systemSymbolName: version == nil ? "desktopcomputer" : "arrow.down.circle",
+            let label = version.map { "OneButton 업데이트 \($0) 사용 가능" } ?? "OneButton 폴더"
+            button.image = NSImage(systemSymbolName: version == nil ? "folder" : "arrow.down.circle",
                                    accessibilityDescription: label)
             button.image?.isTemplate = true
-            button.toolTip = version.map { "OneButton \($0) 업데이트 사용 가능" } ?? "OneButton — 바탕화면 파일 열기"
+            button.toolTip = version.map { "OneButton \($0) 업데이트 사용 가능" } ?? "OneButton — 연결한 폴더 열기"
             button.setAccessibilityLabel(label)
         }
     }
@@ -75,6 +82,12 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         if popover.isShown {
             popover.performClose(nil)
         } else if let button = statusItem?.button {
+            if let window = button.window, let screen = window.screen {
+                let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
+                let visible = screen.visibleFrame
+                popoverSize.fit(in: CGSize(width: visible.width - 24, height: visible.height - 60),
+                                fromLeadingEdge: anchor.midX >= visible.midX)
+            }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }

@@ -144,28 +144,90 @@ func clickObserved(_ element: AXUIElement) throws {
     }
 }
 
-func verifyLayout(grid: Bool, itemNames: [String], in app: AXUIElement) throws {
-    try require(itemNames.count == 4, "Layout check needs the first four fixture names")
+func hoverObserved(_ element: AXUIElement) throws {
+    let frame = try observedFrame(element)
+    guard let event = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved,
+                              mouseCursorPosition: CGPoint(x: frame.midX, y: frame.midY), mouseButton: .left) else {
+        throw SmokeFailure(description: "Could not create menu hover event")
+    }
+    event.flags = []
+    event.post(tap: .cghidEventTap)
+    pumpRunLoop(0.4)
+}
+
+func dragObserved(_ element: AXUIElement, by delta: CGSize) throws {
+    let frame = try observedFrame(element)
+    let start = CGPoint(x: frame.midX, y: frame.midY)
+    func post(_ type: CGEventType, at point: CGPoint) throws {
+        guard let event = CGEvent(mouseEventSource: nil, mouseType: type,
+                                  mouseCursorPosition: point, mouseButton: .left) else {
+            throw SmokeFailure(description: "Could not create resize drag event")
+        }
+        event.flags = []
+        event.post(tap: .cghidEventTap)
+        pumpRunLoop(0.04)
+    }
+    try post(.mouseMoved, at: start)
+    try post(.leftMouseDown, at: start)
+    var point = start
+    defer { try? post(.leftMouseUp, at: point) }
+    for step in 1...12 {
+        let fraction = CGFloat(step) / 12
+        point = CGPoint(x: start.x + delta.width * fraction, y: start.y + delta.height * fraction)
+        try post(.leftMouseDragged, at: point)
+    }
+}
+
+@discardableResult
+func verifyLayout(grid: Bool, itemNames: [String], columns expectedColumns: Int? = nil, in app: AXUIElement) throws -> Int {
+    try require(itemNames.count >= 4, "Layout check needs at least the first four fixture names")
     var frames: [CGRect] = []
+    var columns = 1
     try require(until(4) {
         frames = itemNames.compactMap { name in
             guard let item = identified("desktop.item.\(name)", in: app) else { return nil }
             return try? observedFrame(item)
         }
-        guard frames.count == 4 else { return false }
+        guard frames.count == itemNames.count else { return false }
         if grid {
-            return abs(frames[0].minY - frames[1].minY) < 2
-                && abs(frames[1].minY - frames[2].minY) < 2
-                && frames[0].maxX <= frames[1].minX + 2
-                && frames[1].maxX <= frames[2].minX + 2
-                && frames[3].minY >= frames[0].maxY - 2
-                && abs(frames[3].minX - frames[0].minX) < 2
-                && frames.allSatisfy { $0.width > 70 && $0.width < 120 && $0.height >= 80 }
+            columns = frames.prefix { abs($0.minY - frames[0].minY) < 2 }.count
+            guard columns >= 2, expectedColumns.map({ columns == $0 }) ?? true else { return false }
+            return frames.enumerated().allSatisfy { index, frame in
+                guard frame.width > 70, frame.height >= 80, abs(frame.width - frames[0].width) < 2,
+                      abs(frame.minX - frames[index % columns].minX) < 2 else { return false }
+                if index % columns > 0 {
+                    let previous = frames[index - 1]
+                    guard abs(frame.minY - previous.minY) < 2, previous.maxX <= frame.minX + 2 else { return false }
+                }
+                return index < columns || frames[index - columns].maxY <= frame.minY + 2
+            }
         }
         return zip(frames, frames.dropFirst()).allSatisfy { previous, next in
             abs(previous.minX - next.minX) < 2 && previous.maxY <= next.minY + 2
         } && frames.allSatisfy { $0.width > 240 && $0.height < 60 }
-    }, grid ? "File buttons are not arranged in a three-column icon grid" : "File buttons are not arranged in a vertical list")
+    }, grid ? "File buttons are not arranged in the expected icon grid" : "File buttons are not arranged in a vertical list")
+    return columns
+}
+
+func menuBarControl(ownerPIDs: Set<pid_t>, matching predicate: (AXUIElement) -> Bool) -> AXUIElement? {
+    let global = AXUIElementCreateSystemWide()
+    AXUIElementSetMessagingTimeout(global, 0.05)
+    for screen in NSScreen.screens {
+        guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { continue }
+        let bounds = CGDisplayBounds(number.uint32Value)
+        let deadline = Date().addingTimeInterval(1)
+        for x in stride(from: bounds.maxX - 6, through: bounds.minX, by: -12) {
+            guard Date() < deadline else { break }
+            var candidate: AXUIElement?
+            if AXUIElementCopyElementAtPosition(global, Float(x), Float(bounds.minY + 12), &candidate) == .success,
+               let candidate {
+                var pid: pid_t = 0
+                AXUIElementGetPid(candidate, &pid)
+                if ownerPIDs.contains(pid), predicate(candidate) { return candidate }
+            }
+        }
+    }
+    return nil
 }
 
 func overflowControl() -> AXUIElement? {
@@ -175,38 +237,55 @@ func overflowControl() -> AXUIElement? {
     if let control = find(roots, maxDepth: 4, matching: { value($0, kAXIdentifierAttribute) as? String == "menu-bar-overflow-indicator" }) {
         return control
     }
-    // The menu relay sometimes omits its menu tree after another app activates.
-    let global = AXUIElementCreateSystemWide()
-    AXUIElementSetMessagingTimeout(global, 0.2)
-    let bounds = CGDisplayBounds(CGMainDisplayID())
-    let deadline = Date().addingTimeInterval(2)
-    for x in stride(from: bounds.maxX - 12, through: bounds.minX, by: -12) {
-        guard Date() < deadline else { break }
-        var candidate: AXUIElement?
-        if AXUIElementCopyElementAtPosition(global, Float(x), Float(bounds.minY + 19), &candidate) == .success,
-           let candidate, value(candidate, kAXIdentifierAttribute) as? String == "menu-bar-overflow-indicator" {
-            var pid: pid_t = 0
-            AXUIElementGetPid(candidate, &pid)
-            if pid == agent.processIdentifier { return candidate }
+    // The menu relay can omit its tree and display overflow on a secondary monitor.
+    return menuBarControl(ownerPIDs: [agent.processIdentifier]) {
+        value($0, kAXIdentifierAttribute) as? String == "menu-bar-overflow-indicator"
+    }
+}
+
+func relayedMenuItem(_ app: AXUIElement) -> AXUIElement? {
+    var appPID: pid_t = 0
+    guard AXUIElementGetPid(app, &appPID) == .success else { return nil }
+    var ownerPIDs: Set<pid_t> = [appPID]
+    if let agent = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.MenuBarAgent").first {
+        ownerPIDs.insert(agent.processIdentifier)
+    }
+    return menuBarControl(ownerPIDs: ownerPIDs) { candidate in
+        guard let role = value(candidate, kAXRoleAttribute) as? String,
+              [kAXMenuBarItemRole, kAXButtonRole].contains(role) else { return false }
+        return [kAXDescriptionAttribute, kAXTitleAttribute].contains {
+            (value(candidate, $0) as? String)?.hasPrefix("OneButton ") == true
         }
     }
-    return nil
 }
 
 func openMenu(_ app: AXUIElement) throws {
     _ = until(2) { menuItem(app) != nil }
-    if let overflow = overflowControl() {
-        let description = value(overflow, kAXDescriptionAttribute) as? String ?? ""
-        // shortcut: overflow text matches Korean macOS; add locale variants when testing other languages.
-        if description == "가려진 메뉴 막대 항목 보기" || menuItem(app) == nil {
-            try clickObserved(overflow)
-            pumpRunLoop(0.5)
+    if menuItem(app) == nil, relayedMenuItem(app) == nil {
+        if let bar = elementValue(app, kAXMenuBarAttribute) { try hoverObserved(bar) }
+        if menuItem(app) == nil, relayedMenuItem(app) == nil, let overflow = overflowControl() {
+            try hoverObserved(overflow)
+            // Moving to another monitor can relocate its menu controls; resolve them again before clicking.
+            // shortcut: overflow labels match Korean macOS; add variants when testing another locale.
+            if let current = overflowControl(),
+               value(current, kAXDescriptionAttribute) as? String == "가려진 메뉴 막대 항목 보기" {
+                try clickObserved(current)
+                pumpRunLoop(0.5)
+            }
         }
     }
-    try require(until(6) { menuItem(app) != nil }, "OneButton menu item did not appear")
-    guard let item = menuItem(app) else { throw SmokeFailure(description: "OneButton menu item disappeared") }
+    var observedItem: AXUIElement?
+    try require(until(6) {
+        observedItem = menuItem(app) ?? relayedMenuItem(app)
+        return observedItem != nil
+    }, "OneButton menu item did not appear on any display")
+    guard let item = observedItem else { throw SmokeFailure(description: "OneButton menu item disappeared") }
+    try hoverObserved(item)
+    guard let current = menuItem(app) ?? relayedMenuItem(app) else {
+        throw SmokeFailure(description: "OneButton menu item disappeared after moving to its monitor")
+    }
     // macOS 27's menu relay acknowledges AXPress without opening this status item.
-    try clickObserved(item)
+    try clickObserved(current)
 }
 
 func ownedOnscreenWindow(_ pid: pid_t) -> CGWindowID? {
@@ -219,6 +298,45 @@ func ownedOnscreenWindow(_ pid: pid_t) -> CGWindowID? {
         return entry[kCGWindowNumber as String] as? CGWindowID
     }
     return nil
+}
+
+func observedWindowFrame(_ pid: pid_t) throws -> CGRect {
+    guard let windowID = ownedOnscreenWindow(pid),
+          let entries = CGWindowListCopyWindowInfo(.optionIncludingWindow, windowID) as? [[String: Any]],
+          let bounds = entries.first?[kCGWindowBounds as String] as? [String: CGFloat],
+          let x = bounds["X"], let y = bounds["Y"],
+          let width = bounds["Width"], let height = bounds["Height"] else {
+        throw SmokeFailure(description: "App has no observed onscreen window frame")
+    }
+    return CGRect(x: x, y: y, width: width, height: height)
+}
+
+@discardableResult
+func resizePopup(by change: CGSize, in app: AXUIElement, pid: pid_t) throws -> CGSize {
+    guard let grip = identified("desktop.resize", in: app) else {
+        throw SmokeFailure(description: "Popup resize grip is missing")
+    }
+    let before = try observedWindowFrame(pid)
+    let gripFrame = try observedFrame(grip)
+    let horizontalDirection: CGFloat = gripFrame.midX < before.midX ? -1 : 1
+    try dragObserved(grip, by: CGSize(width: change.width * horizontalDirection, height: change.height))
+    var after = before
+    try require(until(4) {
+        guard let frame = try? observedWindowFrame(pid) else { return false }
+        after = frame
+        return abs(after.width - before.width - change.width) < 3
+            && abs(after.height - before.height - change.height) < 3
+    }, "Grip drag did not resize both dimensions: before \(before.size), after \(after.size), requested \(change)")
+    return after.size
+}
+
+func verifyFolderName(_ name: String, in app: AXUIElement) throws {
+    try require(until(3) {
+        guard let title = identified("desktop.folder.name", in: app) else { return false }
+        return [kAXTitleAttribute, kAXValueAttribute, kAXDescriptionAttribute].contains {
+            value(title, $0) as? String == name
+        }
+    }, "Popup header does not show the connected folder's actual name")
 }
 
 func screenshot(_ pid: pid_t, to url: URL) {
@@ -339,7 +457,7 @@ final class Smoke {
         try Data().write(to: fixture.appendingPathComponent(".hidden"))
         let openName = "00 OneButton Open \(UUID().uuidString.prefix(8))"
         try FileManager.default.createDirectory(at: fixture.appendingPathComponent(openName), withIntermediateDirectories: false)
-        let gridNames = (1...3).map { "0\($0) OneButton Grid \(UUID().uuidString.prefix(8))" }
+        let gridNames = (1...5).map { "0\($0) OneButton Grid \(UUID().uuidString.prefix(8))" }
         for name in gridNames {
             try FileManager.default.createDirectory(at: fixture.appendingPathComponent(name), withIntermediateDirectories: false)
         }
@@ -395,8 +513,9 @@ final class Smoke {
             throw SmokeFailure(description: "Selected folder's file did not appear")
         }
         try require(labeled(".hidden", in: app) == nil, "Hidden file appeared in the list")
+        try verifyFolderName(fixture.lastPathComponent, in: app)
         screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-connected.png"))
-        print("PASS: real folder picker grant, file listing, hidden-file exclusion")
+        print("PASS: real folder picker grant, connected folder name, file listing, hidden-file exclusion")
 
         try key(53, to: process.processIdentifier)
         try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Connected popup did not close")
@@ -416,7 +535,7 @@ final class Smoke {
         try openMenu(app)
         try verifyLayout(grid: false, itemNames: layoutNames, in: app)
         try press(identified("desktop.view.grid", in: app), "icon view")
-        try verifyLayout(grid: true, itemNames: layoutNames, in: app)
+        try verifyLayout(grid: true, itemNames: layoutNames, columns: 3, in: app)
         screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-grid.png"))
         // The previous Return opened item 0; down/right/left must select item 3 in the grid.
         for arrow: CGKeyCode in [125, 124, 123] {
@@ -428,6 +547,16 @@ final class Smoke {
         try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Grid Return-open did not close popup")
         print("PASS: list-to-grid, three-column tile geometry, grid arrows and Return")
 
+        try openMenu(app)
+        try require(until(5) { identified("desktop.resize", in: app) != nil }, "Resize grip did not appear")
+        try resizePopup(by: CGSize(width: 160, height: 100), in: app, pid: process.processIdentifier)
+        try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
+        screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-resize-larger.png"))
+        let savedSize = try resizePopup(by: CGSize(width: -60, height: -60), in: app, pid: process.processIdentifier)
+        try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
+        screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-resize-smaller.png"))
+        print("PASS: real grip drags increase/decrease width and height, grid adapts to four columns")
+
         stop(process)
         process = try launch("OneButton", arguments: ["--ui-testing"])
         app = AXUIElementCreateApplication(process.processIdentifier)
@@ -438,8 +567,13 @@ final class Smoke {
             throw SmokeFailure(description: "Bookmark did not restore after relaunch: \(error ?? "no visible error")")
         }
         try require(identified("desktop.connect", in: app) == nil, "Relaunch unexpectedly requires a new grant")
-        try verifyLayout(grid: true, itemNames: layoutNames, in: app)
-        print("PASS: sandbox bookmark and icon-view preference restoration after relaunch")
+        try verifyFolderName(fixture.lastPathComponent, in: app)
+        try require(until(4) {
+            guard let frame = try? observedWindowFrame(process.processIdentifier) else { return false }
+            return abs(frame.width - savedSize.width) < 3 && abs(frame.height - savedSize.height) < 3
+        }, "Popup size was not restored after relaunch")
+        try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
+        print("PASS: sandbox bookmark, folder name, popup size and icon-view preference restoration after relaunch")
         try press(identified("desktop.item.\(openName)", in: app), "fixture folder icon")
         try closeOpenedFixtureFolder(named: openName)
         try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Click-open did not close popup")
@@ -466,19 +600,36 @@ final class Smoke {
             try press(identified("fixture.fullscreen", in: hostAX), "fullscreen fixture toggle")
             try require(until(10) { labeled("전체 화면 테스트 중", in: hostAX) != nil }, "Fixture did not enter fullscreen")
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Fullscreen fixture is not on the active Space")
+            let hostFrame = try observedWindowFrame(host.processIdentifier)
+            let displayBounds = NSScreen.screens.compactMap { screen -> CGRect? in
+                guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return nil }
+                return CGDisplayBounds(number.uint32Value)
+            }.first { $0.contains(CGPoint(x: hostFrame.midX, y: hostFrame.midY)) }
+            guard let displayBounds,
+                  let revealMenu = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved,
+                                           mouseCursorPosition: CGPoint(x: displayBounds.midX, y: displayBounds.minY + 1),
+                                           mouseButton: .left) else {
+                throw SmokeFailure(description: "Could not locate the fullscreen fixture's menu bar edge")
+            }
+            revealMenu.flags = []
+            revealMenu.post(tap: .cghidEventTap)
+            pumpRunLoop(1)
             try openMenu(app)
             try require(until(6) { labeled("문서 2.txt", in: app) != nil }, "Popup failed above fullscreen fixture")
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Opening popup switched away from fullscreen Space")
             try require(ownedOnscreenWindow(process.processIdentifier) != nil, "Popup is not on screen")
             screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-fullscreen-popup.png"))
             try press(identified("desktop.view.grid", in: app), "icon view above fullscreen")
-            try verifyLayout(grid: true, itemNames: layoutNames, in: app)
+            try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Changing to grid switched away from fullscreen Space")
+            try resizePopup(by: CGSize(width: 40, height: 30), in: app, pid: process.processIdentifier)
+            try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Resizing popup switched away from fullscreen Space")
+            try verifyLayout(grid: true, itemNames: layoutNames, columns: 4, in: app)
             screenshot(process.processIdentifier, to: artifacts.appendingPathComponent("native-fullscreen-grid.png"))
             try key(53, to: process.processIdentifier)
             try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Fullscreen popup did not close")
             try require(ownedOnscreenWindow(host.processIdentifier) != nil, "Closing popup switched away from fullscreen Space")
-            print("PASS: popup above another app's fullscreen Space, close preserves Space")
+            print("PASS: popup opens, changes layout, resizes and closes without leaving another app's fullscreen Space")
         } else {
             print("SKIP: fullscreen fixture app is not built")
         }

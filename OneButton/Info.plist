@@ -27,7 +27,7 @@
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSDesktopFolderUsageDescription</key>
-    <string>메뉴 막대에서 바탕화면 파일 목록을 표시하고 선택한 파일을 열기 위해 접근합니다.</string>
+    <string>메뉴 막대에서 선택한 폴더의 파일 목록을 표시하고 선택한 파일을 열기 위해 접근합니다.</string>
     <key>SUFeedURL</key>
     <string>https://raw.githubusercontent.com/mindw96/DesktopButton/main/appcast.xml</string>
     <key>SUPublicEDKey</key>
