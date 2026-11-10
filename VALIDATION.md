@@ -1,5 +1,37 @@
 # OneButton 검증 기록
 
+## 0.2.0 공증 및 배포 완료 (2026-11-10)
+
+**[GitHub Release v0.2.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.0)**를 공개했습니다. macOS 13 이상, Universal `arm64 + x86_64`, 앱 버전 `0.2.0`, build `2`입니다. 아래 11월 7일의 공증 대기 상태는 이 기록으로 갱신합니다.
+
+| 검증 | 결과 |
+| --- | --- |
+| Release archive 및 Developer ID export | 통과 — Xcode 27.2 (27B52), macOS 27.2 |
+| 앱 및 Sparkle framework·helper·XPC 서명 | 통과 — Team `4J7HGK26PF`, hardened runtime |
+| Release 권한 | 읽기 전용 폴더·북마크·네트워크·Sparkle mach lookup, Debug 예외 없음 |
+| 앱 공증 | `Accepted`, issues 없음 — `cfd458ad-87fb-47c2-aff4-46cb5ccbfb5d` |
+| DMG 공증 | `Accepted`, issues 없음 — `92dcb0c0-1f05-4332-afc6-356ae15a9566` |
+| 앱·DMG 공증 티켓 | staple 및 validate 통과 |
+| Gatekeeper | 앱 및 공개 ZIP에서 꺼낸 앱 모두 `accepted / Notarized Developer ID` |
+| 패키지 구성 | ZIP과 DMG의 앱 실행 파일 일치, DMG의 Applications 바로가기 확인 |
+| 공개 파일 검증 | 인증 없는 재다운로드 성공, ZIP·DMG·SHA256SUMS가 로컬 최종본과 일치 |
+| Sparkle 서명 | 앱 공개키와 Keychain 공개키 일치, 공개 ZIP의 EdDSA 실제 검증 통과 |
+| 공개 업데이트 피드 | raw URL의 내용 일치, build·버전·최소 OS·URL·파일 크기 대조 통과 |
+| 배포 앱의 업데이트 UI | 공개 ZIP에서 꺼낸 앱으로 수동 확인, “최신 버전입니다.” 표시 통과 |
+
+최종 파일과 SHA-256:
+
+```text
+173edf4c2f047f15cd4e50e93a65e0aa18ab5484bdc16dd3e0a2294899c3b33c  OneButton-0.2.0.zip
+6a3b6c71d9320146ed6932c5e410f2257c30cbb3294b9855ce4df45e188f84c2  OneButton-0.2.0.dmg
+```
+
+릴리스 태그 `v0.2.0`의 소스 커밋은 `222d842`, 업데이트 피드 공개 커밋은 `eca256d`입니다. 이번 작업에서는 제품 코드를 변경하지 않았으며, 기존 단위 테스트 12개와 실제 UI 검증 결과는 아래에 기록되어 있습니다. 배포 스크립트의 아키텍처 검사를 `lipo -archs` 출력 검사로 보완하고 실제 배포본에서 통과를 확인했습니다.
+
+최종 산출물은 `dist/OneButton-0.2.0.zip`, `dist/OneButton-0.2.0.dmg`, `dist/SHA256SUMS`, `dist/appcast.xml`입니다. `dist/pending-notarization/`은 11월 7일의 미공증 초안이며 배포에 사용하지 않았습니다. 실행 로그는 `.test-artifacts/release-20261110-final.log`, Apple 공증 로그는 `.test-artifacts/notary-app-20261110.json` 및 `notary-dmg-20261110.json`, 업데이트 UI 결과는 `.test-artifacts/sparkle-release-ui-20261110.log`에 있습니다.
+
+실제 구버전 → 신버전 교체 설치, Intel Mac 및 macOS 13–26의 실제 실행은 검증하지 않았습니다. 이번 검증은 최종 패키지·공개 다운로드·Sparkle 피드와 수동 업데이트 확인까지입니다. App Store 제출은 이번 배포 범위에 포함하지 않습니다.
+
 ## 0.2.0 추가 검증 (2026-11-07)
 
 - 목록/격자 3열 전환, 보기 설정 저장, 48pt 파일 아이콘, 방향키 이동을 추가했습니다.
@@ -10,13 +42,13 @@
 - 격자 3열 배치, 방향키/Return, 아이콘 한 번 클릭, 폴더/텍스트 문서 열기, 재실행 후 북마크와 격자 설정 복원, 목록 복귀, 다른 앱의 전체 화면 위에서 격자 열기·닫기를 확인했습니다. 결과: `.test-artifacts/grid-native-ui-smoke-3.log`.
 - Release 앱과 Sparkle의 framework, Installer.xpc, Updater.app, Autoupdate 서명 무결성을 확인했습니다. Developer ID, hardened runtime, arm64/x86_64를 포함합니다. 배포본에는 Debug의 library-validation 예외나 파일 쓰기 권한이 없습니다.
 - ZIP·DMG 초안은 `dist/pending-notarization/`에 생성했습니다. DMG 이미지 체크섬 검증이 통과했습니다.
-- 공증은 `OneButtonNotary` 키체인 프로필 설정 대기 상태입니다. 완료 전 초안은 업데이트 피드에 등록하지 않습니다. 현재 `appcast.xml`은 유효한 빈 피드입니다.
+- 당시 공증은 `OneButtonNotary` 키체인 프로필 설정 대기 상태였으며 `appcast.xml`은 빈 피드였습니다. 11월 10일 공증 및 피드 공개를 완료했습니다.
 - 공개 GitHub raw feed를 인증 없이 내려받아 저장소 파일과 일치하는지 확인했습니다. Developer ID Release 앱의 **업데이트 → 업데이트 확인…**을 실제로 눌러 Sparkle의 **최신 버전입니다.** 안내를 확인했습니다. 아직 최신 릴리스가 없는 빈 피드 확인이며, 버전 교체 설치 테스트와는 다릅니다. 결과: `.test-artifacts/sparkle-ui-smoke.log`.
 - 비공개 테스트 폴더에서 현재 ZIP의 appcast 생성, 버전/URL/크기 검증, 키체인 공개키와 앱 공개키 일치, Sparkle `sign_update --verify`의 EdDSA 검증이 통과했습니다. 최종 공증 후 ZIP을 다시 만들면 반드시 서명과 검증을 다시 수행해야 합니다.
-- 잘못된 다운로드 URL과 파일 크기를 넣은 피드를 `PYTHONOPTIMIZE=1`에서도 거부하는 음성 테스트가 통과했습니다.
-- 저장소: `https://github.com/mindw96/DesktopButton`, 구현 커밋 `7c57eb3`, `main` 푸시 완료. 공증된 릴리스와 업데이트 enclosure는 아직 공개하지 않았습니다.
+- 잘못된 다운로드 URL과 파일 크기를 넣은 피드를 `PYTHONOPTIMIZE=1`에서도 거부하는 오류 입력 검증이 통과했습니다.
+- 저장소: `https://github.com/mindw96/DesktopButton`, 구현 커밋 `7c57eb3`, `main` 푸시 완료. 당시에는 공증된 릴리스와 업데이트 enclosure를 공개하지 않았습니다.
 
-공증·Gatekeeper 설치·Sparkle 실제 버전 교체의 완료 여부는 아래 배포 기록에 별도로 기록합니다. 아래 항목은 0.1.0 초기 구현의 검증 기록입니다.
+최신 공증·배포 검증 결과는 문서 상단에 기록했습니다. 아래 항목은 0.1.0 초기 구현의 검증 기록입니다.
 
 검증일: 2026-11-07 (Asia/Seoul)
 

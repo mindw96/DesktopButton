@@ -4,6 +4,16 @@
 
 앱 이름은 **OneButton**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 소스 버전은 **0.2.0 (build 2)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
 
+## 다운로드와 설치
+
+**[OneButton 0.2.0 다운로드](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.0)** — macOS 13 이상, Apple Silicon 및 Intel 지원. 앱과 DMG는 Developer ID 서명 및 Apple 공증을 완료했습니다.
+
+- [DMG 설치 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.2.0/OneButton-0.2.0.dmg)을 열고 `OneButton.app`을 `Applications`로 드래그하세요.
+- [ZIP 파일](https://github.com/mindw96/DesktopButton/releases/download/v0.2.0/OneButton-0.2.0.zip)에는 같은 공증 앱이 들어 있습니다.
+- [SHA256SUMS](https://github.com/mindw96/DesktopButton/releases/download/v0.2.0/SHA256SUMS)로 다운로드 무결성을 확인할 수 있습니다.
+
+최초 배포본을 설치한 뒤에는 앱의 **업데이트** 메뉴에서 새 버전을 확인할 수 있습니다. 공개 Sparkle 피드는 [appcast.xml](https://raw.githubusercontent.com/mindw96/DesktopButton/main/appcast.xml)입니다.
+
 ## 실행과 사용
 
 Xcode에서 `OneButton.xcodeproj`의 **OneButton** scheme과 **My Mac**을 선택하거나, Codex의 **Run** 버튼을 누르세요. 터미널에서는 다음 명령으로 개발용 앱을 빌드하고 실행합니다.
