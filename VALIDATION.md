@@ -20,7 +20,9 @@ a77f24a37e6cb7f61df2f809fcad331a681458117dc345cdfdfdf0f304f0e86a  OneButton-0.2.
 
 [GitHub Release v0.2.2](https://github.com/mindw96/DesktopButton/releases/tag/v0.2.2)을 공개했습니다. 릴리스 소스 커밋은 `d6428c5`입니다. ZIP·DMG·SHA256SUMS를 인증 없이 다시 내려받아 로컬 최종본과 일치하는지 확인했습니다. 공개 ZIP 앱의 코드 서명·staple·Gatekeeper(`accepted / Notarized Developer ID`)와 공개 DMG의 staple도 통과했습니다. ZIP과 DMG의 앱 실행 파일·Info.plist 및 Applications 바로가기도 대조했습니다.
 
-Sparkle 피드의 공개 상태는 최종 확인 후 기록합니다.
+공개 Sparkle 피드(`7533563`)를 인증 없이 읽어 저장소 파일과 일치하는지 확인했습니다. build 4, 0.2.2, 최소 OS, 공개 ZIP URL·크기를 대조했고 공개 ZIP의 EdDSA 서명 검증이 통과했습니다. 공개 ZIP에서 꺼낸 0.2.2 앱의 **앱 업데이트 확인… → 최신 버전입니다.** 표시도 실제로 확인했습니다. 결과: `.test-artifacts/update-0.2.2-smoke.log`.
+
+실제 재로그인·Mac 재시작, Intel Mac과 macOS 13–26의 실행은 검증하지 않았습니다. 이번 버전의 구버전 교체 설치를 반복하지 않았으며, 이전 0.2.0 → 0.2.1 교체 설치 결과는 아래 기록에 있습니다.
 
 ## 0.2.1 폴더 표시와 팝업 크기 조절 (2026-11-11)
 
