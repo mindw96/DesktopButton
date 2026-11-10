@@ -26,7 +26,24 @@ Dock 정책을 regular에서 accessory로 바꾼 뒤 팝업이 다른 앱의 전
 a16d940315f7499eae72fb0e6507dfea402678d8df6b0ec62b76b53bf955bc9f  FolderInBar-0.4.0.dmg
 ```
 
-[GitHub Release v0.4.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.4.0)을 공개했습니다. 릴리스 소스 커밋은 `215c1b7`입니다. 공개 ZIP·DMG·SHA256SUMS를 인증 없이 다시 내려받아 로컬 최종본과 바이트·해시가 같고, 공개 앱의 서명·staple·Gatekeeper와 공개 DMG의 staple이 유효한 것을 확인했습니다. 구버전 실제 업데이트 결과는 다음 검증 후 추가합니다.
+[GitHub Release v0.4.0](https://github.com/mindw96/DesktopButton/releases/tag/v0.4.0)을 공개했습니다. 릴리스 소스 커밋은 `215c1b7`입니다. 공개 ZIP·DMG·SHA256SUMS를 인증 없이 다시 내려받아 로컬 최종본과 바이트·해시가 같고, 공개 앱의 서명·staple·Gatekeeper와 공개 DMG의 staple이 유효한 것을 확인했습니다. 공개 피드 커밋 `a607a17`의 raw URL이 로컬 피드와 같고, build 6·0.4.0·ZIP URL·크기 및 공개 ZIP의 EdDSA 서명이 유효한 것을 확인했습니다.
+
+**공개 구버전 → 0.4.0 자동 업데이트 두 경로가 통과했습니다.**
+
+| 이전 버전과 설정 | 이전 PID → 새 PID | 결과 |
+| --- | --- | --- |
+| OneButton 0.2.2, 로그인 자동 실행 ON | 22134 → 22176 | 새 파일명·실행 경로, ON 유지·승인 대기 없음, 설정·폴더 복원, 최신 버전 확인 PASS |
+| Folder In Bar 0.3.0을 기존 OneButton.app 경로에 설치, 로그인 자동 실행 OFF | 21821 → 21876 | 새 파일명·실행 경로, OFF 유지, 설정·폴더 복원, 최신 버전 확인 PASS |
+
+두 검사 모두 실제 공개 feed 안내 → 다운로드 → 설치 → 재실행을 거쳤고 `OneButton.app` 경로 소멸과 `Folder In Bar.app` 경로의 새 PID·실행 파일을 확인했습니다. `desktopBookmark`, `desktopLayout`, `popoverWidth`, `popoverHeight` 네 키가 전후 존재하고 값이 같았습니다. 기존 연결 폴더를 실제로 읽었으며 파일 항목 35개의 식별자 집합도 같았습니다. 설정 값과 파일 식별자는 메모리에서만 비교했습니다.
+
+업데이트로 설치된 두 앱의 실행 파일·helper·아이콘·Info.plist를 공개 ZIP과 해시로 비교했고, 코드 서명·staple·Gatekeeper도 통과했습니다. ON 검사는 원래 사용자 상태인 OFF로 복구했고 OFF 검사는 토글하지 않았습니다. 검증 스테이지의 앱과 helper는 모두 종료했습니다.
+
+- ON 최종 증거: `.test-artifacts/migration-upgrade-040-from-0.2.2-login-on-2026-11-10T17-31-47Z-FBAB3EBC/migration-upgrade-result.json`
+- OFF 최종 증거: `.test-artifacts/migration-upgrade-040-from-0.3.0-login-off-2026-11-10T17-30-27Z-02030C29/migration-upgrade-result.json`
+- 원래 실행 위치의 최종 앱도 버전 0.4.0/build 6으로 다시 실행했습니다. Dock 옵션 사용 가능, 기존 로그인 OFF 상태 유지를 확인했습니다. `.test-artifacts/final-release-040-running.json`.
+
+공개 업데이트 검증 중 추가 `sfltool dumpbtm` 읽기가 시간 초과했습니다. 첫 ON 시도는 그 단계에서 중단했지만 원래 OFF 상태를 복구했고, 새 스테이지에서 핵심 검증 전체를 다시 수행해 통과했습니다. **이번 공개 업데이트의 BTM 저장 경로 조회는 완료했다고 주장하지 않습니다.** 로그인 ON 보존은 새 앱이 읽어 표시한 시스템 등록·승인 상태로 확인했으며, 위의 별도 고유 ID 프로브에서 확인한 BTM 경로 추적과 구분합니다. 실제 로그아웃·Mac 재시작 및 Intel Mac/macOS 13–26 실행은 확인하지 않았습니다.
 
 ## 0.3.0 폴더인바 이름과 앱 아이콘 (2026-11-11)
 
