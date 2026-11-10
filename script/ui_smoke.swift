@@ -254,7 +254,7 @@ func relayedMenuItem(_ app: AXUIElement) -> AXUIElement? {
         guard let role = value(candidate, kAXRoleAttribute) as? String,
               [kAXMenuBarItemRole, kAXButtonRole].contains(role) else { return false }
         return [kAXDescriptionAttribute, kAXTitleAttribute].contains {
-            (value(candidate, $0) as? String)?.hasPrefix("OneButton ") == true
+            (value(candidate, $0) as? String)?.hasPrefix("Folder In Bar ") == true
         }
     }
 }
@@ -293,11 +293,11 @@ func openMenu(_ app: AXUIElement) throws {
     try require(until(6) {
         observedItem = menuItem(app) ?? relayedMenuItem(app)
         return observedItem != nil
-    }, "OneButton menu item did not appear on any display")
-    guard let item = observedItem else { throw SmokeFailure(description: "OneButton menu item disappeared") }
+    }, "Folder In Bar menu item did not appear on any display")
+    guard let item = observedItem else { throw SmokeFailure(description: "Folder In Bar menu item disappeared") }
     try hoverObserved(item)
     guard let current = menuItem(app) ?? relayedMenuItem(app) else {
-        throw SmokeFailure(description: "OneButton menu item disappeared after moving to its monitor")
+        throw SmokeFailure(description: "Folder In Bar menu item disappeared after moving to its monitor")
     }
     // macOS 27's menu relay acknowledges AXPress without opening this status item.
     try clickObserved(current)
@@ -425,12 +425,19 @@ final class Smoke {
 
     init(root: URL) {
         self.root = root
-        fixture = FileManager.default.temporaryDirectory.appendingPathComponent("OneButton-Smoke-\(UUID().uuidString)")
+        fixture = FileManager.default.temporaryDirectory.appendingPathComponent("Folder In Bar-Smoke-\(UUID().uuidString)")
     }
 
     func launch(_ name: String, arguments: [String] = [], activates: Bool = false) throws -> NSRunningApplication {
         let url = root.appendingPathComponent("build/Build/Products/Debug/\(name).app")
         try require(FileManager.default.fileExists(atPath: url.path), "Missing built app: \(name)")
+        if name == "Folder In Bar" {
+            let bundle = Bundle(url: url)
+            try require(bundle?.object(forInfoDictionaryKey: "CFBundleName") as? String == name
+                        && bundle?.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String == name
+                        && bundle?.bundleIdentifier == "com.onebutton.desktop",
+                        "Built app branding or stable bundle identifier is incorrect")
+        }
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.arguments = arguments
         configuration.activates = activates
@@ -447,6 +454,11 @@ final class Smoke {
         if let launchError { throw launchError }
         guard let application else { throw SmokeFailure(description: "Launch returned no process: \(name)") }
         launched.append(application)
+        try require(until(10) { application.isFinishedLaunching }, "App startup did not finish: \(name)")
+        if activates {
+            application.activate(options: [])
+            pumpRunLoop(1)
+        }
         return application
     }
 
@@ -460,7 +472,7 @@ final class Smoke {
     func run() throws {
         try require(AXIsProcessTrusted(), "Accessibility permission is unavailable for this executor")
         try require(NSRunningApplication.runningApplications(withBundleIdentifier: "com.onebutton.desktop").isEmpty,
-                    "Quit OneButton before running UI smoke checks to avoid duplicate menu items")
+                    "Quit Folder In Bar before running UI smoke checks to avoid duplicate menu items")
         try FileManager.default.createDirectory(at: fixture, withIntermediateDirectories: true)
         let artifacts = root.appendingPathComponent(".test-artifacts")
         try FileManager.default.createDirectory(at: artifacts, withIntermediateDirectories: true)
@@ -468,19 +480,19 @@ final class Smoke {
             launched.reversed().forEach(stop)
             try? FileManager.default.removeItem(at: fixture)
         }
-        try Data("OneButton test fixture".utf8).write(to: fixture.appendingPathComponent("문서 2.txt"))
+        try Data("Folder In Bar test fixture".utf8).write(to: fixture.appendingPathComponent("문서 2.txt"))
         try Data().write(to: fixture.appendingPathComponent(".hidden"))
-        let openName = "00 OneButton Open \(UUID().uuidString.prefix(8))"
+        let openName = "00 Folder In Bar Open \(UUID().uuidString.prefix(8))"
         try FileManager.default.createDirectory(at: fixture.appendingPathComponent(openName), withIntermediateDirectories: false)
-        let gridNames = (1...5).map { "0\($0) OneButton Grid \(UUID().uuidString.prefix(8))" }
+        let gridNames = (1...5).map { "0\($0) Folder In Bar Grid \(UUID().uuidString.prefix(8))" }
         for name in gridNames {
             try FileManager.default.createDirectory(at: fixture.appendingPathComponent(name), withIntermediateDirectories: false)
         }
         let layoutNames = [openName] + gridNames
-        let documentURL = fixture.appendingPathComponent("OneButton Smoke \(UUID().uuidString.prefix(8)).txt")
-        try Data("OneButton text document smoke test.\n".utf8).write(to: documentURL)
+        let documentURL = fixture.appendingPathComponent("Folder In Bar Smoke \(UUID().uuidString.prefix(8)).txt")
+        try Data("Folder In Bar text document smoke test.\n".utf8).write(to: documentURL)
 
-        var process = try launch("OneButton", arguments: ["--ui-testing", "--reset-test-state"], activates: true)
+        var process = try launch("Folder In Bar", arguments: ["--ui-testing", "--reset-test-state"], activates: true)
         var app = AXUIElementCreateApplication(process.processIdentifier)
         try openMenu(app)
         if !until(6, { identified("desktop.connect", in: app) != nil }) {
@@ -589,7 +601,7 @@ final class Smoke {
         print("PASS: real grip drags increase/decrease width and height, grid adapts to four columns")
 
         stop(process)
-        process = try launch("OneButton", arguments: ["--ui-testing"], activates: true)
+        process = try launch("Folder In Bar", arguments: ["--ui-testing"], activates: true)
         app = AXUIElementCreateApplication(process.processIdentifier)
         try openMenu(app)
         if !until(6, { labeled("문서 2.txt", in: app) != nil }) {

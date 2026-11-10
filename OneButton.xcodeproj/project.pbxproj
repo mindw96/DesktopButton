@@ -42,7 +42,6 @@
 		07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStore.swift; sourceTree = "<group>"; };
 		1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButtonFullscreenFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayoutTests.swift; sourceTree = "<group>"; };
-		32F2A6C13853F568D6098F4B /* OneButton.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButton.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		389B8DADC2FB256DD12851A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3F1D8BC4FF3525A3C658ACB7 /* OneButton.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneButton.entitlements; sourceTree = "<group>"; };
 		49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopMenuView.swift; sourceTree = "<group>"; };
@@ -53,6 +52,7 @@
 		8B11E832FE1770C6DD4FB160 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		9C565AB01C3FBE58A1F0FC59 /* LoginItemControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemControllerTests.swift; sourceTree = "<group>"; };
 		C3E094051639952B86E9D408 /* DesktopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayout.swift; sourceTree = "<group>"; };
+		C4A4976EB92F310BD85830DB /* Folder In Bar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Folder In Bar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStoreTests.swift; sourceTree = "<group>"; };
 		CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverSizeTests.swift; sourceTree = "<group>"; };
 		DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverSize.swift; sourceTree = "<group>"; };
@@ -157,7 +157,7 @@
 		8CD27A44E83738EE8B7DC0B7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32F2A6C13853F568D6098F4B /* OneButton.app */,
+				C4A4976EB92F310BD85830DB /* Folder In Bar.app */,
 				1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */,
 				737A92DA2A83497EF7134274 /* OneButtonTests.xctest */,
 			);
@@ -247,7 +247,7 @@
 				B5A8C8D814BC9DF170EE8637 /* Sparkle */,
 			);
 			productName = OneButton;
-			productReference = 32F2A6C13853F568D6098F4B /* OneButton.app */;
+			productReference = C4A4976EB92F310BD85830DB /* Folder In Bar.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -382,7 +382,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop.tests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OneButton.app/Contents/MacOS/OneButton";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Folder In Bar.app/Contents/MacOS/Folder In Bar";
 			};
 			name = Debug;
 		};
@@ -482,7 +482,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop.tests;
 				SDKROOT = macosx;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OneButton.app/Contents/MacOS/OneButton";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Folder In Bar.app/Contents/MacOS/Folder In Bar";
 			};
 			name = Release;
 		};
@@ -493,7 +493,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OneButton/OneButton.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OneButton/Info.plist;
@@ -501,9 +501,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.2;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
-				PRODUCT_NAME = OneButton;
+				PRODUCT_MODULE_NAME = OneButton;
+				PRODUCT_NAME = "Folder In Bar";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -575,7 +576,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OneButton/OneButton.Debug.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OneButton/Info.plist;
@@ -583,9 +584,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.2.2;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
-				PRODUCT_NAME = OneButton;
+				PRODUCT_MODULE_NAME = OneButton;
+				PRODUCT_NAME = "Folder In Bar";
 				SDKROOT = macosx;
 			};
 			name = Debug;

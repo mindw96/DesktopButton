@@ -83,7 +83,7 @@ struct DesktopMenuView: View {
                     .truncationMode(.middle)
                     .help(store.folderURL?.path ?? "연결할 폴더를 선택해 주세요.")
                     .accessibilityIdentifier("desktop.folder.name")
-                Text(store.folderURL == nil ? "OneButton" : "\(store.items.count)개 항목")
+                Text(store.folderURL == nil ? "Folder In Bar" : "\(store.items.count)개 항목")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -285,7 +285,7 @@ struct DesktopMenuView: View {
             .controlSize(.mini)
             .font(.system(size: 11))
             .fixedSize()
-            .help("OneButton 앱 업데이트 및 자동 업데이트 설정")
+            .help("Folder In Bar 앱 업데이트 및 자동 업데이트 설정")
             .accessibilityLabel("앱 업데이트")
             .accessibilityIdentifier("desktop.updates")
             Menu {

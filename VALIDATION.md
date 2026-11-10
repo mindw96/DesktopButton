@@ -1,4 +1,22 @@
-# OneButton 검증 기록
+# Folder In Bar 검증 기록
+
+## 0.3.0 폴더인바 이름과 앱 아이콘 (2026-11-11)
+
+새 이름은 **폴더인바(Folder In Bar)**, 버전 **0.3.0 (build 5)**입니다. 앱 표시 이름·실행 파일·신규 설치 번들·메뉴 안내를 변경하고, 파란 폴더와 메뉴 막대를 결합한 아이콘을 추가했습니다. macOS AppIcon 10개 표현(16–1024px)을 빌드에 포함했습니다. 생성 원본과 프롬프트는 `docs/branding/`에 있습니다.
+
+기존 bundle ID·서명 Team·Sparkle 키/피드·설정 키·메뉴 위치 식별자는 유지했습니다. Xcode 프로젝트/scheme/Swift 모듈은 내부 이름 `OneButton`을 유지하되 productName과 테스트 호스트·실행 scheme의 실제 앱 경로는 새 이름을 사용합니다.
+
+- **단위 테스트 23개 통과, 실패 0개, 런타임 경고 0개**. 작업 공간에서 첫 XCTest 실행이 dyld의 라이브러리 열기 단계에 머물러 중단했습니다. 제품 소스·테스트·리소스·프로젝트 해시가 같은 `/private/tmp` 전체 복사본에서 다시 실행해 통과했습니다. 정확한 대기 원인은 단정하지 않습니다. 결과: `.test-artifacts/rename-icon-unit-local.xcresult`.
+- 실제 UI에서 새 앱 metadata·안내 이름, 설정 메뉴, 폴더 연결·열기, 목록·격자 전환, 방향키, 크기 조절·재실행 복원, 전체화면 유지가 통과했습니다. 테스트 앱의 시작 완료를 기다려 명시적으로 활성화하도록 검사 스크립트를 보완했습니다. 결과: `.test-artifacts/rename-icon-ui-2.log`.
+- Release Universal archive/export, 코드 서명·Release 권한·Gatekeeper, 앱과 DMG 공증·staple, Sparkle EdDSA 검증이 통과했습니다. 앱 공증 `637182fd-5797-4d32-aeb3-4db9e9628fbf`, DMG 공증 `7e35b0e5-a997-4d63-8331-2faf4987a2e5` — 모두 `Accepted`, issues 없음.
+- ZIP과 DMG의 앱 실행 파일·Info.plist·AppIcon.icns가 일치하며 Applications 바로가기를 확인했습니다. 배포 로그: `.test-artifacts/release-0.3.0.log`.
+
+```text
+3e951afe4db7f27b3b13fa68ab460c0a3a37e46c20e4f07cf43a630de53b9fbe  FolderInBar-0.3.0.zip
+1d6b4b51a82a9eeb77fa91d35ebd54ea66602de8498d5e3ba502130713a97c89  FolderInBar-0.3.0.dmg
+```
+
+공개 다운로드와 기존 OneButton의 실제 업데이트 결과는 배포 완료 후 추가합니다. Sparkle 기본 설치 방식은 기존 설치 경로를 유지하므로 자동 업데이트 후 실제 `.app` 파일명은 `OneButton.app`으로 남을 수 있습니다. 새 DMG/ZIP의 앱은 `Folder In Bar.app`입니다.
 
 ## 0.2.2 로그인 시 자동 실행 (2026-11-11)
 

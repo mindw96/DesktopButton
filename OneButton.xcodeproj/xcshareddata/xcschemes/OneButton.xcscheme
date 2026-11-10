@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "ED34A937A7D7C86CA18F5366"
-               BuildableName = "OneButton.app"
+               BuildableName = "Folder In Bar.app"
                BlueprintName = "OneButton"
                ReferencedContainer = "container:OneButton.xcodeproj">
             </BuildableReference>
@@ -48,7 +48,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "ED34A937A7D7C86CA18F5366"
-            BuildableName = "OneButton.app"
+            BuildableName = "Folder In Bar.app"
             BlueprintName = "OneButton"
             ReferencedContainer = "container:OneButton.xcodeproj">
          </BuildableReference>
@@ -84,7 +84,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "ED34A937A7D7C86CA18F5366"
-            BuildableName = "OneButton.app"
+            BuildableName = "Folder In Bar.app"
             BlueprintName = "OneButton"
             ReferencedContainer = "container:OneButton.xcodeproj">
          </BuildableReference>
@@ -101,7 +101,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "ED34A937A7D7C86CA18F5366"
-            BuildableName = "OneButton.app"
+            BuildableName = "Folder In Bar.app"
             BlueprintName = "OneButton"
             ReferencedContainer = "container:OneButton.xcodeproj">
          </BuildableReference>

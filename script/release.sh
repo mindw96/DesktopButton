@@ -30,13 +30,13 @@ PY
 xcodebuild -exportArchive -archivePath "$ARCHIVE" -exportPath "$EXPORT" \
   -exportOptionsPlist "$ROOT/build/ExportOptions.plist" -quiet
 
-APP="$EXPORT/OneButton.app"
+APP="$EXPORT/Folder In Bar.app"
 VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")
 BUILD=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Contents/Info.plist")
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$BUILD" =~ ^[0-9]+$ ]] || exit 65
 codesign --verify --deep --strict --verbose=2 "$APP"
 codesign -d --entitlements :- "$APP" > "$ROOT/build/release-entitlements.plist" 2>/dev/null
-python3 -E - "$ROOT/build/release-entitlements.plist" "$APP/Contents/MacOS/OneButton" <<'PY'
+python3 -E - "$ROOT/build/release-entitlements.plist" "$APP/Contents/MacOS/Folder In Bar" <<'PY'
 import plistlib, subprocess, sys
 architectures = subprocess.check_output(['lipo', '-archs', sys.argv[2]], text=True).split()
 assert {'arm64', 'x86_64'}.issubset(architectures), 'Missing Universal architecture'
@@ -56,14 +56,14 @@ xcrun stapler staple "$APP"
 xcrun stapler validate "$APP"
 spctl --assess --type execute --verbose=2 "$APP"
 
-ZIP="$DIST/OneButton-$VERSION.zip"
-DMG="$DIST/OneButton-$VERSION.dmg"
+ZIP="$DIST/FolderInBar-$VERSION.zip"
+DMG="$DIST/FolderInBar-$VERSION.dmg"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
 STAGING=$(mktemp -d "$ROOT/build/dmg.XXXXXX")
 trap 'rm -rf "$STAGING"' EXIT
-ditto "$APP" "$STAGING/OneButton.app"
+ditto "$APP" "$STAGING/Folder In Bar.app"
 ln -s /Applications "$STAGING/Applications"
-hdiutil create -volname OneButton -srcfolder "$STAGING" -format UDZO -ov "$DMG"
+hdiutil create -volname 'Folder In Bar' -srcfolder "$STAGING" -format UDZO -ov "$DMG"
 codesign --force --timestamp --sign "$SIGN_IDENTITY" "$DMG"
 xcrun notarytool submit "$DMG" --keychain-profile "$NOTARYTOOL_PROFILE" --wait
 xcrun stapler staple "$DMG"
@@ -91,6 +91,6 @@ PY
 cp "$DIST/appcast.xml" "$ROOT/appcast.xml"
 (
   cd "$DIST"
-  shasum -a 256 "OneButton-$VERSION.zip" "OneButton-$VERSION.dmg" > SHA256SUMS
+  shasum -a 256 "FolderInBar-$VERSION.zip" "FolderInBar-$VERSION.dmg" > SHA256SUMS
 )
 printf 'Ready: %s\n' "$ZIP" "$DMG" "$DIST/SHA256SUMS" "$ROOT/appcast.xml"

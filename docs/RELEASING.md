@@ -1,6 +1,8 @@
-# OneButton 배포 안내
+# Folder In Bar 배포 안내
 
-앱 이름은 **OneButton**, bundle ID는 `com.onebutton.desktop`, GitHub 저장소는 `mindw96/DesktopButton`입니다. 현재 소스는 **0.2.2 (build 4)**이며, 실제 공증·검증·Release 공개 상태는 [VALIDATION.md](../VALIDATION.md)를 기준으로 확인합니다.
+앱 이름은 **폴더인바(Folder In Bar)**, bundle ID는 `com.onebutton.desktop`, GitHub 저장소는 `mindw96/DesktopButton`입니다. 현재 소스는 **0.3.0 (build 5)**이며, 실제 공증·검증·Release 공개 상태는 [VALIDATION.md](../VALIDATION.md)를 기준으로 확인합니다.
+
+기존 사용자의 설정·업데이트 연결을 유지하기 위해 bundle ID, Sparkle 키·피드, 공증 프로필 `OneButtonNotary`와 내부 Xcode 프로젝트·scheme 이름 `OneButton`은 유지합니다. 앱 번들과 실행 파일은 `Folder In Bar`, 배포 ZIP·DMG 파일은 공백 없는 `FolderInBar-VERSION`을 사용합니다.
 
 이 문서는 `script/release.sh`의 동작과 후속 공개 절차를 설명합니다. 공증 프로필이 준비되지 않았거나 공증에 실패한 산출물은 배포 준비가 끝난 파일로 취급하지 않습니다.
 
@@ -63,7 +65,7 @@ Sparkle 기본 구성, 키 관리, 서명 및 앱 배포 원칙은 [공식 Spark
 
 ## 3. 버전과 소스 준비
 
-1. `project.yml`의 `MARKETING_VERSION`과 `CURRENT_PROJECT_VERSION`을 올립니다. 예를 들어 `0.2.0 / 2` 다음 배포를 `0.2.1 / 3`으로 지정합니다.
+1. `project.yml`의 `MARKETING_VERSION`과 `CURRENT_PROJECT_VERSION`을 올립니다. 예를 들어 `0.2.2 / 4` 다음 배포를 `0.3.0 / 5`로 지정합니다.
 2. `MARKETING_VERSION`은 숫자 세 부분(`x.y.z`), build는 증가하는 정수로 유지합니다. Sparkle은 표시 버전보다 **build 번호**로 신버전을 판단합니다.
 3. `xcodegen generate`를 실행하고 생성된 프로젝트와 `Package.resolved` 변경을 확인합니다.
 4. README의 개발 검증을 실행하고 결과를 `VALIDATION.md`에 기록합니다.
@@ -98,10 +100,10 @@ SIGN_IDENTITY="$SIGN_IDENTITY" \
 | 경로 | 용도 |
 | --- | --- |
 | `build/OneButton.xcarchive` | Universal Release archive |
-| `build/export/OneButton.app` | 공증·staple된 배포 앱 |
+| `build/export/Folder In Bar.app` | 공증·staple된 배포 앱 |
 | `build/notarization.zip` | 앱 공증 제출용 중간 파일 |
-| `dist/OneButton-VERSION.zip` | Sparkle 업데이트 및 직접 다운로드용 최종 ZIP |
-| `dist/OneButton-VERSION.dmg` | 직접 설치용 최종 DMG |
+| `dist/FolderInBar-VERSION.zip` | Sparkle 업데이트 및 직접 다운로드용 최종 ZIP |
+| `dist/FolderInBar-VERSION.dmg` | 직접 설치용 최종 DMG |
 | `dist/SHA256SUMS` | 이번 ZIP·DMG의 SHA-256 |
 | `dist/appcast.xml`, `appcast.xml` | 이번 업데이트 피드 |
 
@@ -112,18 +114,18 @@ SIGN_IDENTITY="$SIGN_IDENTITY" \
 이번 export에서 버전을 읽고 최종 파일을 확인합니다.
 
 ```sh
-APP="$PWD/build/export/OneButton.app"
+APP="$PWD/build/export/Folder In Bar.app"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")"
 SPARKLE_BIN="$PWD/build/SourcePackages/artifacts/sparkle/Sparkle/bin"
 
 codesign --verify --deep --strict --verbose=2 "$APP"
 xcrun stapler validate "$APP"
 spctl --assess --type execute --verbose=2 "$APP"
-lipo -archs "$APP/Contents/MacOS/OneButton" # arm64와 x86_64가 모두 포함되어야 합니다.
-xcrun stapler validate "dist/OneButton-$VERSION.dmg"
-hdiutil verify "dist/OneButton-$VERSION.dmg"
+lipo -archs "$APP/Contents/MacOS/Folder In Bar" # arm64와 x86_64가 모두 포함되어야 합니다.
+xcrun stapler validate "dist/FolderInBar-$VERSION.dmg"
+hdiutil verify "dist/FolderInBar-$VERSION.dmg"
 (cd dist && shasum -a 256 -c SHA256SUMS)
-python3 script/verify_appcast.py dist/appcast.xml "dist/OneButton-$VERSION.zip" "$APP"
+python3 script/verify_appcast.py dist/appcast.xml "dist/FolderInBar-$VERSION.zip" "$APP"
 ```
 
 `verify_appcast.py`는 version/build, 최소 macOS, 다운로드 URL, 파일 크기와 서명 형식을 대조합니다. 별도로 최종 ZIP의 EdDSA 서명을 실제 검증하고, 서명 계정의 공개키가 export된 앱에 들어 있는지 확인합니다.
@@ -136,7 +138,7 @@ print(item.attrib['{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignat
 PY
 )"
 "$SPARKLE_BIN/sign_update" --account com.onebutton.desktop \
-  --verify "dist/OneButton-$VERSION.zip" "$SIGNATURE"
+  --verify "dist/FolderInBar-$VERSION.zip" "$SIGNATURE"
 "$SPARKLE_BIN/generate_keys" --account com.onebutton.desktop -p
 /usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' "$APP/Contents/Info.plist"
 ```
@@ -162,17 +164,17 @@ git diff --cached --name-only
 staged 목록에 `appcast.xml`이나 비밀 파일·빌드 산출물이 없는지 확인한 뒤 commit과 tag를 만듭니다. 기존에 stage한 appcast가 있으면 먼저 staging에서 제외합니다.
 
 ```sh
-git commit -m "Release OneButton $VERSION"
-git tag -a "v$VERSION" -m "OneButton $VERSION"
+git commit -m "Release Folder In Bar $VERSION"
+git tag -a "v$VERSION" -m "Folder In Bar $VERSION"
 git push origin main
 git push origin "v$VERSION"
 
 gh release create "v$VERSION" \
-  "dist/OneButton-$VERSION.zip" \
-  "dist/OneButton-$VERSION.dmg" \
+  "dist/FolderInBar-$VERSION.zip" \
+  "dist/FolderInBar-$VERSION.dmg" \
   dist/SHA256SUMS \
   --repo mindw96/DesktopButton --verify-tag --draft \
-  --title "OneButton $VERSION" --notes-file build/release-notes.md
+  --title "Folder In Bar $VERSION" --notes-file build/release-notes.md
 
 gh release view "v$VERSION" --repo mindw96/DesktopButton \
   --json tagName,isDraft,assets
@@ -191,22 +193,22 @@ gh release edit "v$VERSION" --repo mindw96/DesktopButton --draft=false
 ```sh
 VERIFY_DIR="$(mktemp -d "$PWD/build/published-check.XXXXXX")"
 RELEASE_URL="https://github.com/mindw96/DesktopButton/releases/download/v$VERSION"
-curl --fail --location "$RELEASE_URL/OneButton-$VERSION.zip" \
-  --output "$VERIFY_DIR/OneButton-$VERSION.zip"
-curl --fail --location "$RELEASE_URL/OneButton-$VERSION.dmg" \
-  --output "$VERIFY_DIR/OneButton-$VERSION.dmg"
+curl --fail --location "$RELEASE_URL/FolderInBar-$VERSION.zip" \
+  --output "$VERIFY_DIR/FolderInBar-$VERSION.zip"
+curl --fail --location "$RELEASE_URL/FolderInBar-$VERSION.dmg" \
+  --output "$VERIFY_DIR/FolderInBar-$VERSION.dmg"
 curl --fail --location "$RELEASE_URL/SHA256SUMS" \
   --output "$VERIFY_DIR/SHA256SUMS"
 (cd "$VERIFY_DIR" && shasum -a 256 -c SHA256SUMS)
-cmp "dist/OneButton-$VERSION.zip" "$VERIFY_DIR/OneButton-$VERSION.zip"
-cmp "dist/OneButton-$VERSION.dmg" "$VERIFY_DIR/OneButton-$VERSION.dmg"
+cmp "dist/FolderInBar-$VERSION.zip" "$VERIFY_DIR/FolderInBar-$VERSION.zip"
+cmp "dist/FolderInBar-$VERSION.dmg" "$VERIFY_DIR/FolderInBar-$VERSION.dmg"
 ```
 
 확인 후 appcast를 공개 브랜치에 반영합니다.
 
 ```sh
 git add appcast.xml
-git commit -m "Publish OneButton $VERSION update feed"
+git commit -m "Publish Folder In Bar $VERSION update feed"
 git push origin main
 
 curl --fail --location \
@@ -214,7 +216,7 @@ curl --fail --location \
   --output "$VERIFY_DIR/appcast.xml"
 cmp appcast.xml "$VERIFY_DIR/appcast.xml"
 python3 script/verify_appcast.py "$VERIFY_DIR/appcast.xml" \
-  "$VERIFY_DIR/OneButton-$VERSION.zip" "$APP"
+  "$VERIFY_DIR/FolderInBar-$VERSION.zip" "$APP"
 ```
 
-raw feed에 이전 내용이 보이면 전파 후 다시 확인합니다. 공개 피드의 enclosure가 이번 Release URL을 가리키며 실제 받은 파일의 크기·버전과 일치하는지 확인하고, 실행 중인 앱의 **업데이트 확인…**으로 마지막 점검을 수행합니다. 결과와 남은 검증 항목을 `VALIDATION.md`에 기록하고 commit·push합니다.
+raw feed에 이전 내용이 보이면 전파 후 다시 확인합니다. 공개 피드의 enclosure가 이번 Release URL을 가리키며 실제 받은 파일의 크기·버전과 일치하는지 확인하고, 실행 중인 앱의 **앱 업데이트 확인…**으로 마지막 점검을 수행합니다. 결과와 남은 검증 항목을 `VALIDATION.md`에 기록하고 commit·push합니다.

@@ -11,7 +11,9 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>OneButton</string>
+    <string>Folder In Bar</string>
+    <key>CFBundleDisplayName</key>
+    <string>Folder In Bar</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

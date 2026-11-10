@@ -8,11 +8,11 @@ case "$MODE" in
 esac
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_NAME="OneButton"
+APP_NAME="Folder In Bar"
 APP_BUNDLE="$PROJECT_ROOT/build/Build/Products/Debug/$APP_NAME.app"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
-xcodebuild -project "$PROJECT_ROOT/OneButton.xcodeproj" -scheme "$APP_NAME" \
+xcodebuild -project "$PROJECT_ROOT/OneButton.xcodeproj" -scheme OneButton \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath "$PROJECT_ROOT/build" build -quiet
 
@@ -21,11 +21,11 @@ if [[ "$MODE" == --debug ]]; then
 fi
 /usr/bin/open -n "$APP_BUNDLE"
 case "$MODE" in
-  --logs) exec /usr/bin/log stream --info --style compact --predicate 'process == "OneButton"' ;;
+  --logs) exec /usr/bin/log stream --info --style compact --predicate 'process == "Folder In Bar"' ;;
   --telemetry) exec /usr/bin/log stream --info --style compact --predicate 'subsystem == "com.onebutton.desktop"' ;;
   --verify)
     sleep 2
     pgrep -x "$APP_NAME" >/dev/null
-    echo "OneButton 실행 확인: $APP_BUNDLE"
+    echo "$APP_NAME 실행 확인: $APP_BUNDLE"
     ;;
 esac

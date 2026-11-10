@@ -1,8 +1,12 @@
-# OneButton
+# 폴더인바 (Folder In Bar)
+
+![Folder In Bar 앱 아이콘](docs/branding/icon-preview.png)
 
 메뉴 막대에서 선택한 폴더의 파일을 목록이나 아이콘 격자로 확인하고, 한 번 클릭해 기본 앱으로 여는 macOS 앱입니다. 전체 화면에서도 메뉴 막대를 표시해 사용할 수 있습니다.
 
-앱 이름은 **OneButton**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 공개 버전은 **0.2.2 (build 4)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
+앱 이름은 **폴더인바(Folder In Bar)**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 소스 버전은 **0.3.0 (build 5)**이며 공개 다운로드는 이전 이름의 **OneButton 0.2.2 (build 4)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
+
+기존 설정과 업데이트 연결을 유지하기 위해 bundle ID `com.onebutton.desktop`, Sparkle 공개키·피드, 내부 Xcode 프로젝트·scheme·모듈 이름 `OneButton`은 유지합니다. 배포 앱과 실행 파일의 이름은 `Folder In Bar`입니다. 기존 OneButton을 자동 업데이트하면 설치 경로를 유지하므로 실제 파일명은 `OneButton.app`으로 남을 수 있으며, 앱 내부 이름과 아이콘은 새 이름으로 바뀝니다.
 
 ## 다운로드와 설치
 
@@ -22,7 +26,7 @@ Xcode에서 `OneButton.xcodeproj`의 **OneButton** scheme과 **My Mac**을 선�
 ./script/build_and_run.sh
 ```
 
-개발용 앱은 `build/Build/Products/Debug/OneButton.app`에 생성됩니다. 앱은 Dock 아이콘이나 메인 창 없이 메뉴 막대에서 실행됩니다.
+개발용 앱은 `build/Build/Products/Debug/Folder In Bar.app`에 생성됩니다. 앱은 Dock에 상시 표시되지 않고 메뉴 막대에서 실행됩니다.
 
 1. 메뉴 막대의 **폴더 아이콘**을 누릅니다.
 2. **폴더 연결…**을 누르고 원하는 폴더를 선택합니다. 선택창의 초기 위치는 바탕화면이며, 다른 폴더도 연결할 수 있습니다. 연결한 폴더의 실제 이름이 팝업 상단에 표시됩니다.
@@ -108,7 +112,7 @@ xcodebuild -project OneButton.xcodeproj -scheme OneButton \
 swift script/ui_smoke.swift "$PWD"
 ```
 
-UI 검증 전에는 메뉴에서 OneButton을 종료하세요. 중복 메뉴 항목을 방지하기 위해 앱이 이미 실행 중이면 검증 스크립트가 중단됩니다. 스크립트는 별도 테스트 설정과 임시 폴더를 사용하며, 전체 화면 검증에는 `OneButtonFullscreenFixture` 테스트 앱을 사용합니다. 이 테스트 앱은 제품 앱에 포함되지 않습니다. UI 검증을 실행하는 터미널이나 도구에는 macOS의 손쉬운 사용 권한이 필요합니다.
+UI 검증 전에는 메뉴에서 Folder In Bar를 종료하세요. 중복 메뉴 항목을 방지하기 위해 앱이 이미 실행 중이면 검증 스크립트가 중단됩니다. 스크립트는 별도 테스트 설정과 임시 폴더를 사용하며, 전체 화면 검증에는 `OneButtonFullscreenFixture` 테스트 앱을 사용합니다. 이 테스트 앱은 제품 앱에 포함되지 않습니다. UI 검증을 실행하는 터미널이나 도구에는 macOS의 손쉬운 사용 권한이 필요합니다.
 
 Debug 앱의 `--ui-testing` 실행과 XCTest host 실행에서는 업데이터를 생성하지 않아 업데이트 네트워크 요청과 프롬프트를 차단합니다. 로그인 항목의 시스템 조회·등록·해제도 차단하며, 등록 동작은 별도 배포 앱 검증에서 확인합니다. 이 검증은 실제 구버전에서 신버전으로 업데이트 설치가 완료되는지 확인하는 배포 검증과 별개입니다.
 
