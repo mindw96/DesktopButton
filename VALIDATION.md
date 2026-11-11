@@ -1,5 +1,24 @@
 # Folder In Bar 검증 기록
 
+## Mac App Store 1.0.0 (7) 제출 준비 (2026-11-11)
+
+Mac App Store 전용 `FolderInBarAppStore` target/scheme을 추가했습니다. 기존 GitHub 배포판 `OneButton` target과 공개 버전 **0.4.0 (6)**, Sparkle 피드는 유지합니다. Store판은 **1.0.0 (7)**, bundle ID **com.onebutton.desktop**, 팀 **4J7HGK26PF**입니다.
+
+- Store 빌드에서 Sparkle 의존성·프레임워크·업데이트 UI·SU 설정과 이름 변경 helper를 제외했습니다. Sandbox, 사용자가 선택한 파일 읽기, 앱 범위 bookmark만 사용합니다.
+- `PrivacyInfo.xcprivacy`에 데이터 수집·추적 없음과 자체 설정용 UserDefaults 사유 `CA92.1`을 선언했습니다. 개인정보처리방침·지원 링크를 Store 설정 메뉴에 추가했습니다.
+- Store Debug 빌드 성공. 같은 DerivedData에서 직접 배포판 → Store판으로 전환한 뒤에도 출력 번들이 섞이지 않음을 확인했습니다.
+- 기존 단위 테스트 **31개 통과, 실패 0, runtime warning 0**: `.test-artifacts/store-direct-regression-2.xcresult`.
+- 실제 Store Debug 앱으로 임시 폴더 연결, 격자·목록 보기, 개인정보·지원 메뉴와 업데이트 메뉴 제외를 확인했습니다. 사용자 실제 폴더·로그인 설정을 변경하지 않았습니다. 스토어 이미지 2장은 실제 화면을 촬영한 **1440×900 JPEG**입니다: `docs/app-store/screenshots/`.
+- 최종 소스와 staging 입력 **35개 파일**의 SHA-256 일치를 확인하고 **arm64 + x86_64 Universal archive**를 생성했습니다. `.test-artifacts/app-store/archive-source-hashes.json`, `archive-final.log`에 기록했습니다. 아카이브: `build/AppStore/FolderInBar-1.0.0-7-final.xcarchive`.
+- `verify_app_store.py`의 기본 번들 검증 통과. Archive는 **Apple Development** 서명이며 아직 Store 배포용 서명이 아닙니다. `--release`는 Store 앱 인증서, 팀, 배포 프로필과 Universal 구성을 추가 확인하며 현재 개발 서명 archive를 거절합니다.
+- Store export 시 Xcode가 **No Accounts**, Mac Installer Distribution 인증서 및 Store provisioning profile 부재를 보고했습니다. `.test-artifacts/app-store/export.log`. Xcode 계정 로그인 후 배포 export·PKG 검사·업로드를 이어가야 합니다.
+
+[App Store Connect 앱 6833273093](https://appstoreconnect.apple.com/apps/6833273093/distribution/macos/version/inflight)을 생성하고 1.0.0 소개 문구·키워드·지원 URL·심사 메모·로그인 불필요·승인 후 자동 공개 설정 및 스크린샷 2장의 저장을 확인했습니다. 사용자는 무료 배포와 승인 후 자동 공개를 선택했습니다. 개인정보·콘텐츠 응답과 심사 연락처는 명시적 승인 대기 상태입니다. **빌드 업로드, 심사 제출, 승인 및 App Store 공개는 아직 완료되지 않았습니다.**
+
+GitHub Pages의 [개인정보처리방침](https://mindw96.github.io/DesktopButton/privacy.html)과 [지원 페이지](https://mindw96.github.io/DesktopButton/support.html)를 공개하고, 내려받은 본문과 저장소 HTML의 일치를 확인했습니다. 기존 직접 배포판 공증·ZIP/DMG·Sparkle 릴리스에는 변경이 없습니다.
+
+실제 App Store 설치본으로 교체한 뒤의 폴더 권한·로그인 상태 유지, Intel Mac/macOS 13–26 실행은 이번 준비 단계에서 확인하지 않았습니다. Store 배포 절차는 [BUILDING.md](docs/app-store/BUILDING.md)에 있습니다.
+
 ## 0.4.0 실제 앱 파일명 이전과 Dock 표시 (2026-11-11)
 
 버전 **0.4.0 (build 6)**입니다. 기존 Sparkle 설치 경로가 `OneButton.app`이면 새 앱의 첫 실행에서 같은 폴더의 `Folder In Bar.app`으로 이름을 바꿉니다. 메인 앱의 sandbox, bundle ID, 서명 팀, Sparkle 키·피드와 기존 설정 키를 유지합니다. **설정 → Dock에 아이콘 표시**를 추가하고 선택을 저장하며 Dock 클릭으로 기존 팝업을 엽니다.

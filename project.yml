@@ -46,6 +46,38 @@ targets:
       configs:
         Debug:
           CODE_SIGN_ENTITLEMENTS: OneButton/OneButton.Debug.entitlements
+  FolderInBarAppStore:
+    type: application
+    productName: Folder In Bar
+    platform: macOS
+    sources:
+      - path: OneButton
+        excludes:
+          - Info.plist
+          - OneButton.entitlements
+          - OneButton.Debug.entitlements
+          - Services/UpdateController.swift
+          - Services/AppNameMigration.swift
+      - path: AppStore/PrivacyInfo.xcprivacy
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.onebutton.desktop
+        PRODUCT_NAME: Folder In Bar
+        PRODUCT_MODULE_NAME: OneButton
+        INFOPLIST_FILE: AppStore/Info.plist
+        CODE_SIGN_ENTITLEMENTS: AppStore/FolderInBar.entitlements
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: Apple Development
+        DEVELOPMENT_TEAM: 4J7HGK26PF
+        # Keep direct-distribution frameworks out when switching schemes in one build folder.
+        CONFIGURATION_BUILD_DIR: "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"
+        ENABLE_APP_SANDBOX: YES
+        GENERATE_INFOPLIST_FILE: NO
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "7"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
   FolderNameMigrationHelper:
     type: application
     platform: macOS
@@ -84,8 +116,17 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.onebutton.desktop.fullscreen-fixture
         GENERATE_INFOPLIST_FILE: YES
 schemes:
+  FolderInBarAppStore:
+    build:
+      buildImplicitDependencies: false
+      targets:
+        FolderInBarAppStore: all
+    archive:
+      config: Release
   OneButton:
     build:
+      # Both distribution targets produce the same app name; dependencies are explicit.
+      buildImplicitDependencies: false
       targets:
         OneButton: all
         OneButtonFullscreenFixture: [test]

@@ -6,6 +6,8 @@
 
 앱 이름은 **폴더인바(Folder In Bar)**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 공개 버전은 **0.4.0 (build 6)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
 
+**Mac App Store판 1.0.0 (build 7)은 제출 준비 중이며 아직 공개되지 않았습니다.** 별도 `FolderInBarAppStore` scheme을 사용하며 업데이트는 App Store에서 받습니다. Store용 빌드·서명·업로드 절차는 [Mac App Store 빌드 안내](docs/app-store/BUILDING.md)를 참조하세요. 아래 Sparkle·공증·이름 변경 helper 설명은 GitHub 직접 배포판에 해당합니다.
+
 기존 OneButton의 폴더 연결과 앱 설정을 이어서 사용할 수 있습니다. 배포 앱과 실행 파일의 이름은 `Folder In Bar`입니다. 0.4.0부터 기존 `OneButton.app`을 자동 업데이트하면 첫 실행에서 같은 위치의 `Folder In Bar.app`으로 이름을 바꾸고 다시 실행합니다. 기존 폴더 연결, 보기 모드, 팝업 크기와 로그인 자동 실행 설정을 유지합니다. 같은 이름의 앱이 이미 있거나 설치 위치에 쓰기 권한이 없으면 덮어쓰지 않고 기존 이름으로 사용할 수 있도록 안내합니다.
 
 ## 다운로드와 설치

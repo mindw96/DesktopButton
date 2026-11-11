@@ -3,7 +3,9 @@ import SwiftUI
 
 struct DesktopMenuView: View {
     @ObservedObject var store: DesktopStore
+    #if !APP_STORE
     @ObservedObject var updateController: UpdateController
+    #endif
     @ObservedObject var loginItemController: LoginItemController
     @ObservedObject var dockIconController: DockIconController
     @ObservedObject var popoverSize: PopoverSize
@@ -14,6 +16,19 @@ struct DesktopMenuView: View {
     @State private var resizeStart: (point: CGPoint, size: CGSize)?
     @GestureState private var isResizing = false
 
+    #if APP_STORE
+    init(store: DesktopStore, loginItemController: LoginItemController,
+         dockIconController: DockIconController,
+         popoverSize: PopoverSize,
+         defaults: UserDefaults = .standard, dismiss: @escaping () -> Void) {
+        self.store = store
+        self.loginItemController = loginItemController
+        self.dockIconController = dockIconController
+        self.popoverSize = popoverSize
+        self.dismiss = dismiss
+        _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
+    }
+    #else
     init(store: DesktopStore, updateController: UpdateController, loginItemController: LoginItemController,
          dockIconController: DockIconController,
          popoverSize: PopoverSize,
@@ -26,6 +41,7 @@ struct DesktopMenuView: View {
         self.dismiss = dismiss
         _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
     }
+    #endif
 
     var body: some View {
         VStack(spacing: 0) {
@@ -267,6 +283,7 @@ struct DesktopMenuView: View {
                     .accessibilityIdentifier("desktop.reconnect")
             }
             Spacer()
+            #if !APP_STORE
             Menu {
                 Button("앱 업데이트 확인…") {
                     dismiss()
@@ -294,6 +311,7 @@ struct DesktopMenuView: View {
             .help("Folder In Bar 앱 업데이트 및 자동 업데이트 설정")
             .accessibilityLabel("앱 업데이트")
             .accessibilityIdentifier("desktop.updates")
+            #endif
             Menu {
                 Toggle("Dock에 아이콘 표시", isOn: Binding(
                     get: { dockIconController.showsIcon },
@@ -315,6 +333,13 @@ struct DesktopMenuView: View {
                         loginItemController.openSystemSettings()
                     }
                 }
+                #if APP_STORE
+                Divider()
+                Link("개인정보 처리방침", destination: URL(string: "https://mindw96.github.io/DesktopButton/privacy.html")!)
+                    .accessibilityIdentifier("desktop.privacy")
+                Link("도움말 및 문의", destination: URL(string: "https://mindw96.github.io/DesktopButton/support.html")!)
+                    .accessibilityIdentifier("desktop.support")
+                #endif
             } label: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 11))

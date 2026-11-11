@@ -7,26 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0FD55532E6D553E5994BA736 /* PopoverSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */; };
 		1173578672FFB1E63F2F54C7 /* LoginItemControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C565AB01C3FBE58A1F0FC59 /* LoginItemControllerTests.swift */; };
+		11B2E7A2495B104943E4AD13 /* DesktopAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B3DFE00EBF48B8403907E9 /* DesktopAccess.swift */; };
 		15E31B9F6764C23914D41B96 /* DesktopLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */; };
+		18F69DAE2A0E29B0AE18B05C /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
 		2082C1705890DABAB96BA8B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63842E1D00E6609C235902CE /* Assets.xcassets */; };
 		22897CBE5B86E2CDC1552B83 /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C2F2B5F94CE4140052AD62 /* LoginItemController.swift */; };
 		285E54B5CAD2EC7F9CEACD1E /* DesktopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E094051639952B86E9D408 /* DesktopLayout.swift */; };
+		287BEC0552F022FE56768EAE /* DesktopMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */; };
 		3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */; };
 		3AFFF553114B7C5BF399CD7B /* FullscreenFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F02D73D08D8402916988BA /* FullscreenFixture.swift */; };
+		3F29121CAD2B25CF45544AA4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63842E1D00E6609C235902CE /* Assets.xcassets */; };
 		52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11E832FE1770C6DD4FB160 /* UpdateController.swift */; };
 		5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */; };
+		5D1D2DD9110461A10C68F2A5 /* DockIconController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A947B2F7B0371F15FF753E0 /* DockIconController.swift */; };
+		614F5B474B1FC734D5914C14 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */; };
 		669C0C3216E24EBB6B9B1D1A /* DesktopAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B3DFE00EBF48B8403907E9 /* DesktopAccess.swift */; };
 		6832DCD2B7350623666A4519 /* DesktopStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */; };
 		6BA141B7AE60C6381347FF72 /* DockIconControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EDF9F05DE99706B9DA1FF1 /* DockIconControllerTests.swift */; };
 		7F8B48DC200F457FCDCB15A0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B5A8C8D814BC9DF170EE8637 /* Sparkle */; };
+		8451495A4409520263177AEE /* DesktopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E094051639952B86E9D408 /* DesktopLayout.swift */; };
 		981AB82FBA8428AE56F0398E /* MigrationFileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E592396261AD81EC8513D3C9 /* MigrationFileSystem.swift */; };
+		988681EECEEC19CB28E701BD /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C2F2B5F94CE4140052AD62 /* LoginItemController.swift */; };
+		9B99F14DD4B89CF48F003EEA /* DesktopStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */; };
 		A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
 		ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */; };
 		B9DF0529123298E4647E3078 /* AppNameMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA593FD2DC9AEA5279D0DB6 /* AppNameMigration.swift */; };
 		CA832DBD62E32F3210E04E51 /* PopoverSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */; };
 		D2EB8CA2F2216032D1FD0DAA /* PopoverSizeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */; };
 		DB6D45E30DC4B47A9E1C2948 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E34ED6AAFD47F3FF945C3AB1 /* Sparkle */; };
+		DEF88B23A3319798E20922C0 /* DesktopItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E541D4C250D7360E431D7C /* DesktopItem.swift */; };
 		E5B08255502BEF8BD3DFD97C /* DockIconController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A947B2F7B0371F15FF753E0 /* DockIconController.swift */; };
 		EC3579320AC34CA94D668918 /* AppNameMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DDF9758566D4E55FE5745A1 /* AppNameMigrationTests.swift */; };
 		F65D9F0AD07CE4E60984D4B2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1638D234097E5BF0D2A751 /* main.swift */; };
@@ -67,6 +78,7 @@
 
 /* Begin PBXFileReference section */
 		01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateControllerTests.swift; sourceTree = "<group>"; };
+		03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStore.swift; sourceTree = "<group>"; };
 		1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButtonFullscreenFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayoutTests.swift; sourceTree = "<group>"; };
@@ -77,6 +89,7 @@
 		63842E1D00E6609C235902CE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6FF63755C35E570F37208359 /* OneButton.Debug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneButton.Debug.entitlements; sourceTree = "<group>"; };
 		737A92DA2A83497EF7134274 /* OneButtonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OneButtonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		763D2A5B9A3AB7E3AB6B4E86 /* Folder In Bar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Folder In Bar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AA593FD2DC9AEA5279D0DB6 /* AppNameMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNameMigration.swift; sourceTree = "<group>"; };
 		8B11E832FE1770C6DD4FB160 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		9A947B2F7B0371F15FF753E0 /* DockIconController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconController.swift; sourceTree = "<group>"; };
@@ -175,6 +188,7 @@
 		6FDAA736F983EE798B109433 = {
 			isa = PBXGroup;
 			children = (
+				BC26AE46DD126987029ACCCD /* AppStore */,
 				7F99E9CE9E2A060DFB82016F /* FolderNameMigrationHelper */,
 				42B171935C6006A90E673A95 /* OneButton */,
 				3F289A59D93D7DF011AF47F6 /* OneButtonTests */,
@@ -208,6 +222,7 @@
 		8CD27A44E83738EE8B7DC0B7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				763D2A5B9A3AB7E3AB6B4E86 /* Folder In Bar.app */,
 				C4A4976EB92F310BD85830DB /* Folder In Bar.app */,
 				FF4858AA02A5B506671BEAFA /* FolderNameMigrationHelper.app */,
 				1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */,
@@ -222,6 +237,14 @@
 				49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		BC26AE46DD126987029ACCCD /* AppStore */ = {
+			isa = PBXGroup;
+			children = (
+				03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */,
+			);
+			path = AppStore;
 			sourceTree = "<group>";
 		};
 		C4B6D9CA941AFC7A2A6A8CA2 /* Stores */ = {
@@ -321,6 +344,24 @@
 			productReference = C4A4976EB92F310BD85830DB /* Folder In Bar.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F461A408BAA47F2E8B2A10C9 /* FolderInBarAppStore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 107F2979A9B6C419F21DB435 /* Build configuration list for PBXNativeTarget "FolderInBarAppStore" */;
+			buildPhases = (
+				5EE933614621616B4793E43D /* Sources */,
+				A767C155DDEFF2B5879DC5D6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FolderInBarAppStore;
+			packageProductDependencies = (
+			);
+			productName = FolderInBarAppStore;
+			productReference = 763D2A5B9A3AB7E3AB6B4E86 /* Folder In Bar.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -342,6 +383,10 @@
 					ED34A937A7D7C86CA18F5366 = {
 						ProvisioningStyle = Manual;
 					};
+					F461A408BAA47F2E8B2A10C9 = {
+						DevelopmentTeam = 4J7HGK26PF;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = F9A072176D177D9F79796566 /* Build configuration list for PBXProject "OneButton" */;
@@ -362,6 +407,7 @@
 			projectRoot = "";
 			targets = (
 				ED34A937A7D7C86CA18F5366 /* OneButton */,
+				F461A408BAA47F2E8B2A10C9 /* FolderInBarAppStore */,
 				072179CEA2B2C5A6BBF9C887 /* FolderNameMigrationHelper */,
 				9CFF23C3979977BFE9C683AD /* OneButtonTests */,
 				01EA0D55340FF55713B43386 /* OneButtonFullscreenFixture */,
@@ -370,6 +416,15 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A767C155DDEFF2B5879DC5D6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3F29121CAD2B25CF45544AA4 /* Assets.xcassets in Resources */,
+				614F5B474B1FC734D5914C14 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EA437820A9C777CB3D28387A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -381,6 +436,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5EE933614621616B4793E43D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11B2E7A2495B104943E4AD13 /* DesktopAccess.swift in Sources */,
+				DEF88B23A3319798E20922C0 /* DesktopItem.swift in Sources */,
+				8451495A4409520263177AEE /* DesktopLayout.swift in Sources */,
+				287BEC0552F022FE56768EAE /* DesktopMenuView.swift in Sources */,
+				9B99F14DD4B89CF48F003EEA /* DesktopStore.swift in Sources */,
+				5D1D2DD9110461A10C68F2A5 /* DockIconController.swift in Sources */,
+				988681EECEEC19CB28E701BD /* LoginItemController.swift in Sources */,
+				18F69DAE2A0E29B0AE18B05C /* OneButtonApp.swift in Sources */,
+				0FD55532E6D553E5994BA736 /* PopoverSize.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7295CFEE5E58AEEC718B9F93 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -682,6 +753,34 @@
 			};
 			name = Release;
 		};
+		CD0513FF05479B8055D7334E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AppStore/FolderInBar.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				CURRENT_PROJECT_VERSION = 7;
+				DEVELOPMENT_TEAM = 4J7HGK26PF;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AppStore/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
+				PRODUCT_MODULE_NAME = OneButton;
+				PRODUCT_NAME = "Folder In Bar";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) APP_STORE";
+			};
+			name = Debug;
+		};
 		D40B16C9E2840F3432BB6138 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -725,9 +824,46 @@
 			};
 			name = Debug;
 		};
+		F544F7241EF156F8C5DBD2A2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AppStore/FolderInBar.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				CURRENT_PROJECT_VERSION = 7;
+				DEVELOPMENT_TEAM = 4J7HGK26PF;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AppStore/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
+				PRODUCT_MODULE_NAME = OneButton;
+				PRODUCT_NAME = "Folder In Bar";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) APP_STORE";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		107F2979A9B6C419F21DB435 /* Build configuration list for PBXNativeTarget "FolderInBarAppStore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD0513FF05479B8055D7334E /* Debug */,
+				F544F7241EF156F8C5DBD2A2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		1EA5D954DA0F75A42E53E571 /* Build configuration list for PBXNativeTarget "FolderNameMigrationHelper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

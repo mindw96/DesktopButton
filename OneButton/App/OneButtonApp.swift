@@ -15,11 +15,13 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     private var statusItem: NSStatusItem?
     private let popover = NSPopover()
     private var store: DesktopStore!
+    #if !APP_STORE
     private var updateController: UpdateController!
+    private var updateReminderObservation: AnyCancellable?
+    #endif
     private var loginItemController: LoginItemController!
     private var dockIconController: DockIconController!
     private var popoverSize: PopoverSize!
-    private var updateReminderObservation: AnyCancellable?
     private var sizeObservation: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -39,16 +41,29 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         #endif
         store = DesktopStore(defaults: defaults)
         popoverSize = PopoverSize(defaults: defaults)
-        updateController = UpdateController(isEnabled: allowsSystemServices)
         loginItemController = LoginItemController(allowsChanges: allowsSystemServices)
         dockIconController = DockIconController(defaults: defaults)
+        #if !APP_STORE
+        updateController = UpdateController(isEnabled: allowsSystemServices)
         updateController.onWillPresentUpdate = { [weak self] in
             self?.popover.performClose(nil)
         }
+        #endif
         popover.behavior = .transient
         popover.animates = false
         popover.delegate = self
-        popover.contentViewController = NSHostingController(rootView: DesktopMenuView(
+        #if APP_STORE
+        let menu = DesktopMenuView(
+            store: store,
+            loginItemController: loginItemController,
+            dockIconController: dockIconController,
+            popoverSize: popoverSize,
+            defaults: defaults
+        ) { [weak self] in
+            self?.popover.performClose(nil)
+        }
+        #else
+        let menu = DesktopMenuView(
             store: store,
             updateController: updateController,
             loginItemController: loginItemController,
@@ -57,7 +72,9 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
             defaults: defaults
         ) { [weak self] in
             self?.popover.performClose(nil)
-        })
+        }
+        #endif
+        popover.contentViewController = NSHostingController(rootView: menu)
         sizeObservation = popoverSize.$size.sink { [weak self] size in
             self?.popover.contentSize = size
         }
@@ -73,6 +90,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
             button.action = #selector(togglePopover)
         }
         statusItem = item
+        #if !APP_STORE
         updateReminderObservation = updateController.$availableUpdateVersion.sink { [weak item] version in
             guard let button = item?.button else { return }
             let label = version.map { "Folder In Bar 업데이트 \($0) 사용 가능" } ?? "Folder In Bar 폴더"
@@ -85,6 +103,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         if allowsSystemServices {
             AppNameMigration.runIfNeeded(defaults: defaults, loginItem: loginItemController)
         }
+        #endif
     }
 
     @objc private func togglePopover(_ sender: Any?) {
