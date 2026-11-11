@@ -94,4 +94,21 @@ final class DesktopStore: ObservableObject {
         openError = nil
         errorMessage = nil
     }
+
+    func dragProvider(for item: DesktopItem) -> NSItemProvider {
+        guard !isChoosingFolder, openingURL == nil,
+              let folderURL, items.contains(item), item.url.isFileURL,
+              item.url.deletingLastPathComponent().standardizedFileURL == folderURL.standardizedFileURL else {
+            errorMessage = DesktopAccess.AccessError.changedFolder.localizedDescription
+            return NSItemProvider()
+        }
+        guard FileManager.default.isReadableFile(atPath: item.url.path) else {
+            errorMessage = "‘\(item.name)’ 파일을 전달할 수 없습니다. 폴더를 새로고침하거나 다시 연결해 주세요."
+            return NSItemProvider()
+        }
+        // The connected folder's security scope stays active while this store is retained.
+        let provider = NSItemProvider(contentsOf: item.url) ?? NSItemProvider(object: item.url as NSURL)
+        provider.suggestedName = item.url.lastPathComponent
+        return provider
+    }
 }

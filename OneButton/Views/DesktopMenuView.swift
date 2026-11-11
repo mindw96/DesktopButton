@@ -243,11 +243,15 @@ struct DesktopMenuView: View {
         }
         .buttonStyle(.plain)
         .disabled(store.openingURL != nil || store.isChoosingFolder)
+        .onDrag {
+            selection = item.id
+            return store.dragProvider(for: item)
+        }
         .id(item.id)
-        .help(item.name)
+        .help("\(item.name)\n클릭하여 열거나 다른 앱으로 드래그하세요.")
         .accessibilityIdentifier("desktop.item.\(item.name)")
         .accessibilityLabel(item.name)
-        .accessibilityHint(item.isDirectory ? "Finder에서 폴더 열기" : "기본 앱으로 파일 열기")
+        .accessibilityHint(item.isDirectory ? "Finder에서 열기 또는 다른 앱으로 드래그" : "기본 앱으로 열기 또는 다른 앱으로 드래그하여 첨부")
         .accessibilityAddTraits(selection == item.id ? .isSelected : [])
     }
 
