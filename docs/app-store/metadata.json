@@ -1,0 +1,23 @@
+{
+  "name": "Folder In Bar",
+  "bundleIdentifier": "com.onebutton.desktop",
+  "platform": "MAC_OS",
+  "version": "1.0.0",
+  "build": "7",
+  "primaryLocale": "ko",
+  "primaryCategory": "UTILITIES",
+  "price": "FREE",
+  "releaseAfterApproval": "AUTOMATIC",
+  "copyright": "2026 Dongwook Min",
+  "privacyPolicyURL": "https://mindw96.github.io/DesktopButton/privacy.html",
+  "supportURL": "https://mindw96.github.io/DesktopButton/support.html",
+  "marketingURL": "https://mindw96.github.io/DesktopButton/",
+  "localizations": {
+    "ko": {
+      "subtitle": "메뉴 막대에서 폴더와 파일을 바로 열기",
+      "promotionalText": "창을 내리지 않고 자주 쓰는 파일을 열어보세요. 폴더를 한 번 연결하면 메뉴 막대에서 목록이나 아이콘으로 빠르게 살펴볼 수 있습니다.",
+      "description": "자주 쓰는 폴더를 메뉴 막대 가까이에 두세요.\n\nFolder In Bar(폴더인바)는 메뉴 막대에서 연결한 폴더의 파일을 바로 여는 Mac 앱입니다. 전체 화면으로 작업할 때도 메뉴 막대를 열어 파일을 살펴보고, 기본 앱으로 열 수 있습니다.\n\n원하는 폴더 하나를 연결하세요\n바탕화면, 다운로드 등 자주 사용하는 폴더를 선택하면 연결이 유지됩니다. 상단에는 현재 연결한 폴더 이름이 표시됩니다.\n\n목록과 아이콘 보기\n파일 이름을 차례로 확인하는 목록 보기와 바탕화면처럼 살펴보는 아이콘 격자 보기 중 편한 방식을 선택하세요. 파일은 기본 앱으로, 폴더는 Finder에서 열립니다.\n\n내 작업에 맞는 창 크기\n창 아래 모서리를 드래그해 폭과 높이를 조절할 수 있습니다. 보기 방식과 창 크기는 다음 실행에도 유지됩니다. 새로고침 버튼이나 ⌘R로 폴더의 변경 사항을 확인하세요.\n\n필요한 실행 방식만 선택\n로그인 시 자동 실행과 Dock 아이콘 표시를 설정에서 선택할 수 있습니다. 기본 상태에서는 메뉴 막대에서 조용히 동작합니다.\n\nMac 안에서 처리\n계정 가입, 광고, 분석 도구 없이 사용할 수 있습니다. 선택한 폴더의 파일을 서버로 업로드하지 않으며, 폴더 연결과 보기 설정은 Mac에 저장됩니다.\n\nmacOS 13 이상을 지원하며, 인터페이스는 한국어로 제공됩니다.",
+      "keywords": "폴더,파일,메뉴바,바탕화면,런처,생산성,folder,menubar,launcher"
+    }
+  }
+}

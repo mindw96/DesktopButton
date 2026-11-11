@@ -1,0 +1,16 @@
+Folder In Bar is a macOS menu bar utility. No account or sign-in is required, and it has no paid features or in-app purchases. The interface is in Korean.
+
+After launch, click the folder icon in the macOS menu bar near the upper-right corner of the screen. By default, this app does not open a regular window or show a Dock icon. If the menu bar is hidden in full screen, move the pointer to the top edge of the display to reveal it.
+
+Suggested review steps:
+1. Click the menu bar folder icon, then “폴더 연결…” (Connect Folder).
+2. Select a local folder containing sample files in the standard macOS folder picker. The app requests read-only access to that user-selected folder and saves a security-scoped bookmark locally.
+3. Click the menu bar icon again. The connected folder's name appears at the top. Use the list and grid buttons at the top to switch views. Click a file to open it in its default app, or a folder to open it in Finder.
+4. Drag the diagonal-arrow handle at a lower corner to change the panel's width and height. The selected view and size are retained between launches.
+5. Use the gear menu at the bottom to optionally enable “Dock에 아이콘 표시” (Show Icon in Dock) or “로그인 시 자동 실행” (Launch at Login). Launch at login is off by default and is registered only at the user's request; macOS may require approval in System Settings.
+6. “폴더 다시 연결…” (Reconnect Folder) lets the user select a different folder. The refresh button or Command-R reloads the folder listing.
+
+The Mac App Store build uses only App Store updates. It does not contain Sparkle or the app-renaming helper used in the separately distributed version. It is sandboxed, uses no analytics or advertising, and does not transmit files, folder listings, or user settings to the developer. The privacy policy and support page are accessible from the gear menu.
+
+Privacy policy: https://mindw96.github.io/DesktopButton/privacy.html
+Support: https://mindw96.github.io/DesktopButton/support.html
