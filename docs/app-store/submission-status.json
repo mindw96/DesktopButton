@@ -2,11 +2,11 @@
   "appStoreConnectAppID": "6833273093",
   "bundleID": "com.onebutton.desktop",
   "version": "1.0.0",
-  "build": "7",
-  "sourceCommit": "b1ddf89e70e97dd71432e165453664ccae91cf1c",
-  "submissionID": "4f100152-4fee-44d5-a042-5043c5647261",
-  "reviewURL": "https://appstoreconnect.apple.com/apps/6833273093/distribution/reviewsubmissions/details/4f100152-4fee-44d5-a042-5043c5647261",
-  "verifiedAt": "2026-11-11T12:28:37.997492+09:00",
+  "build": "8",
+  "sourceCommit": "015a7c7f560b4a6d144e4b7b00e25dbb4d9e8324",
+  "submissionID": "300e1df9-cc84-4dbe-a400-e22743269327",
+  "reviewURL": "https://appstoreconnect.apple.com/apps/6833273093/distribution/reviewsubmissions/details/300e1df9-cc84-4dbe-a400-e22743269327",
+  "verifiedAt": "2026-11-11T13:42:38.421604+09:00",
   "reviewStatus": "WAITING_FOR_REVIEW",
   "observedStatus": "심사 대기 중",
   "uploadSucceeded": true,
@@ -20,5 +20,16 @@
   "privacyDataNotCollectedPublished": true,
   "contentRights": "DOES_NOT_USE_THIRD_PARTY_CONTENT",
   "ageRating": "4+",
-  "distributionPackageSHA256": "9fd43729d016a5bc84c742e7d1331b2ea9b8d37783fca8f0ee2e5095258a11b3"
+  "distributionPackageSHA256": "7be58bf06d7de6c6939491ca220ad41f8e4a356dedc95927f6327354bf865d98",
+  "previousSubmissionID": "4f100152-4fee-44d5-a042-5043c5647261",
+  "previousSubmissionDisposition": "CANCELED_TO_REPLACE_BUILD_7_WITH_BUILD_8",
+  "validation": {
+    "unitTestsPassed": 35,
+    "unitTestsFailed": 0,
+    "nativeSandboxFileDrops": 4,
+    "fullscreenFileDrops": 2,
+    "sourcePreserved": true,
+    "copyOnly": true,
+    "chatGPTAttachmentUI": "NOT_VERIFIED"
+  }
 }

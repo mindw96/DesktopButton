@@ -1,5 +1,23 @@
 # Folder In Bar 검증 기록
 
+## 파일 드래그 추가 및 Mac App Store 1.0.0 (8) 재제출 (2026-11-11)
+
+목록의 행과 격자의 아이콘에서 파일을 다른 앱으로 드래그할 수 있습니다. 두 보기가 공유하는 버튼에 macOS 기본 드래그를 연결하고, 현재 연결한 폴더의 유효하고 읽을 수 있는 항목만 `NSItemProvider`로 제공합니다. 원래 파일명과 실제 파일 URL·형식별 데이터를 전달하며 원본 파일을 이동하거나 삭제하지 않습니다. 별도 드래그 라이브러리나 추가 권한은 사용하지 않습니다. 구현 계획은 [PLAN.md](PLAN.md), 빌드 소스는 `015a7c7f560b4a6d144e4b7b00e25dbb4d9e8324`입니다.
+
+- 단위 테스트 **35개 통과, 실패·건너뜀·런타임 경고 0**. 새 검사는 파일명·URL·내용 전달, 연결이 바뀐 항목 및 범위 밖 항목 차단, 사라진 파일 차단, 폴더 URL과 원본 보존을 다룹니다. 결과: `.test-artifacts/drag-unit.xcresult`.
+- 실제 Store Debug 앱에서 별도 sandbox 수신 앱으로 **목록 PNG·TXT, 격자 PNG·TXT 4회** 마우스 드래그를 수행했습니다. 수신 앱은 드롭 전에 원본을 읽지 못했고, 드롭 후에는 원래 파일명·바이트 수·SHA-256이 일치했습니다. 네 번 모두 `sourceMasks = 1`로 복사만 허용했습니다.
+- Esc로 취소하면 파일이 전달되거나 열리지 않았고, 일반 클릭은 기존처럼 TextEdit에서 파일을 열었습니다. 모든 원본 파일의 바이트가 유지됐으며 테스트 문서와 앱을 정리했습니다. 결과: `.test-artifacts/drag-smoke-final.log`, `drag-smoke-result.json`.
+- **Dock 끔·목록 보기, Dock 켬·격자 보기** 각각에서 전체 화면 수신 앱으로 PNG 드래그가 통과했습니다. 드래그 이벤트마다 전체 화면 상태와 수신 창의 표시를 확인했고, 파일명·해시·복사 전용 동작·원본 보존도 통과했습니다. 결과: `.test-artifacts/fullscreen-drag.log`, `fullscreen-drag-result.json`.
+- 실제 ChatGPT 첨부 화면은 **미검증**입니다. 이 Mac의 설치본은 `com.openai.codex`로, 별도 창에서 첨부 영역을 안정적으로 지정하지 못해 드롭 전에 중단했습니다. 새 테스트 창만 닫고 기존 창을 보존했습니다. 파일 드롭·메시지 전송은 모두 0회입니다. 결과: `.test-artifacts/chatgpt-drag-result.json`.
+- 최종 archive 입력 **38개 파일**의 SHA-256 일치를 확인했습니다. **arm64 + x86_64 Universal** archive와 Store export가 성공했고, PKG 서명 및 추출 앱의 `script/verify_app_store.py --release`가 통과했습니다. Apple Distribution 앱 서명, Installer 배포 서명, 팀·앱 ID·배포 프로필·읽기 전용 sandbox·디버깅 권한 제거·Sparkle 제외를 확인했습니다.
+- 최종 archive: `build/AppStore/FolderInBar-1.0.0-8.xcarchive`. 검증 패키지: `build/AppStore/export-8/Folder In Bar.pkg` (1,988,579바이트), SHA-256 `7be58bf06d7de6c6939491ca220ad41f8e4a356dedc95927f6327354bf865d98`. 같은 archive의 업로드 성공과 App Store Connect 빌드 8의 **제출 준비 완료**를 확인했습니다. 로그: `.test-artifacts/drag-archive.log`, `drag-export.log`, `drag-upload.log`.
+
+기존 빌드 7 제출 `4f100152-4fee-44d5-a042-5043c5647261`을 취소한 뒤 빌드 8로 교체했습니다. 드래그 사용법이 포함된 소개 문구·설명·심사 메모를 저장하고, 페이지를 새로고침한 뒤 파일 원문과의 일치를 확인했습니다. 스크린샷 2장, 기존 심사 연락처, 로그인 불필요와 승인 후 자동 공개 설정도 유지됐습니다. [개인정보처리방침](https://mindw96.github.io/DesktopButton/privacy.html)과 [지원 페이지](https://mindw96.github.io/DesktopButton/support.html)에 사용자 지정 대상 앱으로의 파일 전달을 반영하고, 공개 HTML과 저장소 파일의 일치를 확인했습니다.
+
+**2026-11-11 13:42 KST에 정식 재제출을 완료했습니다.** 새 제출 ID는 `300e1df9-cc84-4dbe-a400-e22743269327`입니다. 제출 직후 “1개의 항목 제출됨” 안내와 [새 심사 기록](https://appstoreconnect.apple.com/apps/6833273093/distribution/reviewsubmissions/details/300e1df9-cc84-4dbe-a400-e22743269327)의 **1.0.0 (8) · 심사 대기 중**을 각각 확인했습니다. 공개 상태 기록은 [submission-status.json](docs/app-store/submission-status.json), 로컬 확인 기록은 `.test-artifacts/drag-review-submission-confirmed.json`입니다. **심사 승인과 App Store 공개는 아직 완료되지 않았습니다.**
+
+테스트는 별도 설정과 임시 파일로 진행했으며, 종료했던 기존 `build/export/Folder In Bar.app` (0.4.0 build 6)을 다시 실행했습니다. 현재 공개 GitHub ZIP·DMG·Sparkle 버전 0.4.0에는 이번 드래그 기능이 아직 포함되지 않습니다. 이번 기능은 단일 항목을 외부 앱에 전달하며, 대상 앱의 지원 형식·크기·드롭 위치 제한을 따릅니다. 실제 App Store 설치 및 Intel Mac·이전 macOS 버전 실행은 이번 검사에 포함하지 않았습니다.
+
 ## Mac App Store 1.0.0 (7) 심사 제출 완료 (2026-11-11)
 
 Mac App Store 전용 `FolderInBarAppStore` target/scheme을 추가했습니다. 기존 GitHub 배포판 `OneButton` target과 공개 버전 **0.4.0 (6)**, Sparkle 피드는 유지합니다. Store판은 **1.0.0 (7)**, bundle ID **com.onebutton.desktop**, 팀 **4J7HGK26PF**입니다.

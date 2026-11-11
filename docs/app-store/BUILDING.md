@@ -1,11 +1,12 @@
 # Mac App Store 빌드와 제출
 
-Mac App Store판은 별도 **`FolderInBarAppStore` scheme**으로 빌드합니다. 현재 제출 버전은 **1.0.0 (build 7)**이며, App Store Connect 앱 ID는 **6833273093**입니다. 앱 등록·빌드 생성은 심사 제출이나 공개 완료를 뜻하지 않습니다. 실제 진행 결과는 저장소 루트의 [VALIDATION.md](../../VALIDATION.md)를 확인하세요.
+Mac App Store판은 별도 **`FolderInBarAppStore` scheme**으로 빌드합니다. 현재 제출 버전은 **1.0.0 (build 8)**이며, App Store Connect 앱 ID는 **6833273093**입니다. 기존 build 7 제출을 취소하고 파일 드래그 기능이 포함된 build 8로 재제출했습니다. 2026-11-11 13:42:38 KST 확인 기준 **심사 대기 중**이며, 승인·공개는 아직 완료되지 않았습니다. 실제 진행 결과는 저장소 루트의 [VALIDATION.md](../../VALIDATION.md)를 확인하세요.
 
 | 구분 | Mac App Store | GitHub 직접 배포 |
 | --- | --- | --- |
 | Scheme | `FolderInBarAppStore` | `OneButton` |
-| 현재 버전 | 1.0.0 (7), 심사 대기 중 | 0.4.0 (6), 공개됨 |
+| 현재 버전 | 1.0.0 (8), 심사 대기 중 | 0.4.0 (6), 공개됨 |
+| 파일 드래그 | build 8에 포함 | 공개 0.4.0에는 미포함, 현재 소스에는 포함 |
 | 업데이트 | App Store | Sparkle |
 | 서명·패키지 | Store 배포 서명·프로필, 서명된 PKG | Developer ID, 공증·staple, ZIP·DMG |
 | 이름 변경 helper | 포함하지 않음 | 기존 `OneButton.app` 이름 변경용 포함 |
@@ -28,13 +29,13 @@ Store판에는 Sparkle 코드·프레임워크·업데이트 메뉴·관련 설�
 xcodebuild -project OneButton.xcodeproj -scheme FolderInBarAppStore \
   -configuration Release -destination 'generic/platform=macOS' \
   -derivedDataPath build/AppStore/DerivedData \
-  -archivePath build/AppStore/FolderInBar-1.0.0-7.xcarchive \
+  -archivePath build/AppStore/FolderInBar-1.0.0-8.xcarchive \
   ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO \
   -allowProvisioningUpdates archive
 
 xcodebuild -exportArchive \
-  -archivePath build/AppStore/FolderInBar-1.0.0-7.xcarchive \
-  -exportPath build/AppStore/export \
+  -archivePath build/AppStore/FolderInBar-1.0.0-8.xcarchive \
+  -exportPath build/AppStore/export-8 \
   -exportOptionsPlist AppStore/ExportOptions.plist \
   -allowProvisioningUpdates
 ```
@@ -49,16 +50,16 @@ Store 개발 빌드의 출력은 DerivedData의 `Build/Products/AppStore/Debug/F
 
 ```sh
 python3 script/verify_app_store.py \
-  'build/AppStore/export/Folder In Bar.app' --release
+  'build/AppStore/export-8/Folder In Bar.app' --release
 ```
 
-Xcode가 앱 대신 PKG를 내보냈다면, 실제 생성된 PKG 파일명으로 아래 명령을 실행합니다. `pkg-expanded`는 아직 없는 경로여야 합니다. 이는 압축만 풀며 앱을 설치하지 않습니다.
+Xcode가 앱 대신 PKG를 내보냈다면, 실제 생성된 PKG 파일명으로 아래 명령을 실행합니다. 빌드 8의 배포 패키지는 `build/AppStore/export-8/Folder In Bar.pkg`입니다. `pkg-expanded-8`은 아직 없는 경로여야 하며, 이미 검증용으로 풀어 둔 경로가 있다면 다른 빈 경로를 지정합니다. 이는 압축만 풀며 앱을 설치하지 않습니다.
 
 ```sh
-pkgutil --check-signature 'build/AppStore/export/Folder In Bar.pkg'
-pkgutil --expand-full 'build/AppStore/export/Folder In Bar.pkg' \
-  build/AppStore/pkg-expanded
-find build/AppStore/pkg-expanded -type d -name 'Folder In Bar.app'
+pkgutil --check-signature 'build/AppStore/export-8/Folder In Bar.pkg'
+pkgutil --expand-full 'build/AppStore/export-8/Folder In Bar.pkg' \
+  build/AppStore/pkg-expanded-8
+find build/AppStore/pkg-expanded-8 -type d -name 'Folder In Bar.app'
 ```
 
 마지막 명령이 출력한 앱 경로를 `verify_app_store.py`의 인자로 전달하고 `--release`를 붙입니다. 검증은 Universal 구성, 앱 서명·팀, 정확한 앱 ID의 배포 프로필, sandbox와 읽기 권한, 디버깅 권한 제거, 개인정보 manifest, Sparkle·이름 변경 helper 제외를 확인합니다. PKG 서명도 별도로 확인해야 합니다.
@@ -69,8 +70,8 @@ find build/AppStore/pkg-expanded -type d -name 'Folder In Bar.app'
 
 ```sh
 xcodebuild -exportArchive \
-  -archivePath build/AppStore/FolderInBar-1.0.0-7.xcarchive \
-  -exportPath build/AppStore/upload \
+  -archivePath build/AppStore/FolderInBar-1.0.0-8.xcarchive \
+  -exportPath build/AppStore/upload-8 \
   -exportOptionsPlist AppStore/ExportOptions-Upload.plist \
   -allowProvisioningUpdates
 ```

@@ -1,6 +1,11 @@
 # Mac App Store 제출 자료
 
-Folder In Bar 1.0.0 (빌드 7)의 제출 자료입니다. 무료 배포와 심사 승인 후 자동 공개는 사용자가 선택한 설정입니다. 2026-11-11 빌드 업로드와 정식 심사 제출을 완료했고, 현재 **심사 대기 중**입니다. 승인 및 공개는 아직 완료되지 않았습니다. 상세 상태는 [submission-status.json](submission-status.json)과 [검증 기록](../../VALIDATION.md)에 있습니다.
+Folder In Bar 1.0.0 (빌드 8)의 제출 자료입니다. 무료 배포와 심사 승인 후 자동 공개는 사용자가 선택한 설정입니다. 기존 빌드 7 제출을 취소하고, 파일·사진 드래그 기능이 포함된 빌드 8을 업로드하여 정식 심사에 재제출했습니다. **2026-11-11 13:42:38 KST 확인 기준 심사 대기 중(`WAITING_FOR_REVIEW`)**이며, 승인 및 공개는 아직 완료되지 않았습니다. 상세 상태는 [submission-status.json](submission-status.json)과 [검증 기록](../../VALIDATION.md)에 있습니다.
+
+- [현재 심사 제출](https://appstoreconnect.apple.com/apps/6833273093/distribution/reviewsubmissions/details/300e1df9-cc84-4dbe-a400-e22743269327): `300e1df9-cc84-4dbe-a400-e22743269327`
+- 제출 소스: `015a7c7f560b4a6d144e4b7b00e25dbb4d9e8324`
+
+드래그 기능은 이 Store 빌드와 현재 소스에 포함되며, 공개된 GitHub 0.4.0 배포본에는 아직 포함되지 않았습니다.
 
 - `metadata.json`: 한국어 소개 문구, URL, 카테고리와 공개 설정
 - `review-notes.txt`: 심사 담당자에게 전달할 영문 사용 절차
