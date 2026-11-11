@@ -135,13 +135,44 @@ func observedFrame(_ element: AXUIElement) throws -> CGRect {
     return CGRect(origin: position, size: size)
 }
 
+func requirePointOnDisplay(_ point: CGPoint) throws {
+    let onDisplay = NSScreen.screens.contains { screen in
+        guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return false }
+        return CGDisplayBounds(number.uint32Value).contains(point)
+    }
+    try require(onDisplay, "Observed mouse point \(point) is outside all physical displays; no input sent")
+}
+
 func clickObserved(_ element: AXUIElement) throws {
     let frame = try observedFrame(element)
     let point = CGPoint(x: frame.midX, y: frame.midY)
+    try requirePointOnDisplay(point)
     for type in [CGEventType.mouseMoved, .leftMouseDown, .leftMouseUp] {
         CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
         pumpRunLoop(0.15)
     }
+}
+
+func doubleClickObserved(_ element: AXUIElement) throws {
+    let frame = try observedFrame(element)
+    let point = CGPoint(x: frame.midX, y: frame.midY)
+    try requirePointOnDisplay(point)
+    CGEvent(mouseEventSource: nil, mouseType: .mouseMoved,
+            mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
+    pumpRunLoop(0.04)
+    for count in 1...2 {
+        for type in [CGEventType.leftMouseDown, .leftMouseUp] {
+            guard let event = CGEvent(mouseEventSource: nil, mouseType: type,
+                                      mouseCursorPosition: point, mouseButton: .left) else {
+                throw SmokeFailure(description: "Could not create double-click event")
+            }
+            event.flags = []
+            event.setIntegerValueField(.mouseEventClickState, value: Int64(count))
+            event.post(tap: .cghidEventTap)
+            pumpRunLoop(0.04)
+        }
+    }
+    pumpRunLoop(0.2)
 }
 
 func hoverObserved(_ element: AXUIElement) throws {
@@ -684,23 +715,23 @@ final class Smoke {
         if identified("desktop.item.\(openName)", in: app) == nil { try openMenu(app) }
         try require(until(4) { identified("desktop.item.\(openName)", in: app) != nil }, "Popup unavailable after hiding the Dock icon")
         print("PASS: Dock preference survives restart, disabling it restores accessory policy and removes the icon")
-        try press(identified("desktop.item.\(openName)", in: app), "fixture folder icon")
+        try doubleClickObserved(identified("desktop.item.\(openName)", in: app)!)
         try closeOpenedFixtureFolder(named: openName)
-        try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Click-open did not close popup")
-        print("PASS: one-click grid icon opens the fixture folder in Finder")
+        try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "Double-click did not close popup")
+        print("PASS: double-click grid icon opens the fixture folder in Finder")
         try openMenu(app)
         try require(until(5) { identified("desktop.item.\(documentURL.lastPathComponent)", in: app) != nil }, "Document row missing")
-        try press(identified("desktop.item.\(documentURL.lastPathComponent)", in: app), "fixture text document row")
+        try doubleClickObserved(identified("desktop.item.\(documentURL.lastPathComponent)", in: app)!)
         try closeOpenedFixtureDocument(documentURL)
         print("PASS: text document opens in TextEdit and its own tab closes")
 
         try openMenu(app)
         try press(identified("desktop.view.list", in: app), "list view")
         try verifyLayout(grid: false, itemNames: layoutNames, in: app)
-        try press(identified("desktop.item.\(openName)", in: app), "fixture folder row")
+        try doubleClickObserved(identified("desktop.item.\(openName)", in: app)!)
         try closeOpenedFixtureFolder(named: openName)
-        try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "List click-open did not close popup")
-        print("PASS: grid-to-list restores the vertical layout and one-click opening")
+        try require(until(3) { labeled("문서 2.txt", in: app) == nil }, "List double-click did not close popup")
+        print("PASS: grid-to-list restores the vertical layout and double-click opening")
 
         let fullscreenURL = root.appendingPathComponent("build/Build/Products/Debug/OneButtonFullscreenFixture.app")
         if FileManager.default.fileExists(atPath: fullscreenURL.path) {

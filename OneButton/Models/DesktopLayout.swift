@@ -6,8 +6,8 @@ enum DesktopLayout: String {
 
     static let gridColumnCount = 3
 
-    static func columnCount(for width: CGFloat) -> Int {
-        max(1, Int((width - 16) / 104))
+    static func columnCount(for width: CGFloat, iconSize: DesktopIconSize = .medium) -> Int {
+        max(1, Int((width - 16) / (iconSize.gridSize + 56)))
     }
 
     func selectionIndex(from current: Int?, direction: MoveCommandDirection, itemCount: Int,

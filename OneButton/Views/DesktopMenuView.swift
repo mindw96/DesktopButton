@@ -13,6 +13,7 @@ struct DesktopMenuView: View {
     @State private var selection: URL?
     @FocusState private var gridIsFocused: Bool
     @AppStorage private var layout: DesktopLayout
+    @AppStorage private var iconSize: DesktopIconSize
     @State private var resizeStart: (point: CGPoint, size: CGSize)?
     @GestureState private var isResizing = false
 
@@ -27,6 +28,7 @@ struct DesktopMenuView: View {
         self.popoverSize = popoverSize
         self.dismiss = dismiss
         _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
+        _iconSize = AppStorage(wrappedValue: .medium, "desktopIconSize", store: defaults)
     }
     #else
     init(store: DesktopStore, updateController: UpdateController, loginItemController: LoginItemController,
@@ -40,6 +42,7 @@ struct DesktopMenuView: View {
         self.popoverSize = popoverSize
         self.dismiss = dismiss
         _layout = AppStorage(wrappedValue: .list, "desktopLayout", store: defaults)
+        _iconSize = AppStorage(wrappedValue: .medium, "desktopIconSize", store: defaults)
     }
     #endif
 
@@ -265,33 +268,41 @@ struct DesktopMenuView: View {
     }
 
     private var gridColumnCount: Int {
-        DesktopLayout.columnCount(for: popoverSize.size.width)
+        DesktopLayout.columnCount(for: popoverSize.size.width, iconSize: iconSize)
     }
 
     private func itemButton(_ item: DesktopItem) -> some View {
         Button {
             selection = item.id
-            open(item)
         } label: {
             if layout == .list {
-                DesktopItemRow(item: item, isOpening: store.openingURL == item.url)
+                DesktopItemRow(item: item, isOpening: store.openingURL == item.url,
+                               iconSize: iconSize.listSize)
             } else {
                 DesktopItemTile(item: item, isOpening: store.openingURL == item.url,
-                                isSelected: selection == item.id)
+                                isSelected: selection == item.id, iconSize: iconSize.gridSize)
             }
         }
         .buttonStyle(.plain)
         .disabled(store.openingURL != nil || store.isChoosingFolder)
+        .simultaneousGesture(TapGesture(count: 2).onEnded {
+            selection = item.id
+            open(item)
+        })
         .onDrag {
             selection = item.id
             return store.dragProvider(for: item)
         }
         .id(item.id)
-        .help("\(item.name)\n클릭하여 열거나 다른 앱으로 드래그하세요.")
+        .help("\(item.name)\n한 번 클릭하여 선택하고, 더블클릭하여 열거나 다른 앱으로 드래그하세요.")
         .accessibilityIdentifier("desktop.item.\(item.name)")
         .accessibilityLabel(item.name)
-        .accessibilityHint(item.isDirectory ? "Finder에서 열기 또는 다른 앱으로 드래그" : "기본 앱으로 열기 또는 다른 앱으로 드래그하여 첨부")
+        .accessibilityHint(item.isDirectory ? "한 번 클릭하여 선택, 더블클릭하여 Finder에서 열기" : "한 번 클릭하여 선택, 더블클릭하여 열기 또는 다른 앱으로 드래그하여 첨부")
         .accessibilityAddTraits(selection == item.id ? .isSelected : [])
+        .accessibilityAction(named: "열기") {
+            selection = item.id
+            open(item)
+        }
     }
 
     private var emptyMessage: String {
@@ -356,6 +367,17 @@ struct DesktopMenuView: View {
             .accessibilityIdentifier("desktop.updates")
             #endif
             Menu {
+                Menu("아이콘 크기") {
+                    ForEach(DesktopIconSize.allCases, id: \.self) { size in
+                        Toggle(size.title, isOn: Binding(
+                            get: { iconSize == size },
+                            set: { if $0 { iconSize = size } }
+                        ))
+                        .accessibilityIdentifier("desktop.icon-size.\(size.rawValue)")
+                    }
+                }
+                .accessibilityIdentifier("desktop.icon-size")
+                Divider()
                 Toggle("Dock에 아이콘 표시", isOn: Binding(
                     get: { dockIconController.showsIcon },
                     set: { dockIconController.setShowsIcon($0) }
@@ -468,9 +490,10 @@ struct DesktopMenuView: View {
 private struct DesktopItemRow: View {
     let item: DesktopItem
     let isOpening: Bool
+    let iconSize: CGFloat
     var body: some View {
         HStack(spacing: 10) {
-            DesktopFileIcon(item: item, size: 24)
+            DesktopFileIcon(item: item, size: iconSize)
             Text(item.name).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 4)
             if isOpening {
@@ -482,7 +505,7 @@ private struct DesktopItemRow: View {
                     .accessibilityHidden(true)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 30, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: max(30, iconSize + 6), alignment: .leading)
         .contentShape(Rectangle())
     }
 }
@@ -491,10 +514,11 @@ private struct DesktopItemTile: View {
     let item: DesktopItem
     let isOpening: Bool
     let isSelected: Bool
+    let iconSize: CGFloat
 
     var body: some View {
         VStack(spacing: 6) {
-            DesktopFileIcon(item: item, size: 48)
+            DesktopFileIcon(item: item, size: iconSize)
                 .overlay {
                     if isOpening { ProgressView().controlSize(.small) }
                 }
@@ -506,7 +530,7 @@ private struct DesktopItemTile: View {
                 .frame(maxWidth: .infinity, minHeight: 28, alignment: .top)
         }
         .padding(8)
-        .frame(maxWidth: .infinity, minHeight: 98, maxHeight: 98)
+        .frame(maxWidth: .infinity, minHeight: iconSize + 50, maxHeight: iconSize + 50)
         .background(isSelected ? Color.accentColor.opacity(0.18) : .clear,
                     in: RoundedRectangle(cornerRadius: 8))
         .overlay {

@@ -23,6 +23,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     private var dockIconController: DockIconController!
     private var popoverSize: PopoverSize!
     private var sizeObservation: AnyCancellable?
+    private var outsideClickMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         var defaults = UserDefaults.standard
@@ -131,6 +132,14 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     }
 
     func popoverDidShow(_ notification: Notification) {
+        // A native menu can leave transient dismissal inactive after returning to the popover.
+        if outsideClickMonitor == nil {
+            outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(
+                matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+            ) { [weak self] _ in
+                self?.popover.performClose(nil)
+            }
+        }
         loginItemController.refresh()
         if let window = popover.contentViewController?.view.window {
             // Keep the popover available above other apps' fullscreen windows after Dock policy changes.
@@ -142,11 +151,21 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         Task { await store.refresh() }
     }
 
+    func popoverDidClose(_ notification: Notification) {
+        stopOutsideClickMonitor()
+    }
+
+    private func stopOutsideClickMonitor() {
+        if let outsideClickMonitor { NSEvent.removeMonitor(outsideClickMonitor) }
+        outsideClickMonitor = nil
+    }
+
     func applicationDidBecomeActive(_ notification: Notification) {
         loginItemController?.refresh()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        stopOutsideClickMonitor()
         if let statusItem { NSStatusBar.system.removeStatusItem(statusItem) }
     }
 }

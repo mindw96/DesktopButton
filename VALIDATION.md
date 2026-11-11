@@ -1,5 +1,24 @@
 # Folder In Bar 검증 기록
 
+## 클릭 동작·바깥 클릭 닫힘·아이콘 크기: 1.1.0 (10) 개발·로컬 검증 완료 (2026-11-11)
+
+`codex/sorting-update`의 다음 Store 업데이트를 **1.1.0 (10)**으로 갱신했습니다. 목록·격자의 **한 번 클릭은 선택, 더블클릭 또는 선택 후 Return은 열기**로 동작합니다. 드래그와 접근성의 명시적 열기 동작을 유지합니다. 설정에 **아이콘 크기 → 작게 / 보통 / 크게**를 추가했고, 목록·격자에 적용하며 다음 실행에도 저장합니다. 보통은 기존 크기(목록 24pt·격자 48pt)이고, 작은 크기는 16pt·32pt, 큰 크기는 32pt·72pt입니다. 격자 열 수와 방향키 이동은 창 폭과 아이콘 크기를 함께 반영합니다.
+
+정렬 메뉴를 사용한 후 다른 앱을 클릭하면 포커스만 바뀌고 팝업이 남는 현상을 기존 빌드 9에서 재현했습니다. 팝업이 표시된 동안 다른 앱의 마우스 누름을 관찰해 닫고, 팝업이 닫히거나 앱이 종료되면 관찰을 해제합니다. 자기 앱의 메뉴 선택·드래그 이동·마우스 놓기는 이 관찰 대상에 포함하지 않으며, 새 권한이나 키보드 이벤트 관찰을 추가하지 않았습니다.
+
+- **단위 테스트 49개 통과, 실패·건너뜀·런타임 경고 0**. 새 검사는 크기별 열 수, 기존 기본값 호환, 좁은 폭, 마지막 행의 방향키 이동을 포함합니다. 결과: `.test-artifacts/feedback-unit.xcresult`, `feedback-unit.log`. 기존 의존성의 빌드 경고는 런타임 경고와 구분합니다.
+- **수정 전·후 실제 외부 클릭 비교 통과**. 빌드 9는 일반 상태에서 닫혔지만 정렬 후에는 남았습니다. 빌드 10은 일반 상태·정렬 후·다시 열고 정렬 후·정렬 후 외부 오른쪽 클릭 모두에서 닫혔습니다. 자기 앱의 정렬 옵션을 고르는 동안은 팝업이 유지됐습니다. 별도 테스트 창의 실제 클릭과 팝업 접근성 창의 소멸로 확인했습니다. 결과: `.test-artifacts/popover-dismiss-before.json`, `popover-dismiss-after.json` 및 대응 로그.
+- **목록·격자의 실제 클릭 검사 통과**. 한 번 클릭한 항목의 선택 표시와 열리지 않음, 더블클릭으로 해당 파일 열기·팝업 닫힘, 아이콘 크기에 따른 타일 높이와 열 수, 큰 아이콘의 방향키 이동 후 Return 열기를 확인했습니다. 정렬 9개 시나리오와 새로고침·재실행 후 정렬 및 큰 아이콘 설정 복원도 통과했습니다. 결과: `.test-artifacts/feedback-sort-smoke.log`, `feedback-sort-smoke-result.json`.
+- **외부 앱 드래그 회귀 검사 통과**. 별도 sandbox 수신 앱으로 목록 PNG·TXT, 격자 PNG·TXT의 4회 드롭을 수행했습니다. 드롭 전 원본 읽기 차단, 드롭 후 파일명·바이트·해시 일치, 복사 전용, Esc 취소, 단일 클릭으로 열리지 않음·더블클릭 열기와 원본 보존을 확인했습니다. 결과: `.test-artifacts/feedback-drag-smoke.log`, `feedback-drag-smoke-result.json`.
+- 실제 항목 클릭 검증 중 테스트 앱의 메뉴 막대 항목이 접근성 트리에 없는 경우에는 정확한 테스트 앱 경로를 다시 열어 같은 팝업을 표시했습니다. 팝업이 물리 화면 밖에 배치된 경우 테스트 창만 화면 안으로 옮긴 뒤 위치를 확인하고 검사했습니다. 화면 밖 초기 클릭은 무효로 제외했으며, 공통 클릭·드래그 헬퍼에는 모든 물리 화면의 좌표 범위를 검사하는 조건을 추가했습니다. 이 실행은 메뉴 막대 아이콘 자체의 실제 마우스 클릭이나 숨겨진 앵커의 팝업 배치를 검증한 것은 아닙니다.
+- Store Debug와 **arm64 + x86_64 Universal archive/export 성공**. 최종 작업 폴더와 테스트·archive 입력의 SHA-256 manifest 50개 항목이 일치합니다. PKG Installer 서명 및 추출 앱의 `verify_app_store.py --release` 검증으로 Apple Distribution 서명, 팀·앱 ID·배포 프로필·읽기 전용 sandbox·디버깅 권한 제거·개인정보 manifest·Sparkle 제외를 확인했습니다. 결과: `.test-artifacts/feedback-source-hashes.json`, `feedback-archive.log`, `feedback-export.log`, `feedback-package-validation.json`.
+
+기존 로컬 개발 앱을 `build/Preview-1.1.0-build9/Folder In Bar.app`에 백업하고, **`build/Preview-1.1.0/Folder In Bar.app`을 검증한 빌드 10으로 교체해 실행했습니다.** 복사 후 서명·Store 구성과 테스트한 앱의 실행 파일·Info.plist·개인정보 manifest의 일치를 확인했습니다. 테스트는 별도 설정과 임시 파일을 사용했고, 사용자 설정을 초기화하지 않았습니다. 임시 문서·테스트 앱은 정리했습니다. 결과: `.test-artifacts/feedback-preview-validation.json`.
+
+제출 준비 archive는 `build/AppStore/FolderInBar-1.1.0-10.xcarchive`, 서명된 패키지는 `build/AppStore/export-10/Folder In Bar.pkg` (**2,104,359바이트**)입니다. PKG SHA-256은 `8b9c419ad255be42b24e6398ab87a28efcb7185176d9d6e0c3823cea1142e1f2`입니다. **App Store 업로드·심사 제출·공개는 하지 않았으며**, 기존 1.0.0 (8) 제출 기록·메타데이터·심사 메모는 유지합니다. 다음 제출 자료는 [next-update.md](docs/app-store/next-update.md)에 준비했습니다.
+
+이번에는 Apple Silicon의 Store Debug 앱으로 해당 상호작용을 확인했습니다. 실제 ChatGPT 첨부, 전체 화면 드래그, VoiceOver 음성 출력, Intel·이전 macOS 실행과 전체 `ui_smoke` 시나리오는 다시 검사하지 않았습니다. 전체 화면 드래그의 과거 빌드 8 결과와 이번 결과는 구분합니다.
+
 ## 다음 업데이트 정렬 기능: 1.1.0 (9) 개발·로컬 검증 완료 (2026-11-11)
 
 `codex/sorting-update` 브랜치에서 **다음 Mac App Store 버전 1.1.0 (9)**을 준비했습니다. 현재 제출한 1.0.0 (8)의 제출 기록·설정은 변경하지 않았고, 새 버전은 **App Store에 업로드하거나 심사 제출하지 않았습니다.** 다음 제출용 설명·심사 메모 초안은 [next-update.md](docs/app-store/next-update.md)에 있습니다. 지원·개인정보 HTML의 정렬 설명도 이 개발 브랜치에만 준비했으며 공개 Pages에는 배포하지 않았습니다.

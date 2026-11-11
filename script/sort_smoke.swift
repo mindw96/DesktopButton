@@ -22,10 +22,12 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
         try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: dates[index])],
                                               ofItemAtPath: file.path)
     }
-    let clickedFile = folder.appendingPathComponent(names[0])
     var launched: [NSRunningApplication] = []
     defer {
-        if openTestDocumentExists(clickedFile) { try? closeDragFixtureDocument(clickedFile) }
+        for name in names {
+            let file = folder.appendingPathComponent(name)
+            if openTestDocumentExists(file) { try? closeDragFixtureDocument(file) }
+        }
         launched.reversed().forEach(stopDragApp)
         try? FileManager.default.removeItem(at: folder)
     }
@@ -78,6 +80,53 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
         try press(optionControl(), "sort \(option)")
         pumpRunLoop(0.3)
     }
+    func isSelected(_ index: Int) -> Bool {
+        guard var item = identified("desktop.item.\(names[index])", in: app) else { return false }
+        for _ in 0..<4 {
+            if value(item, kAXSelectedAttribute) as? Bool == true { return true }
+            guard let parent = elementValue(item, kAXParentAttribute) else { break }
+            item = parent
+        }
+        return false
+    }
+    func selectWithoutOpening(_ index: Int, mode: String) throws {
+        try showFiles()
+        try clickObserved(identified("desktop.item.\(names[index])", in: app)!)
+        pumpRunLoop(NSEvent.doubleClickInterval + 0.2)
+        try require(names.allSatisfy { !openTestDocumentExists(folder.appendingPathComponent($0)) },
+                    "Single \(mode) click unexpectedly opened a file")
+        try require(until(3) { isSelected(index) }, "Single \(mode) click did not select the file")
+        print("PASS: single \(mode) click selects without opening")
+    }
+    func doubleClickAndClose(_ index: Int, mode: String) throws {
+        try doubleClickObserved(identified("desktop.item.\(names[index])", in: app)!)
+        try closeDragFixtureDocument(folder.appendingPathComponent(names[index]))
+        try require(until(3) { identified("desktop.sort", in: app) == nil }, "Double-click did not close the popover")
+        print("PASS: double \(mode) click opens the file; only its fixture tab closed")
+    }
+    func chooseIconSize(_ size: String, title: String) throws {
+        try showFiles()
+        try press(identified("desktop.settings", in: app), "settings menu for icon size")
+        let submenu = identified("desktop.icon-size", in: app) ?? labeled("아이콘 크기", in: app)
+        guard let submenu else { throw SmokeFailure(description: "Icon size submenu missing") }
+        try hoverObserved(submenu)
+        try require(until(3) {
+            identified("desktop.icon-size.\(size)", in: app) != nil || labeled(title, in: app) != nil
+        }, "Icon size option missing: \(size)")
+        try press(identified("desktop.icon-size.\(size)", in: app) ?? labeled(title, in: app), "icon size \(size)")
+    }
+    func checkIconGeometry(height: CGFloat, columns: Int) throws {
+        try require(until(4) {
+            let observed: [CGRect] = names.compactMap { name in
+                guard let item = identified("desktop.item.\(name)", in: app) else { return nil }
+                return try? observedFrame(item)
+            }
+            let frames = observed.sorted { $0.minY == $1.minY ? $0.minX < $1.minX : $0.minY < $1.minY }
+            guard frames.count == names.count else { return false }
+            let firstRow = frames.filter { abs($0.minY - frames[0].minY) < 3 }.count
+            return firstRow == columns && frames.allSatisfy { abs($0.height - height) < 3 }
+        }, "Icon size did not produce height \(height) and \(columns) columns")
+    }
     var checks: [[String: Any]] = []
     func check(_ title: String, _ indices: [Int], grid: Bool = false) throws {
         try showFiles()
@@ -100,6 +149,8 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
         print("PASS: \(title)")
     }
     try check("initial natural name order", [0, 1, 2])
+    try selectWithoutOpening(1, mode: "list")
+    try doubleClickAndClose(1, mode: "list")
     try choose("descending")
     try check("name descending", [2, 1, 0])
     try choose("size")
@@ -110,27 +161,42 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
     try check("modified date ascending", [1, 2, 0])
     try press(identified("desktop.view.grid", in: app), "grid layout")
     try check("same sort in grid", [1, 2, 0], grid: true)
+    try selectWithoutOpening(0, mode: "grid")
+    try doubleClickAndClose(0, mode: "grid")
     try choose("descending")
     try check("modified date descending in grid", [0, 2, 1], grid: true)
     try press(identified("desktop.refresh", in: app), "refresh sorted folder")
     pumpRunLoop(1)
     try check("refresh preserves current sorting", [0, 2, 1], grid: true)
+    try chooseIconSize("small", title: "작게")
+    try checkIconGeometry(height: 82, columns: 3)
+    try chooseIconSize("large", title: "크게")
+    try checkIconGeometry(height: 122, columns: 2)
+    try selectWithoutOpening(0, mode: "large grid")
+    try key(125, to: process.processIdentifier)
+    try require(until(3) { isSelected(1) }, "Down arrow did not use the enlarged grid's two columns")
+    try key(36, to: process.processIdentifier)
+    try closeDragFixtureDocument(folder.appendingPathComponent(names[1]))
+    try require(until(3) { identified("desktop.sort", in: app) == nil }, "Return-open did not close the popover")
+    print("PASS: small/large icons resize tiles and columns; Down follows the current columns and Return opens the selection")
     stopDragApp(process)
     process = try launchDragApp(sourceURL, arguments: ["--ui-testing"])
     launched.append(process)
     app = AXUIElementCreateApplication(process.processIdentifier)
     pumpRunLoop(2)
     try check("relaunch restores criterion, direction and grid", [0, 2, 1], grid: true)
-    try clickObserved(identified("desktop.item.\(names[0])", in: app)!)
-    try closeDragFixtureDocument(clickedFile)
-    print("PASS: sorted file still opens with one click; only the fixture tab closed")
+    try checkIconGeometry(height: 122, columns: 2)
+    print("PASS: relaunch restores large icon size")
     for index in names.indices {
         try require(try Data(contentsOf: folder.appendingPathComponent(names[index]))
                     == Data(repeating: 65 + UInt8(index), count: lengths[index]), "Sorting changed original file bytes")
     }
     let artifacts = root.appendingPathComponent(".test-artifacts")
     try FileManager.default.createDirectory(at: artifacts, withIntermediateDirectories: true)
-    try JSONSerialization.data(withJSONObject: ["checks": checks, "ordinaryClickPassed": true, "originalsPreserved": true],
+    try JSONSerialization.data(withJSONObject: ["checks": checks, "singleClickSelectionPassed": true,
+                                               "doubleClickOpenPassed": true, "iconSizeAndColumnsPassed": true,
+                                               "keyboardReturnPassed": true,
+                                               "iconSizeRestored": true, "originalsPreserved": true],
                                options: [.prettyPrinted, .sortedKeys])
         .write(to: artifacts.appendingPathComponent("sort-smoke-result.json"))
 }

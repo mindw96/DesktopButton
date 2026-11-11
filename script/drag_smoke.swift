@@ -55,6 +55,8 @@ func stopDragApp(_ app: NSRunningApplication) {
 func dragFile(_ element: AXUIElement, to end: CGPoint, sourcePID: pid_t, cancel: Bool = false) throws {
     let frame = try observedFrame(element)
     let start = CGPoint(x: frame.midX, y: frame.midY)
+    try requirePointOnDisplay(start)
+    try requirePointOnDisplay(end)
     var point = start
     func post(_ type: CGEventType, at point: CGPoint) throws {
         guard let event = CGEvent(mouseEventSource: nil, mouseType: type,
@@ -226,8 +228,11 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
     if identified("desktop.item.\(document.lastPathComponent)", in: sourceAX) == nil { try openMenu(sourceAX) }
     try require(until(5) { identified("desktop.item.\(document.lastPathComponent)", in: sourceAX) != nil }, "Click-open item missing")
     try clickObserved(identified("desktop.item.\(document.lastPathComponent)", in: sourceAX)!)
-    try require(until(6) { openTestDocumentExists(document) }, "Ordinary click did not open the fixture document")
-    print("PASS: ordinary click still opens the file in its default app")
+    pumpRunLoop(NSEvent.doubleClickInterval + 0.2)
+    try require(!openTestDocumentExists(document), "Single click unexpectedly opened the fixture document")
+    try doubleClickObserved(identified("desktop.item.\(document.lastPathComponent)", in: sourceAX)!)
+    try require(until(6) { openTestDocumentExists(document) }, "Double-click did not open the fixture document")
+    print("PASS: single click selects without opening; double-click opens the file in its default app")
     try closeDragFixtureDocument(document)
     print("PASS: only the verified temporary document tab was closed")
     for (name, bytes) in originals {

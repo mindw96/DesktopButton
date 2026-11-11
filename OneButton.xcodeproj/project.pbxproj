@@ -22,6 +22,7 @@
 		52236C9B14E13045331BE574 /* DesktopSortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */; };
 		52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11E832FE1770C6DD4FB160 /* UpdateController.swift */; };
 		58F8DF581EC9DE8E89175D46 /* DesktopSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412454AF031ABAE1FBC03051 /* DesktopSort.swift */; };
+		59CF002C8A55F527F75AAE3E /* DesktopIconSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = C04A94D69140CD23D0B7BD2C /* DesktopIconSize.swift */; };
 		5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */; };
 		5D1D2DD9110461A10C68F2A5 /* DockIconController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A947B2F7B0371F15FF753E0 /* DockIconController.swift */; };
 		614F5B474B1FC734D5914C14 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */; };
@@ -30,6 +31,7 @@
 		6BA141B7AE60C6381347FF72 /* DockIconControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EDF9F05DE99706B9DA1FF1 /* DockIconControllerTests.swift */; };
 		7F8B48DC200F457FCDCB15A0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B5A8C8D814BC9DF170EE8637 /* Sparkle */; };
 		8451495A4409520263177AEE /* DesktopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E094051639952B86E9D408 /* DesktopLayout.swift */; };
+		850A50973CCE76C39EC6E074 /* DesktopIconSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = C04A94D69140CD23D0B7BD2C /* DesktopIconSize.swift */; };
 		981AB82FBA8428AE56F0398E /* MigrationFileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E592396261AD81EC8513D3C9 /* MigrationFileSystem.swift */; };
 		988681EECEEC19CB28E701BD /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C2F2B5F94CE4140052AD62 /* LoginItemController.swift */; };
 		9B99F14DD4B89CF48F003EEA /* DesktopStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */; };
@@ -107,6 +109,7 @@
 		9C565AB01C3FBE58A1F0FC59 /* LoginItemControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemControllerTests.swift; sourceTree = "<group>"; };
 		9DDF9758566D4E55FE5745A1 /* AppNameMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNameMigrationTests.swift; sourceTree = "<group>"; };
 		A0EDF9F05DE99706B9DA1FF1 /* DockIconControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconControllerTests.swift; sourceTree = "<group>"; };
+		C04A94D69140CD23D0B7BD2C /* DesktopIconSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopIconSize.swift; sourceTree = "<group>"; };
 		C3E094051639952B86E9D408 /* DesktopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayout.swift; sourceTree = "<group>"; };
 		C4A4976EB92F310BD85830DB /* Folder In Bar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Folder In Bar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStoreTests.swift; sourceTree = "<group>"; };
@@ -282,6 +285,7 @@
 		F619EAE4D96DFC75C8F5B232 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C04A94D69140CD23D0B7BD2C /* DesktopIconSize.swift */,
 				E5E541D4C250D7360E431D7C /* DesktopItem.swift */,
 				C3E094051639952B86E9D408 /* DesktopLayout.swift */,
 				412454AF031ABAE1FBC03051 /* DesktopSort.swift */,
@@ -487,6 +491,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				11B2E7A2495B104943E4AD13 /* DesktopAccess.swift in Sources */,
+				850A50973CCE76C39EC6E074 /* DesktopIconSize.swift in Sources */,
 				DEF88B23A3319798E20922C0 /* DesktopItem.swift in Sources */,
 				8451495A4409520263177AEE /* DesktopLayout.swift in Sources */,
 				287BEC0552F022FE56768EAE /* DesktopMenuView.swift in Sources */,
@@ -505,6 +510,7 @@
 			files = (
 				B9DF0529123298E4647E3078 /* AppNameMigration.swift in Sources */,
 				669C0C3216E24EBB6B9B1D1A /* DesktopAccess.swift in Sources */,
+				59CF002C8A55F527F75AAE3E /* DesktopIconSize.swift in Sources */,
 				FC24CA3AA470C72446F382A8 /* DesktopItem.swift in Sources */,
 				285E54B5CAD2EC7F9CEACD1E /* DesktopLayout.swift in Sources */,
 				3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */,
@@ -839,7 +845,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4J7HGK26PF;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -928,7 +934,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4J7HGK26PF;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
