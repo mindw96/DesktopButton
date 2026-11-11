@@ -5,15 +5,15 @@ enum DesktopSort: String, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .name: return "이름"
-        case .kind: return "종류"
-        case .size: return "크기"
-        case .lastUsed: return "최근 사용일"
-        case .added: return "추가된 날짜"
-        case .modified: return "수정일"
-        case .created: return "생성일"
-        case .tags: return "태그"
-        case .application: return "응용 프로그램"
+        case .name: return String(localized: "Name")
+        case .kind: return String(localized: "Kind")
+        case .size: return String(localized: "Size")
+        case .lastUsed: return String(localized: "Date Last Opened")
+        case .added: return String(localized: "Date Added")
+        case .modified: return String(localized: "Date Modified")
+        case .created: return String(localized: "Date Created")
+        case .tags: return String(localized: "Tags")
+        case .application: return String(localized: "Application")
         }
     }
 
@@ -92,5 +92,5 @@ enum DesktopSort: String, CaseIterable, Sendable {
 enum DesktopSortDirection: String, CaseIterable, Sendable {
     case ascending, descending
 
-    var title: String { self == .ascending ? "오름차순" : "내림차순" }
+    var title: String { self == .ascending ? String(localized: "Ascending") : String(localized: "Descending") }
 }

@@ -507,7 +507,7 @@ final class Smoke {
                         "Built app branding or stable bundle identifier is incorrect")
         }
         let configuration = NSWorkspace.OpenConfiguration()
-        configuration.arguments = arguments
+        configuration.arguments = arguments + (arguments.contains("-AppleLanguages") ? [] : ["-AppleLanguages", "(ko)"])
         configuration.activates = activates
         configuration.createsNewApplicationInstance = true
         var completed = false

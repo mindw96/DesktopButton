@@ -5,9 +5,9 @@ enum DesktopIconSize: String, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .small: return "작게"
-        case .medium: return "보통"
-        case .large: return "크게"
+        case .small: return String(localized: "Small")
+        case .medium: return String(localized: "Medium")
+        case .large: return String(localized: "Large")
         }
     }
 

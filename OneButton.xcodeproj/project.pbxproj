@@ -14,13 +14,16 @@
 		18F69DAE2A0E29B0AE18B05C /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
 		2082C1705890DABAB96BA8B2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63842E1D00E6609C235902CE /* Assets.xcassets */; };
 		22897CBE5B86E2CDC1552B83 /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C2F2B5F94CE4140052AD62 /* LoginItemController.swift */; };
+		278F96F0A16F30AF2933529D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2E324918F2AF98C0C85E1810 /* Localizable.xcstrings */; };
 		285E54B5CAD2EC7F9CEACD1E /* DesktopLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E094051639952B86E9D408 /* DesktopLayout.swift */; };
 		287BEC0552F022FE56768EAE /* DesktopMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */; };
 		3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */; };
 		3AFFF553114B7C5BF399CD7B /* FullscreenFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F02D73D08D8402916988BA /* FullscreenFixture.swift */; };
 		3F29121CAD2B25CF45544AA4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63842E1D00E6609C235902CE /* Assets.xcassets */; };
+		4BCB8586D7EBD42B3271D171 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2E324918F2AF98C0C85E1810 /* Localizable.xcstrings */; };
 		52236C9B14E13045331BE574 /* DesktopSortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */; };
 		52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11E832FE1770C6DD4FB160 /* UpdateController.swift */; };
+		56F2DAA1AE4D2A803F105AA1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6F76625EBDC304C426C56CC9 /* InfoPlist.strings */; };
 		58F8DF581EC9DE8E89175D46 /* DesktopSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412454AF031ABAE1FBC03051 /* DesktopSort.swift */; };
 		59CF002C8A55F527F75AAE3E /* DesktopIconSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = C04A94D69140CD23D0B7BD2C /* DesktopIconSize.swift */; };
 		5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */; };
@@ -37,9 +40,13 @@
 		9B99F14DD4B89CF48F003EEA /* DesktopStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */; };
 		A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
 		A71168F0BF660C7091790838 /* DesktopSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412454AF031ABAE1FBC03051 /* DesktopSort.swift */; };
+		AA56DD83388843A88AA6F928 /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC72811977167D99D119D211 /* LocalizationTests.swift */; };
 		ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */; };
+		AE3E696C8A0F4B5CDEB0E709 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4B200D4C818AD2AA16203F78 /* InfoPlist.strings */; };
 		B9DF0529123298E4647E3078 /* AppNameMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA593FD2DC9AEA5279D0DB6 /* AppNameMigration.swift */; };
+		C5126B55FFB663F2B13CB3CE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4B200D4C818AD2AA16203F78 /* InfoPlist.strings */; };
 		CA832DBD62E32F3210E04E51 /* PopoverSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */; };
+		D2728BE145DE4D3B8BD42985 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 10F108D2079A1FED04A42992 /* Localizable.xcstrings */; };
 		D2EB8CA2F2216032D1FD0DAA /* PopoverSizeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */; };
 		DB6D45E30DC4B47A9E1C2948 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = E34ED6AAFD47F3FF945C3AB1 /* Sparkle */; };
 		DEF88B23A3319798E20922C0 /* DesktopItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E541D4C250D7360E431D7C /* DesktopItem.swift */; };
@@ -87,9 +94,13 @@
 		01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateControllerTests.swift; sourceTree = "<group>"; };
 		03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStore.swift; sourceTree = "<group>"; };
+		10F108D2079A1FED04A42992 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		12FECE23393BFF6BBB44FFFD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1492115A361BABCC707B6574 /* FolderInBarDragDropFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FolderInBarDragDropFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSortTests.swift; sourceTree = "<group>"; };
 		1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButtonFullscreenFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		28662440412577157ECFB707 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		2E324918F2AF98C0C85E1810 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayoutTests.swift; sourceTree = "<group>"; };
 		37E45CAE2B579A10AF74ABBF /* DesktopDragTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopDragTests.swift; sourceTree = "<group>"; };
 		389B8DADC2FB256DD12851A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -109,7 +120,10 @@
 		9C565AB01C3FBE58A1F0FC59 /* LoginItemControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemControllerTests.swift; sourceTree = "<group>"; };
 		9DDF9758566D4E55FE5745A1 /* AppNameMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNameMigrationTests.swift; sourceTree = "<group>"; };
 		A0EDF9F05DE99706B9DA1FF1 /* DockIconControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconControllerTests.swift; sourceTree = "<group>"; };
+		A42874DCFE8526765E71AA38 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		AC72811977167D99D119D211 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		C04A94D69140CD23D0B7BD2C /* DesktopIconSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopIconSize.swift; sourceTree = "<group>"; };
+		C1428E35BD04A346BC3B7612 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C3E094051639952B86E9D408 /* DesktopLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayout.swift; sourceTree = "<group>"; };
 		C4A4976EB92F310BD85830DB /* Folder In Bar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Folder In Bar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStoreTests.swift; sourceTree = "<group>"; };
@@ -179,6 +193,7 @@
 				15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */,
 				C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */,
 				A0EDF9F05DE99706B9DA1FF1 /* DockIconControllerTests.swift */,
+				AC72811977167D99D119D211 /* LocalizationTests.swift */,
 				9C565AB01C3FBE58A1F0FC59 /* LoginItemControllerTests.swift */,
 				CE7AFA9055FC356E43C7B8B3 /* PopoverSizeTests.swift */,
 				01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */,
@@ -195,6 +210,7 @@
 				3F1D8BC4FF3525A3C658ACB7 /* OneButton.entitlements */,
 				15837939F4A1D2D3C1FF17DA /* App */,
 				F619EAE4D96DFC75C8F5B232 /* Models */,
+				8336B93D32C0B05F487B714A /* Resources */,
 				6FE26E290FA33DB0CB2FA629 /* Services */,
 				C4B6D9CA941AFC7A2A6A8CA2 /* Stores */,
 				A76381A4A7EF729313D0EBBA /* Views */,
@@ -232,8 +248,18 @@
 				EC3C4227D3F047614EE64028 /* Info.plist */,
 				9B1638D234097E5BF0D2A751 /* main.swift */,
 				E592396261AD81EC8513D3C9 /* MigrationFileSystem.swift */,
+				8E18713E93F897A68E905481 /* Resources */,
 			);
 			path = FolderNameMigrationHelper;
+			sourceTree = "<group>";
+		};
+		8336B93D32C0B05F487B714A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2E324918F2AF98C0C85E1810 /* Localizable.xcstrings */,
+				4B200D4C818AD2AA16203F78 /* InfoPlist.strings */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		8CD27A44E83738EE8B7DC0B7 /* Products */ = {
@@ -247,6 +273,15 @@
 				737A92DA2A83497EF7134274 /* OneButtonTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8E18713E93F897A68E905481 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				10F108D2079A1FED04A42992 /* Localizable.xcstrings */,
+				6F76625EBDC304C426C56CC9 /* InfoPlist.strings */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		A76381A4A7EF729313D0EBBA /* Views */ = {
@@ -319,6 +354,7 @@
 			buildConfigurationList = 1EA5D954DA0F75A42E53E571 /* Build configuration list for PBXNativeTarget "FolderNameMigrationHelper" */;
 			buildPhases = (
 				F4FE98CAA6D1BB627422521A /* Sources */,
+				D600C0DDA628C51AC76DECBA /* Resources */,
 			);
 			buildRules = (
 			);
@@ -444,6 +480,7 @@
 			knownRegions = (
 				Base,
 				en,
+				ko,
 			);
 			mainGroup = 6FDAA736F983EE798B109433;
 			minimizedProjectReferenceProxies = 1;
@@ -471,7 +508,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F29121CAD2B25CF45544AA4 /* Assets.xcassets in Resources */,
+				AE3E696C8A0F4B5CDEB0E709 /* InfoPlist.strings in Resources */,
+				278F96F0A16F30AF2933529D /* Localizable.xcstrings in Resources */,
 				614F5B474B1FC734D5914C14 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D600C0DDA628C51AC76DECBA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56F2DAA1AE4D2A803F105AA1 /* InfoPlist.strings in Resources */,
+				D2728BE145DE4D3B8BD42985 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -480,6 +528,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				2082C1705890DABAB96BA8B2 /* Assets.xcassets in Resources */,
+				C5126B55FFB663F2B13CB3CE /* InfoPlist.strings in Resources */,
+				4BCB8586D7EBD42B3271D171 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,6 +592,7 @@
 				52236C9B14E13045331BE574 /* DesktopSortTests.swift in Sources */,
 				5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */,
 				6BA141B7AE60C6381347FF72 /* DockIconControllerTests.swift in Sources */,
+				AA56DD83388843A88AA6F928 /* LocalizationTests.swift in Sources */,
 				1173578672FFB1E63F2F54C7 /* LoginItemControllerTests.swift in Sources */,
 				D2EB8CA2F2216032D1FD0DAA /* PopoverSizeTests.swift in Sources */,
 				ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */,
@@ -579,6 +630,27 @@
 			targetProxy = 86093A91CB1E6D2DE4A6E9F4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		4B200D4C818AD2AA16203F78 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				12FECE23393BFF6BBB44FFFD /* en */,
+				A42874DCFE8526765E71AA38 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		6F76625EBDC304C426C56CC9 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1428E35BD04A346BC3B7612 /* en */,
+				28662440412577157ECFB707 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0012C290C898B86C2ADC258C /* Debug */ = {
@@ -675,6 +747,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
@@ -829,6 +902,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
@@ -845,7 +919,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 4J7HGK26PF;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -934,7 +1008,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 4J7HGK26PF;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;

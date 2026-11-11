@@ -55,9 +55,9 @@ enum AppNameMigration {
 
     private static func showFailure() {
         let alert = NSAlert()
-        alert.messageText = "앱 파일명을 변경하지 못했습니다"
-        alert.informativeText = "Folder In Bar는 현재 이름으로 계속 사용할 수 있습니다. 앱을 종료한 뒤 Finder에서 OneButton.app을 Folder In Bar.app으로 바꿔 주세요. 같은 이름의 앱이 이미 있으면 먼저 확인해 주세요. 폴더 연결과 앱 설정은 유지됩니다."
-        alert.addButton(withTitle: "확인")
+        alert.messageText = String(localized: "Could Not Rename the App")
+        alert.informativeText = String(localized: "You can continue using Folder In Bar with its current filename. Quit the app, then rename OneButton.app to Folder In Bar.app in Finder. If an app with that name already exists, check it first. Your folder connection and app settings will be preserved.")
+        alert.addButton(withTitle: String(localized: "OK"))
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
     }

@@ -83,10 +83,10 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.autosaveName = "OneButton"
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "folder", accessibilityDescription: "Folder In Bar 폴더")
+            button.image = NSImage(systemSymbolName: "folder", accessibilityDescription: String(localized: "Folder In Bar — Folder"))
             button.image?.isTemplate = true
-            button.toolTip = "Folder In Bar — 연결한 폴더 열기"
-            button.setAccessibilityLabel("Folder In Bar 폴더")
+            button.toolTip = String(localized: "Folder In Bar — Open Connected Folder")
+            button.setAccessibilityLabel(String(localized: "Folder In Bar — Folder"))
             button.target = self
             button.action = #selector(togglePopover)
         }
@@ -94,11 +94,13 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         #if !APP_STORE
         updateReminderObservation = updateController.$availableUpdateVersion.sink { [weak item] version in
             guard let button = item?.button else { return }
-            let label = version.map { "Folder In Bar 업데이트 \($0) 사용 가능" } ?? "Folder In Bar 폴더"
+            let label = version.map { String(localized: "Folder In Bar \($0) Update Available") }
+                ?? String(localized: "Folder In Bar — Folder")
             button.image = NSImage(systemSymbolName: version == nil ? "folder" : "arrow.down.circle",
                                    accessibilityDescription: label)
             button.image?.isTemplate = true
-            button.toolTip = version.map { "Folder In Bar \($0) 업데이트 사용 가능" } ?? "Folder In Bar — 연결한 폴더 열기"
+            button.toolTip = version.map { String(localized: "Folder In Bar \($0) Update Available") }
+                ?? String(localized: "Folder In Bar — Open Connected Folder")
             button.setAccessibilityLabel(label)
         }
         if allowsSystemServices {

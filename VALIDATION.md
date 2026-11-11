@@ -1,5 +1,23 @@
 # Folder In Bar 검증 기록
 
+## 한국어·영어 지원: 1.1.0 (11) 개발·패키지 준비 (2026-11-12)
+
+사용자가 확인한 범위에 따라 **다음 업데이트 개발·패키지 준비까지** 진행했습니다. 버전은 **1.1.0**, 빌드 번호는 **11**입니다. App Store 업로드·심사 제출·공개는 수행하지 않았으며, 기존 1.0.0 (8)의 제출 기록·메타데이터·심사 메모를 변경하지 않았습니다. 현재 심사 상태를 새로 조회한 것도 아닙니다.
+
+앱 본체의 **79개 문구**를 한국어·영어 String Catalog로 제공하고, 시스템 권한 설명도 두 언어로 포함했습니다. 메뉴·정렬·아이콘 크기·폴더 선택창·오류·툴팁·접근성 문구가 대상입니다. 영어 항목 수에는 `0 items / 1 item / 2 items` 복수 규칙을 적용합니다. macOS의 선호 언어와 앱별 언어 선택을 따르며, 지원되는 선호 언어가 없으면 영어를 사용합니다. 기존 한국어 번역, 파일명·폴더명, 설정 저장 키와 파일 처리 동작은 유지했습니다. 직접 배포판의 이름 변경 도우미 안내 8개도 별도 한국어·영어 리소스로 구성했습니다. 기반 방식은 [Apple의 String Catalog 안내](https://developer.apple.com/documentation/xcode/localizing-and-varying-text-with-a-string-catalog)를 따릅니다.
+
+- **단위 테스트 53개 통과, 실패·건너뜀·런타임 경고 0**. 새 검사 4개는 실제 앱 번들의 양 언어 키 일치·빈 번역, 메뉴·파일명을 포함한 오류 서식, 단수·복수, 권한 안내를 다룹니다. 기존 선택·정렬·아이콘 크기·드래그·설정 검사를 함께 실행했습니다. 결과: `.test-artifacts/localization-unit.xcresult`, `localization-unit.log`.
+- **실제 Store Debug 앱의 영어·한국어 검사 통과**. 시작 화면·툴바, 정렬·날짜·설정·아이콘 크기 메뉴, 폴더 선택창, 빈 폴더와 1개·2개 항목 수, 원래 파일명, 목록·격자에서 한 번 클릭 선택 및 더블클릭 열기를 확인했습니다. 테스트 문서의 원본 바이트를 보존했습니다. 언어는 테스트 앱 실행 인수로만 지정하고 Mac 전체 언어 설정을 변경하지 않았습니다. 결과: `.test-artifacts/localization-smoke-result.json` 및 언어별 `localization-en-*.png`, `localization-ko-*.png`.
+- 테스트 팝업이 화면 밖에 배치된 경우 접근성 정보로 해당 테스트 팝업만 물리 화면 안으로 옮기고 좌표를 확인한 뒤 입력했습니다. 이 검사는 메뉴 막대 아이콘 자체의 마우스 클릭이나 숨겨진 상태 막대 앵커 위치 검증과 구분합니다. 기존 UI 검사 헬퍼는 언어를 별도로 지정하지 않으면 한국어로 실행하도록 고정해, 실행 Mac의 언어 때문에 기존 라벨 검사가 바뀌지 않게 했습니다.
+- 컴파일러가 추출한 앱 문구와 카탈로그를 대조해 번역 누락이 없음을 확인했습니다. `%@, %@`는 양 언어에 공통인 구두점 서식으로 구분했습니다. 테스트·archive 입력 **64개 파일**과 작업 폴더의 SHA-256 일치, 직접 배포 도우미의 양 언어 리소스 포함도 확인했습니다. 결과: `.test-artifacts/localization-key-coverage.json`, `localization-source-hashes.json`.
+- **Apple Silicon + Intel Universal archive/export 성공**. PKG Installer 서명, 추출 앱의 Apple Distribution 서명·팀·프로필·앱 ID·읽기 전용 sandbox·개인정보 manifest·Sparkle 제외 및 양 언어 리소스를 `verify_app_store.py --release`로 검증했습니다. 로컬 archive: `build/AppStore/FolderInBar-1.1.0-11.xcarchive`. 패키지: `build/AppStore/export-11/Folder In Bar.pkg` (**2,114,546바이트**), SHA-256 `42b7d204f72a207cd238450e6d195315194a745bb6f8e8be3c6632b800c2821c`. 로그: `.test-artifacts/localization-archive.log`, `localization-export.log`, `localization-package-validation.json`.
+
+로컬 미리보기 `build/Preview-1.1.0/Folder In Bar.app`을 빌드 11로 교체해 같은 경로에서 실행을 확인하고, 기존 빌드 10은 `build/Preview-1.1.0-build10/Folder In Bar.app`에 백업했습니다. 새 복사본의 서명과 테스트한 앱의 전체 파일 15개 해시가 일치합니다. 결과: `.test-artifacts/localization-preview-validation.json`. 다음 제출용 한국어·영어 업데이트 설명과 심사 안내는 [next-update.md](docs/app-store/next-update.md)에 준비했습니다.
+
+양 언어 핵심 검사 통과 후 추가한 최소 300pt 폭 검사는 크기 조절 컨트롤의 접근성 값이 비어 있어 전체 통과로 판정하지 않았습니다. 이 부가 조건은 최종 스크립트에서 제거했으며 전체 시나리오를 다시 실행하지 않았습니다. `.test-artifacts/localization-minimum-width-attempt.log`에 마지막 시도를 보존했습니다. 공통 `localization-smoke.log`도 이 마지막 시도 로그로 덮어써졌으므로, 앞선 양 언어 전체 통과 근거는 보존된 `localization-smoke-result.json`과 당시 실행 출력·스크린샷입니다.
+
+이번 실제 UI 검사는 Apple Silicon의 Store Debug 앱으로 수행했습니다. 실제 App Store 설치, Intel·이전 macOS 실행, VoiceOver 음성 출력, 직접 배포판의 영어 UI와 전체 화면·외부 앱 드래그는 다시 검사하지 않았습니다. 별도 언어 전환 메뉴나 추가 언어는 만들지 않았습니다.
+
 ## 클릭 동작·바깥 클릭 닫힘·아이콘 크기: 1.1.0 (10) 개발·로컬 검증 완료 (2026-11-11)
 
 `codex/sorting-update`의 다음 Store 업데이트를 **1.1.0 (10)**으로 갱신했습니다. 목록·격자의 **한 번 클릭은 선택, 더블클릭 또는 선택 후 Return은 열기**로 동작합니다. 드래그와 접근성의 명시적 열기 동작을 유지합니다. 설정에 **아이콘 크기 → 작게 / 보통 / 크게**를 추가했고, 목록·격자에 적용하며 다음 실행에도 저장합니다. 보통은 기존 크기(목록 24pt·격자 48pt)이고, 작은 크기는 16pt·32pt, 큰 크기는 32pt·72pt입니다. 격자 열 수와 방향키 이동은 창 폭과 아이콘 크기를 함께 반영합니다.

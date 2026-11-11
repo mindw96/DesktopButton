@@ -27,9 +27,9 @@ final class DesktopAccess {
 
     func chooseFolder() async throws -> DesktopSnapshot? {
         let panel = NSOpenPanel()
-        panel.title = "폴더 연결"
-        panel.message = "연결할 폴더를 선택해 주세요. 파일 목록을 표시하고 선택한 파일을 엽니다."
-        panel.prompt = "연결"
+        panel.title = String(localized: "Connect Folder")
+        panel.message = String(localized: "Choose a folder to connect. Its files will appear here so you can open them.")
+        panel.prompt = String(localized: "Connect")
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
@@ -133,10 +133,10 @@ final class DesktopAccess {
 
         var errorDescription: String? {
             switch self {
-            case .invalidFolder: return "연결할 폴더를 선택해 주세요."
-            case .permissionDenied: return "폴더에 접근할 수 없습니다. 폴더를 다시 연결해 주세요."
-            case .changedFolder: return "폴더 연결이 변경되었습니다. 목록을 새로고침해 주세요."
-            case .openFailed: return "연결된 앱에서 파일을 열지 못했습니다."
+            case .invalidFolder: return String(localized: "Choose a folder to connect.")
+            case .permissionDenied: return String(localized: "Cannot access this folder. Please reconnect it.")
+            case .changedFolder: return String(localized: "The connected folder has changed. Refresh the file list.")
+            case .openFailed: return String(localized: "The file could not be opened in its default app.")
             }
         }
     }

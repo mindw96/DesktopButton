@@ -107,22 +107,22 @@ final class MigrationDelegate: NSObject, NSApplicationDelegate {
 
     private func showFailure(_ failure: MigrationFailure, remainingURL: URL?) {
         let alert = NSAlert()
-        alert.messageText = "앱 파일 이름을 변경하지 못했습니다"
+        alert.messageText = String(localized: "Unable to Rename the App")
         switch failure {
         case .destinationExists:
-            alert.informativeText = "같은 폴더에 Folder In Bar.app이 이미 있습니다. 기존 앱은 그대로 사용할 수 있습니다. 두 앱을 확인하신 뒤 중복 파일을 정리해 주세요."
+            alert.informativeText = String(localized: "Folder In Bar.app already exists in the same folder. You can keep using the current app. Check both apps before removing a duplicate.")
         case .readOnly, .permissionDenied:
-            alert.informativeText = "앱이 있는 폴더에 쓰기 권한이 없습니다. 기존 앱은 그대로 사용할 수 있으며 Finder에서 앱 파일 이름을 Folder In Bar.app으로 바꾸실 수 있습니다."
+            alert.informativeText = String(localized: "You do not have permission to write to the app’s folder. You can keep using the current app, or rename it to Folder In Bar.app in Finder.")
         case .parentTimeout:
-            alert.informativeText = "실행 중인 앱이 종료되지 않아 파일 이름을 바꾸지 않았습니다. 앱을 종료한 뒤 다시 실행해 주세요."
+            alert.informativeText = String(localized: "The app is still running, so its name was not changed. Quit the app and open it again.")
         case .launchFailed:
-            alert.messageText = "앱을 다시 열지 못했습니다"
-            alert.informativeText = "Finder에서 앱을 다시 열어 주세요."
+            alert.messageText = String(localized: "Unable to Reopen the App")
+            alert.informativeText = String(localized: "Open the app again in Finder.")
         default:
-            alert.informativeText = "앱 파일을 안전하게 확인할 수 없어 작업을 중단했습니다. Finder에서 앱을 확인해 주세요."
+            alert.informativeText = String(localized: "The app could not be safely verified, so the operation was stopped. Check the app in Finder.")
         }
         if let remainingURL { alert.informativeText += "\n\n\(remainingURL.path)" }
-        alert.addButton(withTitle: "확인")
+        alert.addButton(withTitle: String(localized: "OK"))
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
     }

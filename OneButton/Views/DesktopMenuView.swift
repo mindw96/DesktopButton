@@ -60,17 +60,17 @@ struct DesktopMenuView: View {
         }
         .frame(width: popoverSize.size.width, height: popoverSize.size.height)
         .background {
-            Button("선택한 파일 열기") { openSelection() }
+            Button("Open Selected File") { openSelection() }
                 .keyboardShortcut(.defaultAction)
                 .hidden()
                 .accessibilityHidden(true)
         }
         .onExitCommand { dismiss() }
-        .alert("설정을 변경하지 못했습니다", isPresented: Binding(
+        .alert("Unable to Change Settings", isPresented: Binding(
             get: { loginItemController.errorMessage != nil || dockIconController.errorMessage != nil },
             set: { if !$0 { loginItemController.dismissError(); dockIconController.dismissError() } }
         )) {
-            Button("확인", role: .cancel) {
+            Button("OK", role: .cancel) {
                 loginItemController.dismissError()
                 dockIconController.dismissError()
             }
@@ -102,26 +102,26 @@ struct DesktopMenuView: View {
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(store.folderURL?.lastPathComponent ?? "폴더 연결")
+                Text(store.folderURL?.lastPathComponent ?? String(localized: "Connect Folder"))
                     .font(.headline)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                    .help(store.folderURL?.path ?? "연결할 폴더를 선택해 주세요.")
+                    .help(store.folderURL?.path ?? String(localized: "Choose a folder to connect."))
                     .accessibilityIdentifier("desktop.folder.name")
-                Text(store.folderURL == nil ? "Folder In Bar" : "\(store.items.count)개 항목")
+                Text(store.folderURL == nil ? "Folder In Bar" : String(localized: "\(store.items.count) items"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer(minLength: 4)
             HStack(spacing: 2) {
-                layoutButton(.list, symbol: "list.bullet", label: "목록 보기")
-                layoutButton(.grid, symbol: "square.grid.2x2", label: "아이콘 보기")
+                layoutButton(.list, symbol: "list.bullet", label: String(localized: "List View"))
+                layoutButton(.grid, symbol: "square.grid.2x2", label: String(localized: "Grid View"))
             }
             .padding(2)
             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
             sortMenu
             if store.isLoading {
-                ProgressView().controlSize(.small).accessibilityLabel("목록 불러오는 중")
+                ProgressView().controlSize(.small).accessibilityLabel("Loading Files")
             }
             Button {
                 Task { await store.refresh() }
@@ -129,8 +129,8 @@ struct DesktopMenuView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.borderless)
-            .help("새로고침 (⌘R)")
-            .accessibilityLabel("새로고침")
+            .help("Refresh (⌘R)")
+            .accessibilityLabel("Refresh")
             .accessibilityIdentifier("desktop.refresh")
             .keyboardShortcut("r", modifiers: .command)
             .disabled(!store.hasConnection || store.isLoading || store.isChoosingFolder)
@@ -157,13 +157,13 @@ struct DesktopMenuView: View {
     private var sortMenu: some View {
         Menu {
             ForEach([DesktopSort.name, .kind, .size], id: \.self) { sortOption($0) }
-            Menu("날짜") {
+            Menu("Date") {
                 ForEach(DesktopSort.allCases.filter(\.isDate), id: \.self) { sortOption($0) }
             }
             .accessibilityIdentifier("desktop.sort.dates")
             ForEach([DesktopSort.tags, .application], id: \.self) { sortOption($0) }
             Divider()
-            Picker("정렬 방향", selection: $store.sortDirection) {
+            Picker("Sort Direction", selection: $store.sortDirection) {
                 ForEach(DesktopSortDirection.allCases, id: \.self) { direction in
                     Text(direction.title)
                         .tag(direction)
@@ -178,8 +178,8 @@ struct DesktopMenuView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .help("정렬: \(store.sortCriterion.title) · \(store.sortDirection.title)\n정보가 없는 항목은 마지막에 표시됩니다.")
-        .accessibilityLabel("정렬")
+        .help(String(localized: "Sort: \(store.sortCriterion.title) · \(store.sortDirection.title)\nItems with missing information appear last."))
+        .accessibilityLabel("Sort")
         .accessibilityValue("\(store.sortCriterion.title), \(store.sortDirection.title)")
         .accessibilityIdentifier("desktop.sort")
     }
@@ -201,14 +201,14 @@ struct DesktopMenuView: View {
                         .font(.system(size: 36, weight: .light))
                         .foregroundStyle(.secondary)
                         .accessibilityHidden(true)
-                    Text("폴더를 가까이").font(.headline)
-                    Text("폴더를 한 번 연결하면\n여기서 파일을 바로 열 수 있어요.")
+                    Text("Your Folder at Hand").font(.headline)
+                    Text("Connect a folder once to open\nits files right here.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
-                    Button("폴더 연결…") { chooseFolder() }
+                    Button("Connect Folder…") { chooseFolder() }
                         .buttonStyle(.borderedProminent)
                         .disabled(store.isChoosingFolder)
                         .accessibilityIdentifier("desktop.connect")
@@ -294,21 +294,23 @@ struct DesktopMenuView: View {
             return store.dragProvider(for: item)
         }
         .id(item.id)
-        .help("\(item.name)\n한 번 클릭하여 선택하고, 더블클릭하여 열거나 다른 앱으로 드래그하세요.")
+        .help(String(localized: "\(item.name)\nClick once to select, double-click to open, or drag to another app."))
         .accessibilityIdentifier("desktop.item.\(item.name)")
         .accessibilityLabel(item.name)
-        .accessibilityHint(item.isDirectory ? "한 번 클릭하여 선택, 더블클릭하여 Finder에서 열기" : "한 번 클릭하여 선택, 더블클릭하여 열기 또는 다른 앱으로 드래그하여 첨부")
+        .accessibilityHint(item.isDirectory
+                           ? String(localized: "Click once to select, or double-click to open in Finder.")
+                           : String(localized: "Click once to select, double-click to open, or drag to another app to attach."))
         .accessibilityAddTraits(selection == item.id ? .isSelected : [])
-        .accessibilityAction(named: "열기") {
+        .accessibilityAction(named: "Open") {
             selection = item.id
             open(item)
         }
     }
 
     private var emptyMessage: String {
-        if store.isLoading { return "파일 목록을 불러오는 중…" }
-        if store.folderURL == nil { return "폴더 연결과 접근 권한을 확인해 주세요." }
-        return "폴더에 표시할 파일이 없어요."
+        if store.isLoading { return String(localized: "Loading files…") }
+        if store.folderURL == nil { return String(localized: "Check the folder connection and access permission.") }
+        return String(localized: "There are no files to display in this folder.")
     }
 
     private func errorBanner(_ message: String) -> some View {
@@ -323,7 +325,7 @@ struct DesktopMenuView: View {
             Spacer(minLength: 0)
             Button { store.dismissError() } label: { Image(systemName: "xmark") }
                 .buttonStyle(.borderless)
-                .accessibilityLabel("오류 안내 닫기")
+                .accessibilityLabel("Dismiss Error")
         }
         .padding(12)
     }
@@ -332,42 +334,42 @@ struct DesktopMenuView: View {
         HStack {
             if popoverSize.resizesFromLeadingEdge { resizeHandle }
             if store.hasConnection {
-                Button("폴더 다시 연결…") { chooseFolder() }
+                Button("Reconnect Folder…") { chooseFolder() }
                     .disabled(store.isChoosingFolder || store.openingURL != nil)
                     .accessibilityIdentifier("desktop.reconnect")
             }
             Spacer()
             #if !APP_STORE
             Menu {
-                Button("앱 업데이트 확인…") {
+                Button("Check for Updates…") {
                     dismiss()
                     updateController.checkForUpdates()
                 }
                 .disabled(!updateController.canCheckForUpdates)
                 Divider()
-                Toggle("자동으로 업데이트 확인", isOn: Binding(
+                Toggle("Automatically Check for Updates", isOn: Binding(
                     get: { updateController.automaticallyChecksForUpdates },
                     set: { updateController.setAutomaticallyChecksForUpdates($0) }
                 ))
-                Toggle("자동으로 다운로드 및 설치", isOn: Binding(
+                Toggle("Automatically Download and Install", isOn: Binding(
                     get: { updateController.automaticallyDownloadsUpdates },
                     set: { updateController.setAutomaticallyDownloadsUpdates($0) }
                 ))
                 .disabled(!updateController.automaticallyChecksForUpdates)
             } label: {
-                Text(updateController.availableUpdateVersion == nil ? "앱 업데이트" : "새 버전 있음")
+                Text(updateController.availableUpdateVersion == nil ? String(localized: "App Updates") : String(localized: "Update Available"))
                     .font(.system(size: 11))
             }
             .menuStyle(.borderlessButton)
             .controlSize(.mini)
             .font(.system(size: 11))
             .fixedSize()
-            .help("Folder In Bar 앱 업데이트 및 자동 업데이트 설정")
-            .accessibilityLabel("앱 업데이트")
+            .help("Folder In Bar updates and automatic update settings")
+            .accessibilityLabel("App Updates")
             .accessibilityIdentifier("desktop.updates")
             #endif
             Menu {
-                Menu("아이콘 크기") {
+                Menu("Icon Size") {
                     ForEach(DesktopIconSize.allCases, id: \.self) { size in
                         Toggle(size.title, isOn: Binding(
                             get: { iconSize == size },
@@ -378,31 +380,31 @@ struct DesktopMenuView: View {
                 }
                 .accessibilityIdentifier("desktop.icon-size")
                 Divider()
-                Toggle("Dock에 아이콘 표시", isOn: Binding(
+                Toggle("Show Icon in Dock", isOn: Binding(
                     get: { dockIconController.showsIcon },
                     set: { dockIconController.setShowsIcon($0) }
                 ))
                 .accessibilityIdentifier("desktop.show-in-dock")
                 Divider()
                 Toggle(loginItemController.status == .requiresApproval
-                       ? "로그인 시 자동 실행 (승인 필요)" : "로그인 시 자동 실행", isOn: Binding(
+                       ? String(localized: "Launch at Login (Approval Required)") : String(localized: "Launch at Login"), isOn: Binding(
                     get: { loginItemController.isRegistered },
                     set: { loginItemController.setEnabled($0) }
                 ))
                 .disabled(!loginItemController.allowsChanges)
                 .accessibilityIdentifier("desktop.login-at-launch")
                 if loginItemController.status == .requiresApproval {
-                    Text("시스템 설정에서 허용해야 실행됩니다.")
-                    Button("로그인 항목 설정 열기…") {
+                    Text("Allow this app in System Settings to launch at login.")
+                    Button("Open Login Item Settings…") {
                         dismiss()
                         loginItemController.openSystemSettings()
                     }
                 }
                 #if APP_STORE
                 Divider()
-                Link("개인정보 처리방침", destination: URL(string: "https://mindw96.github.io/DesktopButton/privacy.html")!)
+                Link("Privacy Policy", destination: URL(string: "https://mindw96.github.io/DesktopButton/privacy.html")!)
                     .accessibilityIdentifier("desktop.privacy")
-                Link("도움말 및 문의", destination: URL(string: "https://mindw96.github.io/DesktopButton/support.html")!)
+                Link("Help & Support", destination: URL(string: "https://mindw96.github.io/DesktopButton/support.html")!)
                     .accessibilityIdentifier("desktop.support")
                 #endif
             } label: {
@@ -412,10 +414,10 @@ struct DesktopMenuView: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
-            .help("설정")
-            .accessibilityLabel("설정")
+            .help("Settings")
+            .accessibilityLabel("Settings")
             .accessibilityIdentifier("desktop.settings")
-            Button("종료") { NSApplication.shared.terminate(nil) }
+            Button("Quit") { NSApplication.shared.terminate(nil) }
                 .keyboardShortcut("q", modifiers: .command)
                 .accessibilityIdentifier("desktop.quit")
             if !popoverSize.resizesFromLeadingEdge { resizeHandle }
@@ -433,7 +435,7 @@ struct DesktopMenuView: View {
             .foregroundStyle(.secondary)
             .frame(width: 22, height: 22)
             .contentShape(Rectangle())
-            .help("모서리를 드래그하여 창의 폭과 높이를 조절하세요.")
+            .help("Drag the corner to adjust the window width and height.")
             .gesture(DragGesture(minimumDistance: 0)
                 .updating($isResizing) { _, active, _ in active = true }
                 .onChanged { _ in
@@ -447,13 +449,13 @@ struct DesktopMenuView: View {
                 }
             )
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("창 크기 조절")
-            .accessibilityValue("너비 \(Int(popoverSize.size.width)), 높이 \(Int(popoverSize.size.height))")
+            .accessibilityLabel("Resize Window")
+            .accessibilityValue(String(localized: "Width \(Int(popoverSize.size.width)), height \(Int(popoverSize.size.height))"))
             .accessibilityIdentifier("desktop.resize")
-            .accessibilityAction(named: "너비 늘리기") { adjustSize(width: 40) }
-            .accessibilityAction(named: "너비 줄이기") { adjustSize(width: -40) }
-            .accessibilityAction(named: "높이 늘리기") { adjustSize(height: 40) }
-            .accessibilityAction(named: "높이 줄이기") { adjustSize(height: -40) }
+            .accessibilityAction(named: "Increase Width") { adjustSize(width: 40) }
+            .accessibilityAction(named: "Decrease Width") { adjustSize(width: -40) }
+            .accessibilityAction(named: "Increase Height") { adjustSize(height: 40) }
+            .accessibilityAction(named: "Decrease Height") { adjustSize(height: -40) }
     }
 
     private func adjustSize(width: CGFloat = 0, height: CGFloat = 0) {

@@ -62,7 +62,7 @@ final class DesktopStore: ObservableObject {
             folderURL = nil
             items = []
             hasConnection = access.hasBookmark || hasConnection
-            errorMessage = "파일 목록을 불러오지 못했습니다.\n\(error.localizedDescription)"
+            errorMessage = String(localized: "Could not load the file list.\n\(error.localizedDescription)")
         }
     }
 
@@ -80,7 +80,7 @@ final class DesktopStore: ObservableObject {
             openError = nil
             errorMessage = nil
         } catch {
-            errorMessage = "폴더를 연결하지 못했습니다.\n\(error.localizedDescription)"
+            errorMessage = String(localized: "Could not connect the folder.\n\(error.localizedDescription)")
         }
     }
 
@@ -99,7 +99,7 @@ final class DesktopStore: ObservableObject {
             errorMessage = nil
             return true
         } catch {
-            let message = "‘\(item.name)’ 파일을 열지 못했습니다.\n\(error.localizedDescription)"
+            let message = String(localized: "Could not open “\(item.name)”.\n\(error.localizedDescription)")
             openError = message
             errorMessage = message
             return false
@@ -123,7 +123,7 @@ final class DesktopStore: ObservableObject {
             return NSItemProvider()
         }
         guard FileManager.default.isReadableFile(atPath: item.url.path) else {
-            errorMessage = "‘\(item.name)’ 파일을 전달할 수 없습니다. 폴더를 새로고침하거나 다시 연결해 주세요."
+            errorMessage = String(localized: "Could not share “\(item.name)”. Refresh or reconnect the folder.")
             return NSItemProvider()
         }
         // The connected folder's security scope stays active while this store is retained.

@@ -24,7 +24,7 @@ func requireSandboxed(_ app: URL) throws {
 
 func launchDragApp(_ url: URL, arguments: [String]) throws -> NSRunningApplication {
     let configuration = NSWorkspace.OpenConfiguration()
-    configuration.arguments = arguments
+    configuration.arguments = arguments + (arguments.contains("-AppleLanguages") ? [] : ["-AppleLanguages", "(ko)"])
     configuration.activates = true
     configuration.createsNewApplicationInstance = true
     var result: NSRunningApplication?

@@ -38,6 +38,20 @@ for key in ("com.apple.security.network.client",
     assert not entitlements.get(key), f"Unexpected entitlement: {key}"
 assert not any("temporary-exception" in key for key in entitlements)
 
+assert info["CFBundleDevelopmentRegion"] == "en"
+def read_localized_plist(path):
+    # Xcode can emit localized property lists as UTF-16 XML.
+    return plistlib.loads(subprocess.check_output(["plutil", "-convert", "xml1", "-o", "-", str(path)]))
+
+for language, connect in (("en", "Connect Folder"), ("ko", "폴더 연결")):
+    localized = contents / "Resources" / f"{language}.lproj"
+    strings = read_localized_plist(localized / "Localizable.strings")
+    plurals = read_localized_plist(localized / "Localizable.stringsdict")
+    permission = read_localized_plist(localized / "InfoPlist.strings")
+    assert strings["Connect Folder"] == connect, f"Missing {language} translation"
+    assert "%lld items" in plurals, f"Missing {language} item-count plural rules"
+    assert permission["NSDesktopFolderUsageDescription"], f"Missing {language} permission description"
+
 privacy = plistlib.loads((contents / "Resources" / "PrivacyInfo.xcprivacy").read_bytes())
 assert privacy["NSPrivacyTracking"] is False
 assert privacy["NSPrivacyTrackingDomains"] == []

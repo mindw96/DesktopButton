@@ -20,7 +20,7 @@ final class DockIconController: ObservableObject {
         if currentPolicy == requestedPolicy || applyPolicy(requestedPolicy) {
             showsIcon = saved
         } else {
-            errorMessage = "Dock 아이콘 표시를 변경하지 못했습니다. 다시 시도해 주세요."
+            errorMessage = String(localized: "Could not change Dock icon visibility. Please try again.")
         }
     }
 
@@ -28,7 +28,7 @@ final class DockIconController: ObservableObject {
         errorMessage = nil
         guard visible != showsIcon else { return }
         guard applyPolicy(visible ? .regular : .accessory) else {
-            errorMessage = "Dock 아이콘 표시를 변경하지 못했습니다. 다시 시도해 주세요."
+            errorMessage = String(localized: "Could not change Dock icon visibility. Please try again.")
             return
         }
         showsIcon = visible
