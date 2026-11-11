@@ -13,7 +13,7 @@ Mac App Store 전용 `FolderInBarAppStore` target/scheme을 추가했습니다. 
 - `verify_app_store.py`의 기본 번들 검증 통과. Archive는 **Apple Development** 서명이며 아직 Store 배포용 서명이 아닙니다. `--release`는 Store 앱 인증서, 팀, 배포 프로필과 Universal 구성을 추가 확인하며 현재 개발 서명 archive를 거절합니다.
 - Store export 시 Xcode가 **No Accounts**, Mac Installer Distribution 인증서 및 Store provisioning profile 부재를 보고했습니다. `.test-artifacts/app-store/export.log`. Xcode 계정 로그인 후 배포 export·PKG 검사·업로드를 이어가야 합니다.
 
-[App Store Connect 앱 6833273093](https://appstoreconnect.apple.com/apps/6833273093/distribution/macos/version/inflight)을 생성하고 1.0.0 소개 문구·키워드·지원 URL·심사 메모·로그인 불필요·승인 후 자동 공개 설정 및 스크린샷 2장의 저장을 확인했습니다. 사용자는 무료 배포와 승인 후 자동 공개를 선택했습니다. 개인정보·콘텐츠 응답과 심사 연락처는 명시적 승인 대기 상태입니다. **빌드 업로드, 심사 제출, 승인 및 App Store 공개는 아직 완료되지 않았습니다.**
+[App Store Connect 앱 6833273093](https://appstoreconnect.apple.com/apps/6833273093/distribution/macos/version/inflight)을 생성하고 1.0.0 소개 문구·키워드·지원 URL·심사 메모·로그인 불필요·승인 후 자동 공개 설정 및 스크린샷 2장의 저장을 확인했습니다. 사용자는 무료 배포와 승인 후 자동 공개를 선택했습니다. 한국어 부제와 Utilities 카테고리를 저장했으며, 가격 175개 지역 모두 0.00 및 사용 가능 여부 175개 모두 “앱 출시 후 사용 가능”을 저장 후 다시 확인했습니다. 개인정보·콘텐츠·연령 등급 응답과 심사 연락처는 명시적 승인 대기 상태입니다. **빌드 업로드, 심사 제출, 승인 및 App Store 공개는 아직 완료되지 않았습니다.**
 
 GitHub Pages의 [개인정보처리방침](https://mindw96.github.io/DesktopButton/privacy.html)과 [지원 페이지](https://mindw96.github.io/DesktopButton/support.html)를 공개하고, 내려받은 본문과 저장소 HTML의 일치를 확인했습니다. 기존 직접 배포판 공증·ZIP/DMG·Sparkle 릴리스에는 변경이 없습니다.
 
