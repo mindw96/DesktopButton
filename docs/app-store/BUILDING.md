@@ -1,11 +1,11 @@
 # Mac App Store 빌드와 제출
 
-Mac App Store판은 별도 **`FolderInBarAppStore` scheme**으로 빌드합니다. 현재 준비 버전은 **1.0.0 (build 7)**이며, App Store Connect 앱 ID는 **6833273093**입니다. 앱 등록·빌드 생성은 심사 제출이나 공개 완료를 뜻하지 않습니다. 실제 진행 결과는 저장소 루트의 [VALIDATION.md](../../VALIDATION.md)를 확인하세요.
+Mac App Store판은 별도 **`FolderInBarAppStore` scheme**으로 빌드합니다. 현재 제출 버전은 **1.0.0 (build 7)**이며, App Store Connect 앱 ID는 **6833273093**입니다. 앱 등록·빌드 생성은 심사 제출이나 공개 완료를 뜻하지 않습니다. 실제 진행 결과는 저장소 루트의 [VALIDATION.md](../../VALIDATION.md)를 확인하세요.
 
 | 구분 | Mac App Store | GitHub 직접 배포 |
 | --- | --- | --- |
 | Scheme | `FolderInBarAppStore` | `OneButton` |
-| 현재 버전 | 1.0.0 (7), 제출 준비 | 0.4.0 (6), 공개됨 |
+| 현재 버전 | 1.0.0 (7), 심사 대기 중 | 0.4.0 (6), 공개됨 |
 | 업데이트 | App Store | Sparkle |
 | 서명·패키지 | Store 배포 서명·프로필, 서명된 PKG | Developer ID, 공증·staple, ZIP·DMG |
 | 이름 변경 helper | 포함하지 않음 | 기존 `OneButton.app` 이름 변경용 포함 |

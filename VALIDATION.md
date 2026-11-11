@@ -1,6 +1,6 @@
 # Folder In Bar 검증 기록
 
-## Mac App Store 1.0.0 (7) 제출 준비 (2026-11-11)
+## Mac App Store 1.0.0 (7) 심사 제출 완료 (2026-11-11)
 
 Mac App Store 전용 `FolderInBarAppStore` target/scheme을 추가했습니다. 기존 GitHub 배포판 `OneButton` target과 공개 버전 **0.4.0 (6)**, Sparkle 피드는 유지합니다. Store판은 **1.0.0 (7)**, bundle ID **com.onebutton.desktop**, 팀 **4J7HGK26PF**입니다.
 
@@ -10,10 +10,12 @@ Mac App Store 전용 `FolderInBarAppStore` target/scheme을 추가했습니다. 
 - 기존 단위 테스트 **31개 통과, 실패 0, runtime warning 0**: `.test-artifacts/store-direct-regression-2.xcresult`.
 - 실제 Store Debug 앱으로 임시 폴더 연결, 격자·목록 보기, 개인정보·지원 메뉴와 업데이트 메뉴 제외를 확인했습니다. 사용자 실제 폴더·로그인 설정을 변경하지 않았습니다. 스토어 이미지 2장은 실제 화면을 촬영한 **1440×900 JPEG**입니다: `docs/app-store/screenshots/`.
 - 최종 소스와 staging 입력 **35개 파일**의 SHA-256 일치를 확인하고 **arm64 + x86_64 Universal archive**를 생성했습니다. `.test-artifacts/app-store/archive-source-hashes.json`, `archive-final.log`에 기록했습니다. 아카이브: `build/AppStore/FolderInBar-1.0.0-7-final.xcarchive`.
-- `verify_app_store.py`의 기본 번들 검증 통과. Archive는 **Apple Development** 서명이며 아직 Store 배포용 서명이 아닙니다. `--release`는 Store 앱 인증서, 팀, 배포 프로필과 Universal 구성을 추가 확인하며 현재 개발 서명 archive를 거절합니다.
-- Store export 시 Xcode가 **No Accounts**, Mac Installer Distribution 인증서 및 Store provisioning profile 부재를 보고했습니다. `.test-artifacts/app-store/export.log`. Xcode 계정 로그인 후 배포 export·PKG 검사·업로드를 이어가야 합니다.
+- Archive의 기본 번들 검증과, export한 PKG에서 추출한 최종 앱의 **`verify_app_store.py --release` 검증**이 모두 통과했습니다. 앱은 **Apple Distribution: Dongwook Min (4J7HGK26PF)**, 설치 패키지는 **3rd Party Mac Developer Installer: Dongwook Min (4J7HGK26PF)**로 서명됐습니다. 배포 프로필의 팀·앱 식별자, Universal 구성, sandbox 권한과 디버깅 권한 제거를 확인했습니다.
+- 사용자 Xcode 로그인 후 Store export·PKG 검증·업로드가 성공했습니다. 로그: `.test-artifacts/app-store/export-final.log`, `upload-final.log`. 로컬 검증 패키지: `build/AppStore/export-final/Folder In Bar.pkg`, SHA-256 `9fd43729d016a5bc84c742e7d1331b2ea9b8d37783fca8f0ee2e5095258a11b3`. 업로드는 검증한 동일 archive에서 수행했습니다.
 
-[App Store Connect 앱 6833273093](https://appstoreconnect.apple.com/apps/6833273093/distribution/macos/version/inflight)을 생성하고 1.0.0 소개 문구·키워드·지원 URL·심사 메모·로그인 불필요·승인 후 자동 공개 설정 및 스크린샷 2장의 저장을 확인했습니다. 사용자는 무료 배포와 승인 후 자동 공개를 선택했습니다. 한국어 부제와 Utilities 카테고리를 저장했으며, 가격 175개 지역 모두 0.00 및 사용 가능 여부 175개 모두 “앱 출시 후 사용 가능”을 저장 후 다시 확인했습니다. 개인정보·콘텐츠·연령 등급 응답과 심사 연락처는 명시적 승인 대기 상태입니다. **빌드 업로드, 심사 제출, 승인 및 App Store 공개는 아직 완료되지 않았습니다.**
+[App Store Connect 앱 6833273093](https://appstoreconnect.apple.com/apps/6833273093/distribution/macos/version/inflight)을 생성하고 1.0.0 소개 문구·키워드·지원 URL·심사 메모·로그인 불필요·승인 후 자동 공개 설정 및 스크린샷 2장의 저장을 확인했습니다. 사용자는 무료 배포와 승인 후 자동 공개를 선택했습니다. 한국어 부제와 Utilities 카테고리를 저장했으며, 가격 175개 지역 모두 0.00 및 사용 가능 여부 175개 모두 “앱 출시 후 사용 가능”을 저장 후 다시 확인했습니다. 사용자가 승인한 기존 심사 연락처, 로그인 불필요 응답과 영문 심사 메모를 저장하고 새로고침 후 원문 일치를 확인했습니다. 개인정보 **데이터 수집 안 함**을 게시하고, 타사 콘텐츠 없음·연령 등급 **4+** 응답도 저장 후 재확인했습니다. 연락처 값은 저장소나 검증 파일에 보관하지 않았습니다.
+
+**2026-11-11 12:28 KST에 정식 제출 기록의 “심사 대기 중”과 빌드 1.0.0 (7)을 확인했습니다.** 제출 ID는 `4f100152-4fee-44d5-a042-5043c5647261`이며 [심사 접수 기록](https://appstoreconnect.apple.com/apps/6833273093/distribution/reviewsubmissions/details/4f100152-4fee-44d5-a042-5043c5647261)에서 확인할 수 있습니다. 제출 직후 “1개의 항목 제출됨”도 확인했습니다. 공개용 상태는 [submission-status.json](docs/app-store/submission-status.json), 로컬 증거는 `.test-artifacts/app-store/review-submission-confirmed.json`에 있습니다. **심사 승인 및 App Store 공개는 아직 완료되지 않았습니다.** 승인되면 설정에 따라 자동 공개됩니다.
 
 GitHub Pages의 [개인정보처리방침](https://mindw96.github.io/DesktopButton/privacy.html)과 [지원 페이지](https://mindw96.github.io/DesktopButton/support.html)를 공개하고, 내려받은 본문과 저장소 HTML의 일치를 확인했습니다. 기존 직접 배포판 공증·ZIP/DMG·Sparkle 릴리스에는 변경이 없습니다.
 
