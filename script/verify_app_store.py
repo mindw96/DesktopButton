@@ -45,6 +45,9 @@ assert privacy["NSPrivacyCollectedDataTypes"] == []
 assert privacy["NSPrivacyAccessedAPITypes"] == [{
     "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
     "NSPrivacyAccessedAPITypeReasons": ["CA92.1"],
+}, {
+    "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+    "NSPrivacyAccessedAPITypeReasons": ["3B52.1"],
 }]
 if args.release:
     architectures = subprocess.check_output(["lipo", "-archs", str(binary)], text=True).split()

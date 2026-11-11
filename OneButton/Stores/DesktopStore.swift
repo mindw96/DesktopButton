@@ -10,7 +10,20 @@ final class DesktopStore: ObservableObject {
     @Published private(set) var hasConnection: Bool
     @Published private(set) var errorMessage: String?
     @Published private(set) var openingURL: URL?
+    @Published var sortCriterion: DesktopSort {
+        didSet {
+            defaults.set(sortCriterion.rawValue, forKey: "desktopSort")
+            sortItems()
+        }
+    }
+    @Published var sortDirection: DesktopSortDirection {
+        didSet {
+            defaults.set(sortDirection.rawValue, forKey: "desktopSortDirection")
+            sortItems()
+        }
+    }
 
+    private let defaults: UserDefaults
     private let access: DesktopAccess
     private let loadFolder: () async throws -> DesktopSnapshot?
     private var generation = 0
@@ -21,6 +34,9 @@ final class DesktopStore: ObservableObject {
         loadFolder: (() async throws -> DesktopSnapshot?)? = nil
     ) {
         let access = DesktopAccess(defaults: defaults)
+        self.defaults = defaults
+        self.sortCriterion = DesktopSort(rawValue: defaults.string(forKey: "desktopSort") ?? "") ?? .name
+        self.sortDirection = DesktopSortDirection(rawValue: defaults.string(forKey: "desktopSortDirection") ?? "") ?? .ascending
         self.access = access
         self.hasConnection = access.hasBookmark
         self.loadFolder = loadFolder ?? { try await access.loadFolder() }
@@ -38,7 +54,7 @@ final class DesktopStore: ObservableObject {
             let snapshot = try await loadFolder()
             guard request == generation else { return }
             folderURL = snapshot?.url
-            items = snapshot?.items ?? []
+            items = sortCriterion.sorted(snapshot?.items ?? [], direction: sortDirection)
             hasConnection = snapshot != nil || access.hasBookmark
             errorMessage = openError
         } catch {
@@ -59,7 +75,7 @@ final class DesktopStore: ObservableObject {
         do {
             guard let snapshot = try await access.chooseFolder() else { return }
             folderURL = snapshot.url
-            items = snapshot.items
+            items = sortCriterion.sorted(snapshot.items, direction: sortDirection)
             hasConnection = true
             openError = nil
             errorMessage = nil
@@ -93,6 +109,10 @@ final class DesktopStore: ObservableObject {
     func dismissError() {
         openError = nil
         errorMessage = nil
+    }
+
+    private func sortItems() {
+        items = sortCriterion.sorted(items, direction: sortDirection)
     }
 
     func dragProvider(for item: DesktopItem) -> NSItemProvider {

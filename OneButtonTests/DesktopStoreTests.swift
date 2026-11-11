@@ -1,3 +1,4 @@
+import AppKit
 import XCTest
 @testable import OneButton
 
@@ -110,6 +111,106 @@ final class DesktopStoreTests: XCTestCase {
         XCTAssertNotNil(store.errorMessage)
         store.dismissError()
         XCTAssertNil(store.errorMessage)
+    }
+
+    func testSortingChangesImmediatelyAndSurvivesRefreshAndRelaunch() async {
+        let defaults = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+        defaults.set("grid", forKey: "desktopLayout")
+        defaults.set(true, forKey: "showDockIcon")
+        let bookmark = Data("keep existing connection".utf8)
+        defaults.set(bookmark, forKey: "desktopBookmark")
+        let folder = URL(fileURLWithPath: "/test/Desktop")
+        let small = DesktopItem(url: folder.appendingPathComponent("10.txt"), name: "10.txt", isDirectory: false, size: 1)
+        let large = DesktopItem(url: folder.appendingPathComponent("2.txt"), name: "2.txt", isDirectory: false, size: 20)
+        let store = DesktopStore(defaults: defaults, loadFolder: { (folder, [small, large]) })
+        await store.refresh()
+        XCTAssertEqual(store.items, [large, small])
+        store.sortCriterion = .size
+        XCTAssertEqual(store.items, [small, large])
+        store.sortDirection = .descending
+        XCTAssertEqual(store.items, [large, small])
+        await store.refresh()
+        XCTAssertEqual(store.items, [large, small])
+
+        let restored = DesktopStore(defaults: defaults, loadFolder: { (folder, [small, large]) })
+        await restored.refresh()
+        XCTAssertEqual(restored.sortCriterion, .size)
+        XCTAssertEqual(restored.sortDirection, .descending)
+        XCTAssertEqual(restored.items, [large, small])
+        XCTAssertEqual(defaults.data(forKey: "desktopBookmark"), bookmark)
+        XCTAssertEqual(defaults.string(forKey: "desktopLayout"), "grid")
+        XCTAssertTrue(defaults.bool(forKey: "showDockIcon"))
+    }
+
+    func testPendingRefreshUsesMostRecentSortChoice() async {
+        let defaults = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+        var pending: CheckedContinuation<DesktopSnapshot?, Error>?
+        let store = DesktopStore(defaults: defaults) {
+            try await withCheckedThrowingContinuation { pending = $0 }
+        }
+        let refresh = Task { await store.refresh() }
+        while pending == nil { await Task.yield() }
+        store.sortCriterion = .size
+        store.sortDirection = .descending
+        let folder = URL(fileURLWithPath: "/test/Desktop")
+        let small = DesktopItem(url: folder.appendingPathComponent("a"), name: "a", isDirectory: false, size: 1)
+        let large = DesktopItem(url: folder.appendingPathComponent("b"), name: "b", isDirectory: false, size: 2)
+        pending?.resume(returning: (folder, [small, large]))
+        await refresh.value
+        XCTAssertEqual(store.items, [large, small])
+        XCTAssertFalse(store.isLoading)
+    }
+
+    func testMissingOrInvalidSortPreferencesKeepExistingNameAscendingDefault() {
+        let defaults = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+        let fresh = DesktopStore(defaults: defaults, loadFolder: { nil })
+        XCTAssertEqual(fresh.sortCriterion, .name)
+        XCTAssertEqual(fresh.sortDirection, .ascending)
+        defaults.set("unknown-criterion", forKey: "desktopSort")
+        defaults.set("unknown-direction", forKey: "desktopSortDirection")
+        let restored = DesktopStore(defaults: defaults, loadFolder: { nil })
+        XCTAssertEqual(restored.sortCriterion, .name)
+        XCTAssertEqual(restored.sortDirection, .ascending)
+    }
+
+    func testDirectoryReadLoadsRealMetadataWithoutCountingFolderOrPackageContents() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        var file = folder.appendingPathComponent("sample.txt")
+        let bytes = Data("sort metadata test".utf8)
+        try bytes.write(to: file)
+        let modified = Date(timeIntervalSince1970: 1_700_000_000)
+        try FileManager.default.setAttributes([.modificationDate: modified], ofItemAtPath: file.path)
+        let tags = ["테스트 10", "테스트 2"]
+        if #available(macOS 26.0, *) {
+            var values = URLResourceValues()
+            values.tagNames = tags
+            try file.setResourceValues(values)
+        }
+        for name in ["Folder", "Package.app"] {
+            let directory = folder.appendingPathComponent(name)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+            try Data(repeating: 1, count: 100).write(to: directory.appendingPathComponent("nested.txt"))
+        }
+
+        let items = try DesktopItem.contents(of: folder)
+        let item = try XCTUnwrap(items.first { $0.url == file })
+        XCTAssertEqual(item.size, bytes.count)
+        XCTAssertEqual(try XCTUnwrap(item.modifiedDate).timeIntervalSince1970, modified.timeIntervalSince1970, accuracy: 1)
+        XCTAssertNotNil(item.createdDate)
+        XCTAssertFalse(try XCTUnwrap(item.kind).isEmpty)
+        if #available(macOS 26.0, *) {
+            XCTAssertEqual(Set(item.tags), Set(tags))
+        }
+        XCTAssertEqual(item.applicationName, NSWorkspace.shared.urlForApplication(toOpen: file).map {
+            FileManager.default.displayName(atPath: $0.path)
+        })
+        XCTAssertTrue(items.filter { $0.url != file }.allSatisfy { $0.size == nil })
+        XCTAssertEqual(try Data(contentsOf: file), bytes)
     }
 
     private var defaultsSuite = ""

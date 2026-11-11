@@ -116,6 +116,7 @@ struct DesktopMenuView: View {
             }
             .padding(2)
             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
+            sortMenu
             if store.isLoading {
                 ProgressView().controlSize(.small).accessibilityLabel("목록 불러오는 중")
             }
@@ -148,6 +149,44 @@ struct DesktopMenuView: View {
         .accessibilityLabel(label)
         .accessibilityIdentifier("desktop.view.\(value.rawValue)")
         .accessibilityAddTraits(layout == value ? .isSelected : [])
+    }
+
+    private var sortMenu: some View {
+        Menu {
+            ForEach([DesktopSort.name, .kind, .size], id: \.self) { sortOption($0) }
+            Menu("날짜") {
+                ForEach(DesktopSort.allCases.filter(\.isDate), id: \.self) { sortOption($0) }
+            }
+            .accessibilityIdentifier("desktop.sort.dates")
+            ForEach([DesktopSort.tags, .application], id: \.self) { sortOption($0) }
+            Divider()
+            Picker("정렬 방향", selection: $store.sortDirection) {
+                ForEach(DesktopSortDirection.allCases, id: \.self) { direction in
+                    Text(direction.title)
+                        .tag(direction)
+                        .accessibilityIdentifier("desktop.sort.\(direction.rawValue)")
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
+                .frame(width: 24, height: 24)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("정렬: \(store.sortCriterion.title) · \(store.sortDirection.title)\n정보가 없는 항목은 마지막에 표시됩니다.")
+        .accessibilityLabel("정렬")
+        .accessibilityValue("\(store.sortCriterion.title), \(store.sortDirection.title)")
+        .accessibilityIdentifier("desktop.sort")
+    }
+
+    private func sortOption(_ criterion: DesktopSort) -> some View {
+        Toggle(criterion.title, isOn: Binding(
+            get: { store.sortCriterion == criterion },
+            set: { if $0 { store.sortCriterion = criterion } }
+        ))
+        .accessibilityIdentifier("desktop.sort.\(criterion.rawValue)")
     }
 
     @ViewBuilder

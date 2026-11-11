@@ -19,7 +19,9 @@
 		3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */; };
 		3AFFF553114B7C5BF399CD7B /* FullscreenFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F02D73D08D8402916988BA /* FullscreenFixture.swift */; };
 		3F29121CAD2B25CF45544AA4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63842E1D00E6609C235902CE /* Assets.xcassets */; };
+		52236C9B14E13045331BE574 /* DesktopSortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */; };
 		52ED4AD940AC5F5155D213DD /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11E832FE1770C6DD4FB160 /* UpdateController.swift */; };
+		58F8DF581EC9DE8E89175D46 /* DesktopSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412454AF031ABAE1FBC03051 /* DesktopSort.swift */; };
 		5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */; };
 		5D1D2DD9110461A10C68F2A5 /* DockIconController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A947B2F7B0371F15FF753E0 /* DockIconController.swift */; };
 		614F5B474B1FC734D5914C14 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */; };
@@ -32,6 +34,7 @@
 		988681EECEEC19CB28E701BD /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C2F2B5F94CE4140052AD62 /* LoginItemController.swift */; };
 		9B99F14DD4B89CF48F003EEA /* DesktopStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */; };
 		A4CA85B46790062A1C937C42 /* OneButtonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7FE0C887F0FF57F0222CEA2 /* OneButtonApp.swift */; };
+		A71168F0BF660C7091790838 /* DesktopSort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412454AF031ABAE1FBC03051 /* DesktopSort.swift */; };
 		ACFC37ACDD4A4B10EED9CC7A /* UpdateControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C716A16E6FAF222E7F759C /* UpdateControllerTests.swift */; };
 		B9DF0529123298E4647E3078 /* AppNameMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA593FD2DC9AEA5279D0DB6 /* AppNameMigration.swift */; };
 		CA832DBD62E32F3210E04E51 /* PopoverSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */; };
@@ -83,11 +86,13 @@
 		03418316D30FE041FBB579DA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		07AEFDD2DA13D5602124C3E3 /* DesktopStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopStore.swift; sourceTree = "<group>"; };
 		1492115A361BABCC707B6574 /* FolderInBarDragDropFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FolderInBarDragDropFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSortTests.swift; sourceTree = "<group>"; };
 		1A97F7F16E148CD190938E38 /* OneButtonFullscreenFixture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OneButtonFullscreenFixture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopLayoutTests.swift; sourceTree = "<group>"; };
 		37E45CAE2B579A10AF74ABBF /* DesktopDragTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopDragTests.swift; sourceTree = "<group>"; };
 		389B8DADC2FB256DD12851A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3F1D8BC4FF3525A3C658ACB7 /* OneButton.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneButton.entitlements; sourceTree = "<group>"; };
+		412454AF031ABAE1FBC03051 /* DesktopSort.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSort.swift; sourceTree = "<group>"; };
 		49F752DC27265CA0BCE42156 /* DesktopMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopMenuView.swift; sourceTree = "<group>"; };
 		4ED40F48093C779B59B1231D /* DragDropFixture.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DragDropFixture.entitlements; sourceTree = "<group>"; };
 		51B3DFE00EBF48B8403907E9 /* DesktopAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopAccess.swift; sourceTree = "<group>"; };
@@ -168,6 +173,7 @@
 				9DDF9758566D4E55FE5745A1 /* AppNameMigrationTests.swift */,
 				37E45CAE2B579A10AF74ABBF /* DesktopDragTests.swift */,
 				2E74C9F5E71BAB5A77217C71 /* DesktopLayoutTests.swift */,
+				15BF78904C8921E7D2B44267 /* DesktopSortTests.swift */,
 				C6089FF6BB8754F94F5FAC92 /* DesktopStoreTests.swift */,
 				A0EDF9F05DE99706B9DA1FF1 /* DockIconControllerTests.swift */,
 				9C565AB01C3FBE58A1F0FC59 /* LoginItemControllerTests.swift */,
@@ -278,6 +284,7 @@
 			children = (
 				E5E541D4C250D7360E431D7C /* DesktopItem.swift */,
 				C3E094051639952B86E9D408 /* DesktopLayout.swift */,
+				412454AF031ABAE1FBC03051 /* DesktopSort.swift */,
 				DAF4275A51B5DA42A29AB280 /* PopoverSize.swift */,
 			);
 			path = Models;
@@ -483,6 +490,7 @@
 				DEF88B23A3319798E20922C0 /* DesktopItem.swift in Sources */,
 				8451495A4409520263177AEE /* DesktopLayout.swift in Sources */,
 				287BEC0552F022FE56768EAE /* DesktopMenuView.swift in Sources */,
+				A71168F0BF660C7091790838 /* DesktopSort.swift in Sources */,
 				9B99F14DD4B89CF48F003EEA /* DesktopStore.swift in Sources */,
 				5D1D2DD9110461A10C68F2A5 /* DockIconController.swift in Sources */,
 				988681EECEEC19CB28E701BD /* LoginItemController.swift in Sources */,
@@ -500,6 +508,7 @@
 				FC24CA3AA470C72446F382A8 /* DesktopItem.swift in Sources */,
 				285E54B5CAD2EC7F9CEACD1E /* DesktopLayout.swift in Sources */,
 				3434C45C9F618AD198FC99C6 /* DesktopMenuView.swift in Sources */,
+				58F8DF581EC9DE8E89175D46 /* DesktopSort.swift in Sources */,
 				6832DCD2B7350623666A4519 /* DesktopStore.swift in Sources */,
 				E5B08255502BEF8BD3DFD97C /* DockIconController.swift in Sources */,
 				22897CBE5B86E2CDC1552B83 /* LoginItemController.swift in Sources */,
@@ -524,6 +533,7 @@
 				EC3579320AC34CA94D668918 /* AppNameMigrationTests.swift in Sources */,
 				E0C8262C6EF8CB0CF439ABFC /* DesktopDragTests.swift in Sources */,
 				15E31B9F6764C23914D41B96 /* DesktopLayoutTests.swift in Sources */,
+				52236C9B14E13045331BE574 /* DesktopSortTests.swift in Sources */,
 				5A18B459BB8C296EE4C0A758 /* DesktopStoreTests.swift in Sources */,
 				6BA141B7AE60C6381347FF72 /* DockIconControllerTests.swift in Sources */,
 				1173578672FFB1E63F2F54C7 /* LoginItemControllerTests.swift in Sources */,
@@ -829,7 +839,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 4J7HGK26PF;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -838,7 +848,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
 				PRODUCT_MODULE_NAME = OneButton;
 				PRODUCT_NAME = "Folder In Bar";
@@ -918,7 +928,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/AppStore/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 4J7HGK26PF;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -927,7 +937,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.onebutton.desktop;
 				PRODUCT_MODULE_NAME = OneButton;
 				PRODUCT_NAME = "Folder In Bar";
