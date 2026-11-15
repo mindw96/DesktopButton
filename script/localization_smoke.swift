@@ -32,41 +32,7 @@ func runLocalizationChecks(root: URL, sourceURL: URL) throws {
             let label = text(english, korean)
             try require(until(4) { labeled(label, in: app) != nil }, "\(language): missing translated label: \(label)")
         }
-        func showPanel() throws {
-            if identified("desktop.sort", in: app) == nil {
-                try require(process.bundleURL?.resolvingSymlinksInPath() == sourceURL.resolvingSymlinksInPath(),
-                            "Refusing to reopen an unexpected app")
-                let reopen = Process()
-                reopen.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-                reopen.arguments = ["-a", sourceURL.path]
-                try reopen.run()
-                reopen.waitUntilExit()
-                try require(reopen.terminationStatus == 0, "Could not reopen test app")
-            }
-            try require(until(5) { identified("desktop.sort", in: app) != nil }, "Localized popup missing")
-            let displays = NSScreen.screens.compactMap { screen -> CGRect? in
-                guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return nil }
-                return CGDisplayBounds(number.uint32Value)
-            }
-            let frame = try observedWindowFrame(process.processIdentifier)
-            if !displays.contains(where: { $0.contains(frame) }) {
-                guard let screen = displays.first(where: { $0.width > frame.width + 40 && $0.height > frame.height + 80 }),
-                      let window = find(contentRoots(app), maxDepth: 4, matching: {
-                          let role = value($0, kAXRoleAttribute) as? String
-                          guard role == kAXWindowRole || role == "AXPopover" else { return false }
-                          guard let candidate = try? observedFrame($0) else { return false }
-                          return candidate.width > 200 && candidate.height > 100
-                      }) else { throw SmokeFailure(description: "Could not place isolated test popup on a physical screen: popup=\(frame), displays=\(displays)") }
-                var origin = CGPoint(x: screen.midX - frame.width / 2, y: screen.midY - frame.height / 2)
-                try require(AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString,
-                            AXValueCreate(.cgPoint, &origin)!) == .success, "Test popup reposition failed")
-                pumpRunLoop(0.3)
-                print("TEST WINDOW: moved isolated popup onto a physical display")
-            }
-            let observed = try observedWindowFrame(process.processIdentifier)
-            try require(displays.contains(where: { $0.contains(observed) }), "Test popup remains outside physical displays")
-        }
-        try showPanel()
+        try showTestPanel(process, at: sourceURL, in: app)
         try expect("Connect Folder", "폴더 연결")
         try expect("Your Folder at Hand", "폴더를 가까이")
         try expect("Connect Folder…", "폴더 연결…")
@@ -93,7 +59,7 @@ func runLocalizationChecks(root: URL, sourceURL: URL) throws {
                   "select localized date sorting")
         try require(until(3) { labeled(text("Date Modified", "수정일"), in: app) == nil }, "Date menu did not close")
         pumpRunLoop(0.3)
-        try showPanel()
+        try showTestPanel(process, at: sourceURL, in: app)
         try press(identified("desktop.settings", in: app), "localized settings")
         try expect("Show Icon in Dock", "Dock에 아이콘 표시")
         try expect("Launch at Login", "로그인 시 자동 실행")
@@ -107,13 +73,13 @@ func runLocalizationChecks(root: URL, sourceURL: URL) throws {
         try press(identified("desktop.icon-size.large", in: app) ?? labeled(text("Large", "크게"), in: app), "large icons")
         try require(until(3) { labeled(text("Large", "크게"), in: app) == nil }, "Icon size menu did not close")
         pumpRunLoop(0.3)
-        try showPanel()
+        try showTestPanel(process, at: sourceURL, in: app)
         print("PASS \(language): sort/date, settings and icon size menus")
 
         try press(identified("desktop.connect", in: app), "connect isolated empty folder")
         try expect("Connect", "연결")
-        try expect("Choose a folder to connect. Its files will appear here so you can open them.",
-                   "연결할 폴더를 선택해 주세요. 파일 목록을 표시하고 선택한 파일을 엽니다.")
+        try expect("Choose a folder to open or share its items, or move them to the Trash after confirmation.",
+                   "폴더를 선택하면 항목을 열거나 다른 앱에 전달할 수 있습니다. 선택한 항목을 휴지통으로 옮길 때는 먼저 확인을 받습니다.")
         try require(NSWorkspace.shared.frontmostApplication?.processIdentifier == process.processIdentifier,
                     "Folder picker is not frontmost; no path typed")
         try key(5, to: process.processIdentifier, flags: [.maskCommand, .maskShift], system: true)
@@ -132,7 +98,7 @@ func runLocalizationChecks(root: URL, sourceURL: URL) throws {
         try require(until(4) { labeled(folder.lastPathComponent, in: app) != nil }, "Picker did not navigate to fixture")
         try press(labeled(text("Connect", "연결"), in: app), "confirm isolated folder")
         try require(until(5) { labeled(text("Connect", "연결"), in: app) == nil }, "Picker did not close")
-        try showPanel()
+        try showTestPanel(process, at: sourceURL, in: app)
         try expect("0 items", "0개 항목")
         try verifyFolderName(folder.lastPathComponent, in: app)
         try expect("Reconnect Folder…", "폴더 다시 연결…")
@@ -146,7 +112,7 @@ func runLocalizationChecks(root: URL, sourceURL: URL) throws {
         print("PASS \(language): folder picker, raw filenames, zero/one/multiple counts")
 
         for layout in ["list", "grid"] {
-            try showPanel()
+            try showTestPanel(process, at: sourceURL, in: app)
             try press(identified("desktop.view.\(layout)", in: app), "localized \(layout) view")
             try require(until(3) { identified("desktop.item.\(document.lastPathComponent)", in: app) != nil }, "Fixture missing")
             try clickObserved(identified("desktop.item.\(document.lastPathComponent)", in: app)!)

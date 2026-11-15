@@ -50,6 +50,12 @@ final class LocalizationTests: XCTestCase {
             XCTAssertEqual(message, language == "en"
                            ? "Could not open “\(name)”.\n\(detail)"
                            : "‘\(name)’ 파일을 열지 못했습니다.\n\(detail)")
+            let failed = 1, total = 3
+            let trashMessage = String(localized: "Could not move \(failed) of \(total) items to the Trash.\n\(name): \(detail)",
+                                      bundle: bundle, locale: Locale(identifier: language))
+            XCTAssertEqual(trashMessage, language == "en"
+                           ? "Could not move 1 of 3 items to the Trash.\n\(name): \(detail)"
+                           : "선택한 항목 3개 중 1개를 휴지통으로 옮기지 못했습니다.\n\(name): \(detail)")
         }
     }
 

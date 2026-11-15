@@ -213,6 +213,92 @@ final class DesktopStoreTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: file), bytes)
     }
 
+    func testLegacyConnectionCanStillShareAndRequiresReconnectBeforeTrash() async throws {
+        let defaults = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appendingPathComponent("legacy.txt")
+        let original = Data("keep me".utf8)
+        try original.write(to: file)
+        let legacy = try folder.bookmarkData(options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess])
+        defaults.set(legacy, forKey: "desktopBookmark")
+        let store = DesktopStore(defaults: defaults)
+        await store.refresh()
+        let item = try XCTUnwrap(store.items.first)
+        XCTAssertEqual(store.dragURLs(for: [item]).first?.standardizedFileURL, file.standardizedFileURL)
+
+        // An older copy of the app may have selected a new folder since the last write grant.
+        let unrelatedGrant = Data("old grant for another bookmark".utf8)
+        defaults.set(unrelatedGrant, forKey: "desktopWritableBookmark")
+        await store.moveToTrash([item])
+
+        XCTAssertEqual(store.errorMessage, DesktopAccess.AccessError.reconnectForTrash.localizedDescription)
+        XCTAssertNotNil(defaults.data(forKey: "desktopBookmark"))
+        XCTAssertEqual(defaults.data(forKey: "desktopWritableBookmark"), unrelatedGrant)
+        XCTAssertEqual(store.items.map(\.id), [item.id])
+        XCTAssertEqual(try Data(contentsOf: file), original)
+    }
+
+    func testTrashRejectsOutsideItemBeforeMovingAnyAndNeverFollowsSymlinks() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let folder = root.appendingPathComponent("selection", isDirectory: true)
+        try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: root) }
+        let target = root.appendingPathComponent("outside.txt")
+        let original = Data("not selected".utf8)
+        try original.write(to: target)
+        let link = folder.appendingPathComponent("link")
+        try fm.createSymbolicLink(at: link, withDestinationURL: target)
+        let linkedItem = try XCTUnwrap(DesktopItem.contents(of: folder).first)
+        let outsideItem = try XCTUnwrap(DesktopItem.contents(of: root).first { $0.name == "outside.txt" })
+
+        XCTAssertThrowsError(try DesktopAccess.moveToTrash([linkedItem, outsideItem], within: folder) { _ in
+            XCTFail("Outside item must reject the entire request")
+        })
+        let relocated = root.appendingPathComponent("recycled-link")
+        try DesktopAccess.moveToTrash([linkedItem], within: folder) { url in
+            XCTAssertEqual(url.standardizedFileURL, link.standardizedFileURL)
+            try fm.moveItem(at: url, to: relocated)
+        }
+        XCTAssertEqual(try fm.destinationOfSymbolicLink(atPath: relocated.path), target.path)
+        XCTAssertEqual(try Data(contentsOf: target), original)
+    }
+
+    func testTrashSkipsReplacedMissingAndLockedItemsAndReportsPartialResult() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let folder = root.appendingPathComponent("selection", isDirectory: true)
+        let recycleBin = root.appendingPathComponent("test-recycle", isDirectory: true)
+        try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        try fm.createDirectory(at: recycleBin, withIntermediateDirectories: false)
+        defer { try? fm.removeItem(at: root) }
+        let names = ["file", "missing", "locked", "replaced"]
+        for name in names { try Data(name.utf8).write(to: folder.appendingPathComponent(name)) }
+        let child = folder.appendingPathComponent("subfolder", isDirectory: true)
+        try fm.createDirectory(at: child, withIntermediateDirectories: false)
+        try Data("nested".utf8).write(to: child.appendingPathComponent("child"))
+        let selection = try DesktopItem.contents(of: folder)
+        try fm.moveItem(at: folder.appendingPathComponent("replaced"), to: root.appendingPathComponent("old"))
+        try Data("replacement".utf8).write(to: folder.appendingPathComponent("replaced"))
+        try fm.removeItem(at: folder.appendingPathComponent("missing"))
+
+        XCTAssertThrowsError(try DesktopAccess.moveToTrash(selection, within: folder) { url in
+            if url.lastPathComponent == "locked" { throw CocoaError(.fileWriteNoPermission) }
+            try fm.moveItem(at: url, to: recycleBin.appendingPathComponent(url.lastPathComponent))
+        }) { error in
+            guard case DesktopAccess.AccessError.trashFailed(3, 5, _, _) = error else {
+                return XCTFail("Expected three reported failures, got \(error)")
+            }
+        }
+        XCTAssertEqual(Set(try fm.contentsOfDirectory(atPath: folder.path)), ["locked", "replaced"])
+        XCTAssertEqual(try Data(contentsOf: folder.appendingPathComponent("replaced")), Data("replacement".utf8))
+        XCTAssertEqual(try Data(contentsOf: recycleBin.appendingPathComponent("subfolder/child")), Data("nested".utf8))
+        XCTAssertEqual(try Data(contentsOf: recycleBin.appendingPathComponent("file")), Data("file".utf8))
+    }
+
     private var defaultsSuite = ""
 
     private func isolatedDefaults() -> UserDefaults {

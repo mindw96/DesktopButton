@@ -29,7 +29,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSDesktopFolderUsageDescription</key>
-	<string>Folder In Bar accesses your selected folder to show its files in the menu bar and open the files you choose.</string>
+	<string>Use the menu bar to open or share items in the folder you select, or move selected items to the Trash after confirmation.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

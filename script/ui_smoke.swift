@@ -143,12 +143,16 @@ func requirePointOnDisplay(_ point: CGPoint) throws {
     try require(onDisplay, "Observed mouse point \(point) is outside all physical displays; no input sent")
 }
 
-func clickObserved(_ element: AXUIElement) throws {
+func clickObserved(_ element: AXUIElement, flags: CGEventFlags = []) throws {
     let frame = try observedFrame(element)
     let point = CGPoint(x: frame.midX, y: frame.midY)
     try requirePointOnDisplay(point)
     for type in [CGEventType.mouseMoved, .leftMouseDown, .leftMouseUp] {
-        CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
+        guard let event = CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left) else {
+            throw SmokeFailure(description: "Could not create click event")
+        }
+        event.flags = flags
+        event.post(tap: .cghidEventTap)
         pumpRunLoop(0.15)
     }
 }

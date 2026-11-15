@@ -29,11 +29,11 @@ signed = subprocess.run(["codesign", "-d", "--entitlements", ":-", str(args.app)
                         capture_output=True, check=True)
 entitlements = plistlib.loads(signed.stdout)
 for key in ("com.apple.security.app-sandbox",
-            "com.apple.security.files.user-selected.read-only",
+            "com.apple.security.files.user-selected.read-write",
             "com.apple.security.files.bookmarks.app-scope"):
     assert entitlements.get(key) is True, f"Missing required entitlement: {key}"
 for key in ("com.apple.security.network.client",
-            "com.apple.security.files.user-selected.read-write",
+            "com.apple.security.files.user-selected.read-only",
             "com.apple.security.cs.disable-library-validation"):
     assert not entitlements.get(key), f"Unexpected entitlement: {key}"
 assert not any("temporary-exception" in key for key in entitlements)

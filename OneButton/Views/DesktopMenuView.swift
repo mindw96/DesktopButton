@@ -10,8 +10,9 @@ struct DesktopMenuView: View {
     @ObservedObject var dockIconController: DockIconController
     @ObservedObject var popoverSize: PopoverSize
     let dismiss: () -> Void
-    @State private var selection: URL?
-    @FocusState private var gridIsFocused: Bool
+    @State private var selection = DesktopSelection()
+    @State private var pendingTrash: [DesktopItem] = []
+    @FocusState private var filesAreFocused: Bool
     @AppStorage private var layout: DesktopLayout
     @AppStorage private var iconSize: DesktopIconSize
     @State private var resizeStart: (point: CGPoint, size: CGSize)?
@@ -48,24 +49,36 @@ struct DesktopMenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Divider()
-            if let message = store.errorMessage {
-                errorBanner(message)
+            if pendingTrash.isEmpty {
+                header
                 Divider()
+                if let message = store.errorMessage {
+                    errorBanner(message)
+                    Divider()
+                }
+                content
+                Divider()
+                footer
+            } else {
+                trashConfirmation
             }
-            content
-            Divider()
-            footer
         }
         .frame(width: popoverSize.size.width, height: popoverSize.size.height)
         .background {
-            Button("Open Selected File") { openSelection() }
-                .keyboardShortcut(.defaultAction)
+            if pendingTrash.isEmpty && !store.items.isEmpty && canInteract {
+                ZStack {
+                    Button("Open Selected File") { openSelection() }
+                        .keyboardShortcut(.defaultAction)
+                    Button("Select All") { selection.selectAll(in: store.items) }
+                        .keyboardShortcut("a", modifiers: .command)
+                }
                 .hidden()
                 .accessibilityHidden(true)
+            }
         }
-        .onExitCommand { dismiss() }
+        .onExitCommand {
+            if pendingTrash.isEmpty { dismiss() } else { pendingTrash = [] }
+        }
         .alert("Unable to Change Settings", isPresented: Binding(
             get: { loginItemController.errorMessage != nil || dockIconController.errorMessage != nil },
             set: { if !$0 { loginItemController.dismissError(); dockIconController.dismissError() } }
@@ -79,20 +92,18 @@ struct DesktopMenuView: View {
         }
         .onMoveCommand { direction in moveSelection(direction) }
         .onChange(of: isResizing) { active in
-            gridIsFocused = !active && layout == .grid
+            filesAreFocused = !active
             if !active {
                 resizeStart = nil
                 popoverSize.save()
             }
         }
-        .onAppear {
-            if selection == nil { selection = store.items.first?.id }
+        .onChange(of: store.folderURL) { _ in
+            selection = DesktopSelection()
+            if let first = store.items.first { selection.select(first.id, modifiers: [], in: store.items) }
         }
-        .onChange(of: store.items) { items in
-            if !items.contains(where: { $0.id == selection }) {
-                selection = items.first?.id
-            }
-        }
+        .onChange(of: store.items) { selection.reconcile(with: $0) }
+        .onDisappear { pendingTrash = [] }
     }
 
     private var header: some View {
@@ -108,7 +119,8 @@ struct DesktopMenuView: View {
                     .truncationMode(.middle)
                     .help(store.folderURL?.path ?? String(localized: "Choose a folder to connect."))
                     .accessibilityIdentifier("desktop.folder.name")
-                Text(store.folderURL == nil ? "Folder In Bar" : String(localized: "\(store.items.count) items"))
+                Text(folderSubtitle)
+                    .lineLimit(1)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -120,6 +132,15 @@ struct DesktopMenuView: View {
             .padding(2)
             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
             sortMenu
+            if store.hasConnection {
+                Button { requestTrash() } label: { Image(systemName: "trash") }
+                    .buttonStyle(.borderless)
+                    .help("Move to Trash…")
+                    .accessibilityLabel("Move to Trash…")
+                    .accessibilityIdentifier("desktop.trash")
+                    .keyboardShortcut(.delete, modifiers: .command)
+                    .disabled(selection.ids.isEmpty || !canInteract)
+            }
             if store.isLoading {
                 ProgressView().controlSize(.small).accessibilityLabel("Loading Files")
             }
@@ -133,9 +154,15 @@ struct DesktopMenuView: View {
             .accessibilityLabel("Refresh")
             .accessibilityIdentifier("desktop.refresh")
             .keyboardShortcut("r", modifiers: .command)
-            .disabled(!store.hasConnection || store.isLoading || store.isChoosingFolder)
+            .disabled(!store.hasConnection || store.isLoading || store.isChoosingFolder || store.isTrashing)
         }
         .padding(16)
+    }
+
+    private var folderSubtitle: String {
+        if selection.ids.count > 1 { return String(localized: "\(selection.ids.count) selected") }
+        if store.folderURL == nil { return "Folder In Bar" }
+        return String(localized: "\(store.items.count) items")
     }
 
     private func layoutButton(_ value: DesktopLayout, symbol: String, label: String) -> some View {
@@ -228,39 +255,32 @@ struct DesktopMenuView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollViewReader { scroll in
-                Group {
+                ScrollView {
                     if layout == .list {
-                        List(selection: $selection) {
-                            ForEach(store.items) { item in
-                                itemButton(item)
-                                    .tag(item.id)
-                            }
+                        LazyVStack(spacing: 1) {
+                            ForEach(store.items) { item in itemButton(item) }
                         }
-                        .listStyle(.plain)
+                        .padding(6)
                     } else {
-                        ScrollView {
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8),
-                                                     count: gridColumnCount), spacing: 8) {
-                                ForEach(store.items) { item in
-                                    itemButton(item)
-                                }
-                            }
-                            .padding(12)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8),
+                                                 count: gridColumnCount), spacing: 8) {
+                            ForEach(store.items) { item in itemButton(item) }
                         }
-                        .focusable()
-                        .focused($gridIsFocused)
-                        .onMoveCommand { moveSelection($0) }
-                        .onAppear { gridIsFocused = true }
+                        .padding(12)
                     }
                 }
-                .onChange(of: selection) { url in
+                .focusable()
+                .focused($filesAreFocused)
+                .onMoveCommand { moveSelection($0) }
+                .onAppear { filesAreFocused = true }
+                .onChange(of: selection.lead) { url in
                     if let url { scroll.scrollTo(url) }
                 }
                 .onChange(of: layout) { _ in
-                    if let selection { scroll.scrollTo(selection) }
+                    if let lead = selection.lead { scroll.scrollTo(lead) }
                 }
                 .onChange(of: gridColumnCount) { _ in
-                    if let selection { scroll.scrollTo(selection) }
+                    if let lead = selection.lead { scroll.scrollTo(lead) }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -271,40 +291,102 @@ struct DesktopMenuView: View {
         DesktopLayout.columnCount(for: popoverSize.size.width, iconSize: iconSize)
     }
 
+    private var canInteract: Bool {
+        store.openingURL == nil && !store.isChoosingFolder && !store.isTrashing
+    }
+
     private func itemButton(_ item: DesktopItem) -> some View {
-        Button {
-            selection = item.id
+        let selected = selection.ids.contains(item.id)
+        return Button {
+            select(item, modifiers: [])
         } label: {
             if layout == .list {
                 DesktopItemRow(item: item, isOpening: store.openingURL == item.url,
                                iconSize: iconSize.listSize)
+                    .padding(.horizontal, 6)
+                    .background(selected ? Color.accentColor.opacity(0.18) : .clear,
+                                in: RoundedRectangle(cornerRadius: 5))
             } else {
                 DesktopItemTile(item: item, isOpening: store.openingURL == item.url,
-                                isSelected: selection == item.id, iconSize: iconSize.gridSize)
+                                isSelected: selected, iconSize: iconSize.gridSize)
             }
         }
         .buttonStyle(.plain)
-        .disabled(store.openingURL != nil || store.isChoosingFolder)
-        .simultaneousGesture(TapGesture(count: 2).onEnded {
-            selection = item.id
-            open(item)
-        })
-        .onDrag {
-            selection = item.id
-            return store.dragProvider(for: item)
+        .overlay {
+            FilePointerSurface(
+                clicked: { modifiers, count in
+                    select(item, modifiers: modifiers)
+                    if count == 2 && modifiers.intersection([.command, .shift]).isEmpty { open(item) }
+                },
+                dragURLs: { modifiers in
+                    if !selection.ids.contains(item.id) { select(item, modifiers: modifiers) }
+                    return store.dragURLs(for: selectedItems)
+                },
+                showContext: {
+                    if !selection.ids.contains(item.id) { select(item, modifiers: []) }
+                },
+                requestTrash: { requestTrash() }
+            )
+            .accessibilityHidden(true)
         }
+        .disabled(!canInteract)
         .id(item.id)
-        .help(String(localized: "\(item.name)\nClick once to select, double-click to open, or drag to another app."))
+        .help(String(localized: "\(item.name)\nCommand-click to select multiple items, Shift-click to select a range, or drag to another app."))
         .accessibilityIdentifier("desktop.item.\(item.name)")
         .accessibilityLabel(item.name)
         .accessibilityHint(item.isDirectory
                            ? String(localized: "Click once to select, or double-click to open in Finder.")
                            : String(localized: "Click once to select, double-click to open, or drag to another app to attach."))
-        .accessibilityAddTraits(selection == item.id ? .isSelected : [])
-        .accessibilityAction(named: "Open") {
-            selection = item.id
-            open(item)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityAction(named: "Open") { open(item) }
+        .accessibilityAction(named: selected ? Text("Remove from Selection") : Text("Add to Selection")) {
+            select(item, modifiers: .command)
         }
+        .accessibilityAction(named: "Move to Trash…") {
+            if !selected { select(item, modifiers: []) }
+            requestTrash()
+        }
+    }
+
+    private var selectedItems: [DesktopItem] {
+        store.items.filter { selection.ids.contains($0.id) }
+    }
+
+    private func select(_ item: DesktopItem, modifiers: NSEvent.ModifierFlags) {
+        guard canInteract else { return }
+        filesAreFocused = true
+        selection.select(item.id, modifiers: modifiers, in: store.items)
+    }
+
+    private func requestTrash() {
+        guard canInteract else { return }
+        pendingTrash = selectedItems
+    }
+
+    private var trashConfirmation: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "trash").font(.title).accessibilityHidden(true)
+            Text(pendingTrash.count == 1
+                 ? String(localized: "Move “\(pendingTrash[0].name)” to the Trash?")
+                 : String(localized: "Move \(pendingTrash.count) items to the Trash?"))
+                .font(.headline)
+                .multilineTextAlignment(.center)
+                .lineLimit(4)
+                .truncationMode(.middle)
+            HStack {
+                Button("Cancel") { pendingTrash = [] }
+                    .keyboardShortcut(.cancelAction)
+                    .accessibilityIdentifier("desktop.trash.cancel")
+                Button("Move to Trash", role: .destructive) {
+                    let confirmed = pendingTrash
+                    pendingTrash = []
+                    Task { await store.moveToTrash(confirmed) }
+                }
+                .accessibilityIdentifier("desktop.trash.confirm")
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var emptyMessage: String {
@@ -335,7 +417,7 @@ struct DesktopMenuView: View {
             if popoverSize.resizesFromLeadingEdge { resizeHandle }
             if store.hasConnection {
                 Button("Reconnect Folder…") { chooseFolder() }
-                    .disabled(store.isChoosingFolder || store.openingURL != nil)
+                    .disabled(!canInteract)
                     .accessibilityIdentifier("desktop.reconnect")
             }
             Spacer()
@@ -476,16 +558,17 @@ struct DesktopMenuView: View {
     }
 
     private func openSelection() {
-        guard let item = store.items.first(where: { $0.id == selection }) else { return }
+        guard canInteract, pendingTrash.isEmpty, selection.ids.count == 1, let item = selectedItems.first else { return }
         open(item)
     }
 
     private func moveSelection(_ direction: MoveCommandDirection) {
-        let current = store.items.firstIndex(where: { $0.id == selection })
+        guard canInteract, pendingTrash.isEmpty else { return }
+        let current = store.items.firstIndex(where: { $0.id == selection.lead })
         guard let next = layout.selectionIndex(from: current, direction: direction,
                                                itemCount: store.items.count,
                                                columnCount: gridColumnCount) else { return }
-        selection = store.items[next].id
+        select(store.items[next], modifiers: NSEvent.modifierFlags.intersection(.shift))
     }
 }
 
@@ -559,5 +642,106 @@ private struct DesktopFileIcon: View {
         .frame(width: size, height: size)
         .accessibilityHidden(true)
         .task(id: item.url) { icon = NSWorkspace.shared.icon(forFile: item.url.path) }
+    }
+}
+
+struct DesktopSelection {
+    private(set) var ids: Set<URL> = []
+    private(set) var lead: URL?
+    private var anchor: URL?
+
+    mutating func select(_ id: URL, modifiers: NSEvent.ModifierFlags, in items: [DesktopItem]) {
+        if modifiers.contains(.shift), let anchor,
+           let start = items.firstIndex(where: { $0.id == anchor }),
+           let end = items.firstIndex(where: { $0.id == id }) {
+            let range = items[min(start, end)...max(start, end)].map(\.id)
+            if modifiers.contains(.command) { ids.formUnion(range) } else { ids = Set(range) }
+            lead = id
+        } else if modifiers.contains(.command), ids.remove(id) != nil {
+            lead = items.first(where: { ids.contains($0.id) })?.id
+            anchor = lead
+        } else {
+            if modifiers.contains(.command) { ids.insert(id) } else { ids = [id] }
+            anchor = id
+            lead = id
+        }
+    }
+
+    mutating func selectAll(in items: [DesktopItem]) {
+        ids = Set(items.map(\.id))
+        if lead == nil { lead = items.first?.id }
+        anchor = lead
+    }
+
+    mutating func reconcile(with items: [DesktopItem]) {
+        ids.formIntersection(items.map(\.id))
+        if lead.map(ids.contains) != true { lead = items.first(where: { ids.contains($0.id) })?.id }
+        if anchor.map(ids.contains) != true { anchor = lead }
+    }
+}
+
+// SwiftUI's onDrag exposes a single provider. AppKit publishes a separate file URL per selection.
+struct FilePointerSurface: NSViewRepresentable {
+    let clicked: (NSEvent.ModifierFlags, Int) -> Void
+    let dragURLs: (NSEvent.ModifierFlags) -> [URL]
+    let showContext: () -> Void
+    let requestTrash: () -> Void
+
+    func makeNSView(context: Context) -> PointerView { PointerView() }
+    func updateNSView(_ view: PointerView, context: Context) { view.actions = self }
+
+    static func draggingItems(for urls: [URL], at point: NSPoint) -> [NSDraggingItem] {
+        let frame = NSRect(x: point.x - 16, y: point.y - 16, width: 32, height: 32)
+        return urls.map { url in
+            let item = NSDraggingItem(pasteboardWriter: url as NSURL)
+            item.setDraggingFrame(frame, contents: NSWorkspace.shared.icon(forFile: url.path))
+            return item
+        }
+    }
+
+    final class PointerView: NSView, NSDraggingSource {
+        var actions: FilePointerSurface?
+        private var press: NSEvent?
+
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+        override func mouseDown(with event: NSEvent) { press = event }
+
+        override func mouseUp(with event: NSEvent) {
+            guard let press else { return }
+            self.press = nil
+            if bounds.contains(convert(event.locationInWindow, from: nil)) {
+                actions?.clicked(press.modifierFlags, press.clickCount)
+            }
+        }
+
+        override func mouseDragged(with event: NSEvent) {
+            guard let press else { return }
+            let start = press.locationInWindow
+            let current = event.locationInWindow
+            guard hypot(current.x - start.x, current.y - start.y) >= 4 else { return }
+            self.press = nil
+            guard let urls = actions?.dragURLs(press.modifierFlags), !urls.isEmpty else { return }
+            let draggingItems = FilePointerSurface.draggingItems(for: urls, at: convert(current, from: nil))
+            let session = beginDraggingSession(with: draggingItems, event: event, source: self)
+            session.draggingFormation = .pile
+        }
+
+        func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+            .copy
+        }
+
+        func ignoreModifierKeys(for session: NSDraggingSession) -> Bool { true }
+
+        override func menu(for event: NSEvent) -> NSMenu? {
+            actions?.showContext()
+            let menu = NSMenu()
+            let trash = menu.addItem(withTitle: String(localized: "Move to Trash…"),
+                                     action: #selector(requestTrash), keyEquivalent: "")
+            trash.target = self
+            return menu
+        }
+
+        @objc private func requestTrash() { actions?.requestTrash() }
     }
 }

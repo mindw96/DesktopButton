@@ -46,7 +46,8 @@ assert entitlements.get('com.apple.security.app-sandbox') is True
 assert entitlements.get('com.apple.security.network.client') is True
 assert not entitlements.get('com.apple.security.cs.disable-library-validation')
 assert not entitlements.get('com.apple.security.get-task-allow')
-assert not entitlements.get('com.apple.security.files.user-selected.read-write')
+assert entitlements.get('com.apple.security.files.user-selected.read-write') is True
+assert not entitlements.get('com.apple.security.files.user-selected.read-only')
 PY
 
 # The rename helper is deliberately independent of the main app sandbox.

@@ -1,4 +1,5 @@
 import AppKit
+import Darwin
 
 struct DesktopItem: Identifiable, Equatable, Sendable {
     let url: URL
@@ -12,8 +13,14 @@ struct DesktopItem: Identifiable, Equatable, Sendable {
     var createdDate: Date? = nil
     var tags: [String] = []
     var applicationName: String? = nil
+    var fileIdentity: FileIdentity? = nil
 
     var id: URL { url }
+
+    func isChild(of folder: URL) -> Bool {
+        url.isFileURL && !["", "/", ".", ".."].contains(url.lastPathComponent)
+            && url.deletingLastPathComponent().standardizedFileURL == folder.standardizedFileURL
+    }
 
     static func contents(of folder: URL) throws -> [DesktopItem] {
         let keys: Set<URLResourceKey> = [
@@ -42,10 +49,24 @@ struct DesktopItem: Identifiable, Equatable, Sendable {
                 modifiedDate: values?.contentModificationDate,
                 createdDate: values?.creationDate,
                 tags: values?.tagNames ?? [],
-                applicationName: applicationName
+                applicationName: applicationName,
+                fileIdentity: FileIdentity(url)
             )
         }
         return DesktopSort.name.sorted(items, direction: .ascending)
+    }
+}
+
+struct FileIdentity: Equatable, Sendable {
+    private let volume: dev_t
+    private let inode: ino_t
+
+    init?(_ url: URL) {
+        var info = stat()
+        // Identify the directory entry itself, including a symlink whose target is elsewhere.
+        guard lstat(url.path, &info) == 0 else { return nil }
+        volume = info.st_dev
+        inode = info.st_ino
     }
 }
 

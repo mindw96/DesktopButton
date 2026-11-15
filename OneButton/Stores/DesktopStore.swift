@@ -9,6 +9,7 @@ final class DesktopStore: ObservableObject {
     @Published private(set) var folderURL: URL?
     @Published private(set) var hasConnection: Bool
     @Published private(set) var errorMessage: String?
+    @Published private(set) var isTrashing = false
     @Published private(set) var openingURL: URL?
     @Published var sortCriterion: DesktopSort {
         didSet {
@@ -27,7 +28,7 @@ final class DesktopStore: ObservableObject {
     private let access: DesktopAccess
     private let loadFolder: () async throws -> DesktopSnapshot?
     private var generation = 0
-    private var openError: String?
+    private var operationError: String?
 
     init(
         defaults: UserDefaults = .standard,
@@ -56,18 +57,19 @@ final class DesktopStore: ObservableObject {
             folderURL = snapshot?.url
             items = sortCriterion.sorted(snapshot?.items ?? [], direction: sortDirection)
             hasConnection = snapshot != nil || access.hasBookmark
-            errorMessage = openError
+            errorMessage = operationError
         } catch {
             guard request == generation else { return }
             folderURL = nil
             items = []
             hasConnection = access.hasBookmark || hasConnection
-            errorMessage = String(localized: "Could not load the file list.\n\(error.localizedDescription)")
+            let loadError = String(localized: "Could not load the file list.\n\(error.localizedDescription)")
+            errorMessage = [operationError, loadError].compactMap { $0 }.joined(separator: "\n")
         }
     }
 
     func chooseFolder() async {
-        guard !isChoosingFolder, openingURL == nil else { return }
+        guard !isChoosingFolder, !isTrashing, openingURL == nil else { return }
         generation += 1
         isLoading = false
         isChoosingFolder = true
@@ -77,7 +79,7 @@ final class DesktopStore: ObservableObject {
             folderURL = snapshot.url
             items = sortCriterion.sorted(snapshot.items, direction: sortDirection)
             hasConnection = true
-            openError = nil
+            operationError = nil
             errorMessage = nil
         } catch {
             errorMessage = String(localized: "Could not connect the folder.\n\(error.localizedDescription)")
@@ -85,29 +87,29 @@ final class DesktopStore: ObservableObject {
     }
 
     func open(_ item: DesktopItem) async -> Bool {
-        guard !isChoosingFolder, openingURL == nil else { return false }
+        guard !isChoosingFolder, !isTrashing, openingURL == nil else { return false }
         guard let folderURL, items.contains(item) else {
-            openError = DesktopAccess.AccessError.changedFolder.localizedDescription
-            errorMessage = openError
+            operationError = DesktopAccess.AccessError.changedFolder.localizedDescription
+            errorMessage = operationError
             return false
         }
         openingURL = item.url
         defer { openingURL = nil }
         do {
             try await access.open(item, in: folderURL)
-            openError = nil
+            operationError = nil
             errorMessage = nil
             return true
         } catch {
             let message = String(localized: "Could not open “\(item.name)”.\n\(error.localizedDescription)")
-            openError = message
+            operationError = message
             errorMessage = message
             return false
         }
     }
 
     func dismissError() {
-        openError = nil
+        operationError = nil
         errorMessage = nil
     }
 
@@ -115,20 +117,44 @@ final class DesktopStore: ObservableObject {
         items = sortCriterion.sorted(items, direction: sortDirection)
     }
 
-    func dragProvider(for item: DesktopItem) -> NSItemProvider {
-        guard !isChoosingFolder, openingURL == nil,
-              let folderURL, items.contains(item), item.url.isFileURL,
-              item.url.deletingLastPathComponent().standardizedFileURL == folderURL.standardizedFileURL else {
-            errorMessage = DesktopAccess.AccessError.changedFolder.localizedDescription
-            return NSItemProvider()
+    func moveToTrash(_ selection: [DesktopItem]) async {
+        guard !selection.isEmpty, !isChoosingFolder, !isTrashing, openingURL == nil else { return }
+        guard let folderURL, containsSelection(selection, in: folderURL) else {
+            operationError = DesktopAccess.AccessError.changedItem.localizedDescription
+            errorMessage = operationError
+            return
         }
-        guard FileManager.default.isReadableFile(atPath: item.url.path) else {
-            errorMessage = String(localized: "Could not share “\(item.name)”. Refresh or reconnect the folder.")
-            return NSItemProvider()
+        isTrashing = true
+        defer { isTrashing = false }
+        do {
+            try await access.moveToTrash(selection, in: folderURL)
+            operationError = nil
+        } catch {
+            operationError = error.localizedDescription
+        }
+        await refresh()
+    }
+
+    func dragURLs(for selection: [DesktopItem]) -> [URL] {
+        guard !selection.isEmpty, !isChoosingFolder, !isTrashing, openingURL == nil else { return [] }
+        guard let folderURL, containsSelection(selection, in: folderURL) else {
+            errorMessage = DesktopAccess.AccessError.changedFolder.localizedDescription
+            return []
+        }
+        for item in selection {
+            guard let identity = item.fileIdentity, identity == FileIdentity(item.url),
+                  FileManager.default.isReadableFile(atPath: item.url.path) else {
+                errorMessage = String(localized: "Could not share “\(item.name)”. Refresh or reconnect the folder.")
+                return []
+            }
         }
         // The connected folder's security scope stays active while this store is retained.
-        let provider = NSItemProvider(contentsOf: item.url) ?? NSItemProvider(object: item.url as NSURL)
-        provider.suggestedName = item.url.lastPathComponent
-        return provider
+        return selection.map(\.url)
+    }
+
+    private func containsSelection(_ selection: [DesktopItem], in folder: URL) -> Bool {
+        let current = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+        return Set(selection.map(\.id)).count == selection.count
+            && selection.allSatisfy { $0.isChild(of: folder) && current[$0.id] == $0 }
     }
 }

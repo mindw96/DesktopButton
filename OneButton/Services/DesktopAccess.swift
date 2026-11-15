@@ -3,10 +3,17 @@ import AppKit
 @MainActor
 final class DesktopAccess {
     private static let bookmarkKey = "desktopBookmark"
+    private static let writableBookmarkKey = "desktopWritableBookmark"
     private let defaults: UserDefaults
     private var activeURL: URL?
 
     var hasBookmark: Bool { defaults.data(forKey: Self.bookmarkKey) != nil }
+
+    private var hasWritableBookmark: Bool {
+        // Another installed version can replace the shared bookmark with a read-only one.
+        guard let bookmark = defaults.data(forKey: Self.bookmarkKey) else { return false }
+        return defaults.data(forKey: Self.writableBookmarkKey) == bookmark
+    }
 
     init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -28,14 +35,14 @@ final class DesktopAccess {
     func chooseFolder() async throws -> DesktopSnapshot? {
         let panel = NSOpenPanel()
         panel.title = String(localized: "Connect Folder")
-        panel.message = String(localized: "Choose a folder to connect. Its files will appear here so you can open them.")
+        panel.message = String(localized: "Choose a folder to open or share its items, or move them to the Trash after confirmation.")
         panel.prompt = String(localized: "Connect")
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.canCreateDirectories = false
         panel.treatsFilePackagesAsDirectories = false
-        panel.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first
+        panel.directoryURL = activeURL ?? FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first
 
         NSApp.activate(ignoringOtherApps: true)
         let response = await withCheckedContinuation { continuation in
@@ -56,11 +63,11 @@ final class DesktopAccess {
             try DesktopItem.contents(of: url)
         }.value
         let bookmark = try url.bookmarkData(
-            options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
+            options: [.withSecurityScope],
             includingResourceValuesForKeys: nil,
             relativeTo: nil
         )
-        defaults.set(bookmark, forKey: Self.bookmarkKey)
+        saveBookmark(bookmark, writable: true)
         activeURL?.stopAccessingSecurityScopedResource()
         activeURL = url
         connected = true
@@ -69,9 +76,7 @@ final class DesktopAccess {
 
     func open(_ item: DesktopItem, in folder: URL) async throws {
         let result: Bool? = try await withFolderAccess { current in
-            guard current.standardizedFileURL == folder.standardizedFileURL,
-                  item.url.isFileURL,
-                  item.url.deletingLastPathComponent().standardizedFileURL == current.standardizedFileURL else {
+            guard current.standardizedFileURL == folder.standardizedFileURL, item.isChild(of: current) else {
                 throw AccessError.changedFolder
             }
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -88,6 +93,41 @@ final class DesktopAccess {
             return true
         }
         guard result == true else { throw AccessError.permissionDenied }
+    }
+
+    func moveToTrash(_ items: [DesktopItem], in folder: URL) async throws {
+        guard hasWritableBookmark else { throw AccessError.reconnectForTrash }
+        let done = try await withFolderAccess { current in
+            guard current.standardizedFileURL == folder.standardizedFileURL else { throw AccessError.changedFolder }
+            try await Task.detached(priority: .userInitiated) {
+                try Self.moveToTrash(items, within: current) { url in
+                    try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+                }
+            }.value
+            return true
+        }
+        guard done == true else { throw AccessError.permissionDenied }
+    }
+
+    nonisolated static func moveToTrash(_ items: [DesktopItem], within folder: URL,
+                                        recycle: (URL) throws -> Void) throws {
+        guard items.allSatisfy({ $0.isChild(of: folder) }) else { throw AccessError.changedFolder }
+        var failures = 0
+        var firstFailure: (String, Error)?
+        for item in items {
+            do {
+                guard let identity = item.fileIdentity, identity == FileIdentity(item.url) else {
+                    throw AccessError.changedItem
+                }
+                try recycle(item.url)
+            } catch {
+                if firstFailure == nil { firstFailure = (item.name, error) }
+                failures += 1
+            }
+        }
+        if let (name, error) = firstFailure {
+            throw AccessError.trashFailed(failures, items.count, name, error.localizedDescription)
+        }
     }
 
     private func withFolderAccess<T>(_ body: (URL) async throws -> T) async throws -> T? {
@@ -113,12 +153,13 @@ final class DesktopAccess {
         }
         do {
             if stale {
+                let writable = hasWritableBookmark
                 let updated = try url.bookmarkData(
-                    options: [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
+                    options: writable ? [.withSecurityScope] : [.withSecurityScope, .securityScopeAllowOnlyReadAccess],
                     includingResourceValuesForKeys: nil,
                     relativeTo: nil
                 )
-                defaults.set(updated, forKey: Self.bookmarkKey)
+                saveBookmark(updated, writable: writable)
             }
             activeURL = url
             return url
@@ -128,8 +169,14 @@ final class DesktopAccess {
         }
     }
 
+    private func saveBookmark(_ data: Data, writable: Bool) {
+        defaults.set(data, forKey: Self.bookmarkKey)
+        if writable { defaults.set(data, forKey: Self.writableBookmarkKey) }
+    }
+
     enum AccessError: LocalizedError {
-        case invalidFolder, permissionDenied, changedFolder, openFailed
+        case invalidFolder, permissionDenied, changedFolder, openFailed, reconnectForTrash, changedItem
+        case trashFailed(Int, Int, String, String)
 
         var errorDescription: String? {
             switch self {
@@ -137,6 +184,10 @@ final class DesktopAccess {
             case .permissionDenied: return String(localized: "Cannot access this folder. Please reconnect it.")
             case .changedFolder: return String(localized: "The connected folder has changed. Refresh the file list.")
             case .openFailed: return String(localized: "The file could not be opened in its default app.")
+            case .reconnectForTrash: return String(localized: "Reconnect this folder once to allow moving items to the Trash.")
+            case .changedItem: return String(localized: "This item has changed. Refresh the file list and select it again.")
+            case let .trashFailed(failed, total, name, detail):
+                return String(localized: "Could not move \(failed) of \(total) items to the Trash.\n\(name): \(detail)")
             }
         }
     }

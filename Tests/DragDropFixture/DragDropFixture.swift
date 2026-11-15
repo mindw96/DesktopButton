@@ -49,19 +49,21 @@ private final class DropView: NSView {
         result.sourceMasks.append(sender.draggingSourceOperationMask.rawValue)
         guard let urls = sender.draggingPasteboard.readObjects(
             forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]
-        ) as? [URL], urls.count == 1 else {
-            result.error = "Drop did not provide exactly one readable file URL"
+        ) as? [URL], !urls.isEmpty, urls.count == sender.draggingPasteboard.pasteboardItems?.count else {
+            result.error = "Expected a readable file URL in every dragged pasteboard item"
             publish()
             return false
         }
         do {
-            let url = urls[0]
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            let data = try Data(contentsOf: url)
-            result.drops.append(ReceivedFile(name: url.lastPathComponent,
-                                            sha256: SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined(),
-                                            byteCount: data.count))
+            let received = try urls.map { url in
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                let data = try Data(contentsOf: url)
+                return ReceivedFile(name: url.lastPathComponent,
+                                    sha256: SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined(),
+                                    byteCount: data.count)
+            }
+            result.drops.append(contentsOf: received)
             result.error = nil
             publish()
             return true

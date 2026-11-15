@@ -1,138 +1,118 @@
 import AppKit
-import UniformTypeIdentifiers
 import XCTest
 @testable import OneButton
 
 @MainActor
 final class DesktopDragTests: XCTestCase {
-    func testFileDragExportsOriginalBytesURLAndFilenameWithoutChangingSource() async throws {
+    func testMultiDragPublishesIndependentFileURLsInOrderAndPreservesOriginalBytes() async throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let defaults = isolatedDefaults()
-        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
-        let file = folder.appendingPathComponent("첨부 파일 1.txt")
-        let original = Data("Folder In Bar drag attachment\n한글 파일 내용".utf8)
-        try original.write(to: file)
+        let first = folder.appendingPathComponent("1. 첨부.txt")
+        let second = folder.appendingPathComponent("2. 첨부.dat")
+        try Data("한글 메모".utf8).write(to: first)
+        try Data([0, 5, 8]).write(to: second)
         let items = try DesktopItem.contents(of: folder)
-        let store = DesktopStore(defaults: defaults, loadFolder: { (folder, items) })
+        let store = makeStore { (folder, items) }
         await store.refresh()
 
-        let provider = store.dragProvider(for: try XCTUnwrap(items.first))
-        XCTAssertEqual(provider.suggestedName, file.lastPathComponent)
-        XCTAssertTrue(provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier))
-        XCTAssertTrue(provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier))
-        let received = try await exportedData(from: provider, type: .plainText)
-        let receivedURL = try await exportedURL(from: provider)
-        XCTAssertEqual(received, original)
-        XCTAssertEqual(receivedURL.standardizedFileURL, file.standardizedFileURL)
-        XCTAssertEqual(try Data(contentsOf: file), original)
+        let draggingItems = FilePointerSurface.draggingItems(for: store.dragURLs(for: items), at: .zero)
+        let pasteboard = NSPasteboard.withUniqueName()
+        defer { pasteboard.releaseGlobally() }
+        let writers = try draggingItems.map { try XCTUnwrap($0.item as? NSPasteboardWriting) }
+        XCTAssertTrue(pasteboard.writeObjects(writers))
+        XCTAssertEqual(pasteboard.pasteboardItems?.count, 2)
+        let received = try XCTUnwrap(pasteboard.readObjects(
+            forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL])
+        XCTAssertEqual(received.map(\.standardizedFileURL), [first, second].map(\.standardizedFileURL))
+        XCTAssertEqual(try received.map { try Data(contentsOf: $0) }, [Data("한글 메모".utf8), Data([0, 5, 8])])
         XCTAssertNil(store.openingURL)
         XCTAssertNil(store.errorMessage)
     }
 
-    func testStaleAndOutsideFolderItemsCannotExportFiles() async throws {
+    func testMixedSelectionWithDeletedItemCannotStartAPartialDrag() async throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let defaults = isolatedDefaults()
-        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
-        let previousFolder = folder.appendingPathComponent("previous", isDirectory: true)
-        let currentFolder = folder.appendingPathComponent("current", isDirectory: true)
-        try FileManager.default.createDirectory(at: previousFolder, withIntermediateDirectories: false)
-        try FileManager.default.createDirectory(at: currentFolder, withIntermediateDirectories: false)
-        let file = previousFolder.appendingPathComponent("still exists.txt")
-        try Data("original".utf8).write(to: file)
-        let oldItems = try DesktopItem.contents(of: previousFolder)
-        let item = try XCTUnwrap(oldItems.first)
-        var snapshot: DesktopSnapshot = (previousFolder, oldItems)
-        let store = DesktopStore(defaults: defaults, loadFolder: { snapshot })
-        await store.refresh()
-        snapshot = (currentFolder, [])
-        await store.refresh()
-
-        XCTAssertTrue(store.dragProvider(for: item).registeredTypeIdentifiers.isEmpty)
-        XCTAssertNotNil(store.errorMessage)
-
-        // Even an inconsistent snapshot must not export an item from another folder.
-        snapshot = (currentFolder, oldItems)
-        await store.refresh()
-        XCTAssertTrue(store.dragProvider(for: item).registeredTypeIdentifiers.isEmpty)
-        XCTAssertNotNil(store.errorMessage)
-        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "original")
-    }
-
-    func testFileDeletedAfterRefreshCannotBeDragged() async throws {
-        let folder = try makeFolder()
-        defer { try? FileManager.default.removeItem(at: folder) }
-        let defaults = isolatedDefaults()
-        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
-        let file = folder.appendingPathComponent("removed.txt")
-        try Data("temporary".utf8).write(to: file)
+        let first = folder.appendingPathComponent("keep.txt")
+        let missing = folder.appendingPathComponent("removed.txt")
+        try Data("original".utf8).write(to: first)
+        try Data().write(to: missing)
         let items = try DesktopItem.contents(of: folder)
-        let store = DesktopStore(defaults: defaults, loadFolder: { (folder, items) })
+        let store = makeStore { (folder, items) }
         await store.refresh()
-        try FileManager.default.removeItem(at: file)
+        try FileManager.default.removeItem(at: missing)
 
-        let provider = store.dragProvider(for: try XCTUnwrap(items.first))
-        XCTAssertTrue(provider.registeredTypeIdentifiers.isEmpty)
+        XCTAssertTrue(store.dragURLs(for: items).isEmpty)
         XCTAssertNotNil(store.errorMessage)
-        XCTAssertNil(store.openingURL)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        XCTAssertEqual(try Data(contentsOf: first), Data("original".utf8))
     }
 
-    func testFolderDragExportsUsableURLAndPreservesContents() async throws {
+    func testStaleAndOutOfFolderSelectionsCannotStartDrag() async throws {
+        let previous = try makeFolder()
+        let current = try makeFolder()
+        defer {
+            try? FileManager.default.removeItem(at: previous)
+            try? FileManager.default.removeItem(at: current)
+        }
+        try Data().write(to: previous.appendingPathComponent("old.txt"))
+        let stale = try DesktopItem.contents(of: previous)
+        var snapshot = (previous, stale)
+        let store = makeStore { snapshot }
+        await store.refresh()
+        snapshot = (current, [])
+        await store.refresh()
+        XCTAssertTrue(store.dragURLs(for: stale).isEmpty)
+
+        snapshot = (current, stale)
+        await store.refresh()
+        XCTAssertTrue(store.dragURLs(for: stale).isEmpty)
+        XCTAssertNotNil(store.errorMessage)
+    }
+
+    func testFolderDragPreservesNestedFiles() async throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        let defaults = isolatedDefaults()
-        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
         let child = folder.appendingPathComponent("공유 자료", isDirectory: true)
         try FileManager.default.createDirectory(at: child, withIntermediateDirectories: false)
-        let nestedFile = child.appendingPathComponent("original.txt")
-        let original = Data("keep this file".utf8)
-        try original.write(to: nestedFile)
+        let nested = child.appendingPathComponent("original.txt")
+        try Data("keep".utf8).write(to: nested)
         let items = try DesktopItem.contents(of: folder)
-        let store = DesktopStore(defaults: defaults, loadFolder: { (folder, items) })
+        let store = makeStore { (folder, items) }
         await store.refresh()
 
-        let provider = store.dragProvider(for: try XCTUnwrap(items.first))
-        XCTAssertEqual(provider.suggestedName, child.lastPathComponent)
-        XCTAssertTrue(provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier))
-        let receivedURL = try await exportedURL(from: provider)
-        XCTAssertEqual(receivedURL.standardizedFileURL, child.standardizedFileURL)
-        XCTAssertEqual(try Data(contentsOf: receivedURL.appendingPathComponent("original.txt")), original)
-        XCTAssertEqual(try Data(contentsOf: nestedFile), original)
-        XCTAssertNil(store.errorMessage)
+        XCTAssertEqual(store.dragURLs(for: items), [child])
+        XCTAssertEqual(try Data(contentsOf: nested), Data("keep".utf8))
     }
 
-    private var defaultsSuite = ""
+    func testCommandShiftAndRefreshPreserveSelectionByFileIdentityAndDisplayOrder() {
+        let items = ["A", "B", "C", "D"].map { DesktopItem(url: URL(fileURLWithPath: "/tmp/" + $0),
+                                                           name: $0, isDirectory: false) }
+        var selection = DesktopSelection()
+        selection.select(items[0].id, modifiers: [], in: items)
+        selection.select(items[2].id, modifiers: .command, in: items)
+        XCTAssertEqual(selection.ids, [items[0].id, items[2].id])
+        selection.select(items[0].id, modifiers: .command, in: items)
+        XCTAssertEqual(selection.ids, [items[2].id])
+        selection.select(items[0].id, modifiers: .shift, in: items)
+        XCTAssertEqual(selection.ids, Set(items.prefix(3).map(\.id)))
+        selection.select(items[3].id, modifiers: .shift, in: items.reversed())
+        XCTAssertEqual(selection.ids, [items[2].id, items[3].id])
+        selection.selectAll(in: items)
+        XCTAssertEqual(selection.ids, Set(items.map(\.id)))
+        selection.reconcile(with: Array(items.prefix(2)))
+        XCTAssertEqual(selection.ids, Set(items.prefix(2).map(\.id)))
+        XCTAssertNotNil(selection.lead)
+    }
 
-    private func isolatedDefaults() -> UserDefaults {
-        defaultsSuite = "OneButton.DragTests.\(UUID().uuidString)"
-        return UserDefaults(suiteName: defaultsSuite)!
+    private func makeStore(load: @escaping () async throws -> DesktopSnapshot?) -> DesktopStore {
+        let suite = "OneButton.DragTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        addTeardownBlock { UserDefaults(suiteName: suite)?.removePersistentDomain(forName: suite) }
+        return DesktopStore(defaults: defaults, loadFolder: load)
     }
 
     private func makeFolder() throws -> URL {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
         return folder
-    }
-
-    private func exportedURL(from provider: NSItemProvider) async throws -> URL {
-        let data = try await exportedData(from: provider, type: .fileURL)
-        let string = try XCTUnwrap(String(data: data, encoding: .utf8))
-        return try XCTUnwrap(URL(string: string))
-    }
-
-    private func exportedData(from provider: NSItemProvider, type: UTType) async throws -> Data {
-        try await withCheckedThrowingContinuation { continuation in
-            provider.loadDataRepresentation(forTypeIdentifier: type.identifier) { data, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let data {
-                    continuation.resume(returning: data)
-                } else {
-                    continuation.resume(throwing: CocoaError(.fileReadUnknown))
-                }
-            }
-        }
     }
 }
