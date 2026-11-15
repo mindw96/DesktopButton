@@ -1,4 +1,4 @@
-# 다음 업데이트 준비: 1.1.0 (12)
+# 다음 업데이트 준비: 1.1.0 (13)
 
 현재 제출한 **1.0.0 (8)**과 구분해 `codex/sorting-update` 브랜치에서 준비하는 개발 버전입니다. **App Store 업로드·심사 제출·공개는 수행하지 않았습니다.** 현재 제출 기록과 1.0.0용 소개 자료는 `submission-status.json`, `metadata.json`, `review-notes.txt`에 보존합니다.
 
@@ -29,7 +29,7 @@ Store 개인정보 manifest에는 사용자 선택 파일의 날짜·메타데�
 영어 지원과 함께 폴더를 더 편하게 살펴볼 수 있도록 개선했습니다.
 
 - 한국어·영어 지원: Mac 또는 앱별 언어 설정에 맞춰 메뉴와 안내 표시
-- ⌘-클릭 또는 Shift-클릭으로 여러 항목을 선택해 다른 앱에 한 번에 첨부
+- 목록·격자에서 빈 공간을 드래그해 사각형 안의 파일을 선택한 뒤 다른 앱에 한 번에 첨부
 - 선택한 파일·폴더를 확인 후 macOS 휴지통으로 이동
 - 이름, 종류, 크기, 태그, 파일을 여는 기본 앱으로 정렬
 - 최근 사용일, 추가된 날짜, 수정일, 생성일로 날짜 정렬
@@ -43,7 +43,7 @@ Store 개인정보 manifest에는 사용자 선택 파일의 날짜·메타데�
 Folder In Bar now supports English and makes browsing your folder more convenient.
 
 - English and Korean menus and messages, following your Mac or per-app language setting
-- Command-click individual items or Shift-click a range, then drag the selection into another app in one drop
+- Drag from empty space in either view to select items in a rectangle, then drag the selected files into another app in one drop
 - Select files and folders and confirm to move them to the macOS Trash
 - Sort by name, kind, size, tags, or the default app that opens each file
 - Sort by date last opened, date added, date modified, or date created
@@ -60,15 +60,15 @@ Choose “Connect Folder…” and select a sample folder, then use the up/down-
 
 In both list and grid views, a single click now selects an item without opening it. Double-click the item, or press Return after selecting it, to open it. Dragging files into another app remains available. In the Settings gear menu, open “Icon Size” and choose “Small”, “Medium”, or “Large”. Verify that the size changes in both views and is retained after relaunch. Medium keeps the previous default sizes. After changing a sort option, click outside the folder panel to verify that it closes; selecting a menu option or dragging a file should still work normally.
 
-For build 12, connect a sample folder containing two files and a subfolder. Select both files and drag either into a destination that accepts multiple files. Check both attachments and the originals. With sample items selected, press Command-Delete. Cancel once, then repeat and confirm. Verify the items in Finder’s Trash. Earlier read-only connections can still be used to open and share files. To use Trash for that folder, choose “Reconnect Folder…” and select it again.
+For build 13, connect a sample folder containing two files and a subfolder. In List View or Grid View, press on empty space and drag the selection rectangle across two files. Release, then drag either selected file into a destination that accepts multiple files. Check both attachments and the originals. With sample items selected, press Command-Delete. Cancel once, then repeat and confirm. Verify the items in Finder’s Trash. Earlier read-only connections can still be used to open and share files. To use Trash for that folder, choose “Reconnect Folder…” and select it again.
 
 ## 제출 전 확인
 
-로컬 실행 앱은 `build/Preview-1.1.0-build12/Folder In Bar.app`입니다. Universal archive는 `build/AppStore/FolderInBar-1.1.0-12.xcarchive`, 서명된 PKG는 `build/AppStore/export-12/Folder In Bar.pkg`입니다. PKG 크기는 2,243,419바이트이고 SHA-256은 `fc422c2e31f13377d943d94adc482e02b4d103de6b01857852598797c5064b68`입니다.
+로컬 실행 앱은 `build/Preview-1.1.0-build13/Folder In Bar.app`입니다. Universal archive는 `build/AppStore/FolderInBar-1.1.0-13.xcarchive`, 서명된 PKG는 `build/AppStore/export-13/Folder In Bar.pkg`입니다. PKG 크기는 2,320,598바이트이고 SHA-256은 `abc892766668a88a8aebc90cbbd3e443b5f709f2ae0391e50380d0a3e54cbdc1`입니다.
 
 1. 기존 1.0.0의 실제 심사·출시 상태를 확인합니다.
 2. 이 개발 브랜치의 최종 변경을 검토하고, 추가 변경이 있었다면 다시 빌드·검증합니다.
-3. 1.1.0 (12)의 로컬 검증 결과와 산출물은 [VALIDATION.md](../../VALIDATION.md)를 확인합니다.
+3. 1.1.0 (13)의 로컬 검증 결과와 산출물은 [VALIDATION.md](../../VALIDATION.md)를 확인합니다.
 4. 다음 업데이트를 제출할 때 버전·빌드 번호 중복 여부를 확인하고, 영어 지원을 포함한 스토어 소개·심사 메모·언어별 업데이트 설명에 위 내용을 반영합니다. 그때 빌드를 업로드·선택하고 저장값을 다시 확인한 뒤 제출합니다.
 
 이번 개발 작업은 다음 업데이트 제출을 위한 준비이며, 자동 제출을 예약하지 않습니다.

@@ -1,18 +1,18 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "%@\nCommand-click to select multiple items, Shift-click to select a range, or drag to another app.": {
+    "%@\nDrag from empty space to select items. Drag selected items to another app.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@\nCommand-click to select multiple items, Shift-click to select a range, or drag to another app."
+            "value": "%@\nDrag from empty space to select items. Drag selected items to another app."
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@\n⌘-클릭으로 여러 항목을, Shift-클릭으로 연속된 항목을 선택하세요. 선택한 항목을 다른 앱으로 드래그할 수 있습니다."
+            "value": "%@\n여러 항목을 선택하려면 빈 공간에서 드래그하세요. 선택한 항목을 다른 앱으로 드래그하면 함께 전달됩니다."
           }
         }
       }

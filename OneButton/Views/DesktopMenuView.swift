@@ -11,6 +11,7 @@ struct DesktopMenuView: View {
     @ObservedObject var popoverSize: PopoverSize
     let dismiss: () -> Void
     @State private var selection = DesktopSelection()
+    @State private var marqueeRect: CGRect?
     @State private var pendingTrash: [DesktopItem] = []
     @FocusState private var filesAreFocused: Bool
     @AppStorage private var layout: DesktopLayout
@@ -255,32 +256,55 @@ struct DesktopMenuView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             ScrollViewReader { scroll in
-                ScrollView {
-                    if layout == .list {
-                        LazyVStack(spacing: 1) {
-                            ForEach(store.items) { item in itemButton(item) }
+                GeometryReader { viewport in
+                    ScrollView {
+                        Group {
+                            if layout == .list {
+                                LazyVStack(spacing: fileLayout.spacing) {
+                                    ForEach(store.items) { item in itemButton(item) }
+                                }
+                            } else {
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: fileLayout.spacing),
+                                                         count: gridColumnCount), spacing: fileLayout.spacing) {
+                                    ForEach(store.items) { item in itemButton(item) }
+                                }
+                            }
                         }
-                        .padding(6)
-                    } else {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8),
-                                                 count: gridColumnCount), spacing: 8) {
-                            ForEach(store.items) { item in itemButton(item) }
+                        .padding(.horizontal, fileLayout.horizontalInset)
+                        .padding(.vertical, fileLayout.verticalInset)
+                        .frame(maxWidth: .infinity, minHeight: viewport.size.height, alignment: .topLeading)
+                        .background {
+                            DesktopMarqueeSurface(layout: fileLayout, items: store.items,
+                                                  selection: $selection, rectangle: $marqueeRect,
+                                                  focusFiles: { filesAreFocused = true })
+                                .allowsHitTesting(canInteract)
+                                .accessibilityHidden(true)
                         }
-                        .padding(12)
+                        .overlay(alignment: .topLeading) {
+                            if let rect = marqueeRect {
+                                Rectangle()
+                                    .fill(Color.accentColor.opacity(0.15))
+                                    .overlay { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) }
+                                    .frame(width: rect.width, height: rect.height)
+                                    .offset(x: rect.minX, y: rect.minY)
+                                    .allowsHitTesting(false)
+                                    .accessibilityHidden(true)
+                            }
+                        }
                     }
-                }
-                .focusable()
-                .focused($filesAreFocused)
-                .onMoveCommand { moveSelection($0) }
-                .onAppear { filesAreFocused = true }
-                .onChange(of: selection.lead) { url in
-                    if let url { scroll.scrollTo(url) }
-                }
-                .onChange(of: layout) { _ in
-                    if let lead = selection.lead { scroll.scrollTo(lead) }
-                }
-                .onChange(of: gridColumnCount) { _ in
-                    if let lead = selection.lead { scroll.scrollTo(lead) }
+                    .focusable()
+                    .focused($filesAreFocused)
+                    .onMoveCommand { moveSelection($0) }
+                    .onAppear { filesAreFocused = true }
+                    .onChange(of: selection.lead) { url in
+                        if marqueeRect == nil, let url { scroll.scrollTo(url) }
+                    }
+                    .onChange(of: layout) { _ in
+                        if let lead = selection.lead { scroll.scrollTo(lead) }
+                    }
+                    .onChange(of: gridColumnCount) { _ in
+                        if let lead = selection.lead { scroll.scrollTo(lead) }
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -289,6 +313,10 @@ struct DesktopMenuView: View {
 
     private var gridColumnCount: Int {
         DesktopLayout.columnCount(for: popoverSize.size.width, iconSize: iconSize)
+    }
+
+    private var fileLayout: DesktopMarqueeLayout {
+        DesktopMarqueeLayout(layout: layout, iconSize: iconSize, columnCount: gridColumnCount)
     }
 
     private var canInteract: Bool {
@@ -303,6 +331,7 @@ struct DesktopMenuView: View {
             if layout == .list {
                 DesktopItemRow(item: item, isOpening: store.openingURL == item.url,
                                iconSize: iconSize.listSize)
+                    .frame(height: fileLayout.rowHeight)
                     .padding(.horizontal, 6)
                     .background(selected ? Color.accentColor.opacity(0.18) : .clear,
                                 in: RoundedRectangle(cornerRadius: 5))
@@ -331,7 +360,7 @@ struct DesktopMenuView: View {
         }
         .disabled(!canInteract)
         .id(item.id)
-        .help(String(localized: "\(item.name)\nCommand-click to select multiple items, Shift-click to select a range, or drag to another app."))
+        .help(String(localized: "\(item.name)\nDrag from empty space to select items. Drag selected items to another app."))
         .accessibilityIdentifier("desktop.item.\(item.name)")
         .accessibilityLabel(item.name)
         .accessibilityHint(item.isDirectory
@@ -359,7 +388,7 @@ struct DesktopMenuView: View {
     }
 
     private func requestTrash() {
-        guard canInteract else { return }
+        guard canInteract, marqueeRect == nil else { return }
         pendingTrash = selectedItems
     }
 
@@ -558,12 +587,12 @@ struct DesktopMenuView: View {
     }
 
     private func openSelection() {
-        guard canInteract, pendingTrash.isEmpty, selection.ids.count == 1, let item = selectedItems.first else { return }
+        guard canInteract, pendingTrash.isEmpty, marqueeRect == nil, selection.ids.count == 1, let item = selectedItems.first else { return }
         open(item)
     }
 
     private func moveSelection(_ direction: MoveCommandDirection) {
-        guard canInteract, pendingTrash.isEmpty else { return }
+        guard canInteract, pendingTrash.isEmpty, marqueeRect == nil else { return }
         let current = store.items.firstIndex(where: { $0.id == selection.lead })
         guard let next = layout.selectionIndex(from: current, direction: direction,
                                                itemCount: store.items.count,
@@ -665,6 +694,19 @@ struct DesktopSelection {
             anchor = id
             lead = id
         }
+    }
+
+    func marquee(hits: Set<URL>, modifiers: NSEvent.ModifierFlags, in items: [DesktopItem]) -> DesktopSelection {
+        var result = self
+        if modifiers.contains(.command) { result.ids.formSymmetricDifference(hits) }
+        else if modifiers.contains(.shift) { result.ids.formUnion(hits) }
+        else { result.ids = hits }
+        if result.ids.isEmpty { return DesktopSelection() }
+        if result.lead.map(result.ids.contains) != true {
+            result.lead = items.first(where: { result.ids.contains($0.id) })?.id
+        }
+        if result.anchor.map(result.ids.contains) != true { result.anchor = result.lead }
+        return result
     }
 
     mutating func selectAll(in items: [DesktopItem]) {

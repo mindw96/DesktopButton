@@ -1,5 +1,11 @@
 # Folder In Bar 검증 기록
 
+## 1.1.0 (13) 목록·격자 사각형 선택 (2026-11-15)
+
+- 단위 테스트 60개 통과. 사각형을 어느 방향으로 그려도 부분적으로 겹친 항목을 선택하고, 칸 사이 여백과 마지막 행의 빈칸은 제외하는지 검사했습니다. 선택을 늘렸다 줄일 때 기존 선택과 ⌘·Shift의 조합도 검사했습니다. 결과는 `.test-artifacts/marquee-final-unit.xcresult`에 있습니다.
+- Apple Silicon Mac의 Store Debug 앱에서 목록·격자별로 빈 공간 클릭, 드래그 중 선택 표시, Shift로 선택 추가, Esc로 이전 선택 복원, 선택한 사진과 문서를 한 번의 드롭으로 별도 샌드박스 앱에 전달하는 동작을 확인했습니다. 50개 항목을 추가한 목록에서는 아래쪽 가장자리에 마우스를 두면 화면 밖의 항목이 선택되고, 위쪽 가장자리로 되돌리면 올라가며 선택이 줄어들었습니다. 기존 파일 열기·휴지통 기능도 통과했습니다. 실행 기록은 `.test-artifacts/marquee-gui-204614.log`, 실제 팝업 화면은 `.test-artifacts/marquee-grid.png`입니다.
+- 로컬 미리보기 `build/Preview-1.1.0-build13/Folder In Bar.app`과 테스트한 Debug 앱의 15개 파일이 일치합니다. Apple Silicon·Intel Universal 아카이브를 export하고, PKG의 설치 서명과 추출한 앱의 Store 배포 서명·권한·언어·아키텍처를 검증했습니다. [패키지 경로와 SHA-256](docs/app-store/next-update.md)
+
 ## 1.1.0 (12) 복수 드래그 및 휴지통 (2026-11-15)
 
 - 단위 테스트 57개 통과. 선택 범위, 순서가 보존된 파일 URL, 오래된 읽기 전용 연결, 연결 폴더 밖의 항목 및 심볼릭 링크, 일부 항목의 실패 처리를 검사했습니다. 결과는 `.test-artifacts/multi-trash-final-unit.xcresult`에 있습니다.

@@ -1,6 +1,6 @@
 # Mac App Store 빌드와 제출
 
-Mac App Store판은 **`FolderInBarAppStore` scheme**으로 빌드합니다. App Store Connect 앱 ID는 **6833273093**입니다. 기존 제출 버전은 **1.0.0 (8)**입니다. 2026년 11월 13일 거절 사유에 대한 답변을 보냈으며, 아래 명령은 다음 업데이트 **1.1.0 (12)**를 기준으로 합니다.
+Mac App Store판은 **`FolderInBarAppStore` scheme**으로 빌드합니다. App Store Connect 앱 ID는 **6833273093**입니다. 기존 제출 버전은 **1.0.0 (8)**입니다. 2026년 11월 13일 거절 사유에 대한 답변을 보냈으며, 아래 명령은 다음 업데이트 **1.1.0 (13)**를 기준으로 합니다.
 
 | 구분 | Mac App Store | GitHub 직접 배포 |
 | --- | --- | --- |
@@ -29,13 +29,13 @@ Store판에는 Sparkle 코드·프레임워크·업데이트 메뉴·관련 설�
 xcodebuild -project OneButton.xcodeproj -scheme FolderInBarAppStore \
   -configuration Release -destination 'generic/platform=macOS' \
   -derivedDataPath build/AppStore/DerivedData \
-  -archivePath build/AppStore/FolderInBar-1.1.0-12.xcarchive \
+  -archivePath build/AppStore/FolderInBar-1.1.0-13.xcarchive \
   ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO \
   -allowProvisioningUpdates archive
 
 xcodebuild -exportArchive \
-  -archivePath build/AppStore/FolderInBar-1.1.0-12.xcarchive \
-  -exportPath build/AppStore/export-12 \
+  -archivePath build/AppStore/FolderInBar-1.1.0-13.xcarchive \
+  -exportPath build/AppStore/export-13 \
   -exportOptionsPlist AppStore/ExportOptions.plist \
   -allowProvisioningUpdates
 ```
@@ -50,16 +50,16 @@ Store 개발 빌드의 출력은 DerivedData의 `Build/Products/AppStore/Debug/F
 
 ```sh
 python3 script/verify_app_store.py \
-  'build/AppStore/export-12/Folder In Bar.app' --release
+  'build/AppStore/export-13/Folder In Bar.app' --release
 ```
 
-Xcode가 앱 대신 PKG를 내보냈다면, 실제 생성된 PKG 파일명으로 아래 명령을 실행합니다. 빌드 12의 배포 패키지는 `build/AppStore/export-12/Folder In Bar.pkg`입니다. `pkg-expanded-12`은 아직 없는 경로여야 하며, 이미 검증용으로 풀어 둔 경로가 있다면 다른 빈 경로를 지정합니다. 이는 압축만 풀며 앱을 설치하지 않습니다.
+Xcode가 앱 대신 PKG를 내보냈다면, 실제 생성된 PKG 파일명으로 아래 명령을 실행합니다. 빌드 13의 배포 패키지는 `build/AppStore/export-13/Folder In Bar.pkg`입니다. `pkg-expanded-13`은 아직 없는 경로여야 하며, 이미 검증용으로 풀어 둔 경로가 있다면 다른 빈 경로를 지정합니다. 이는 압축만 풀며 앱을 설치하지 않습니다.
 
 ```sh
-pkgutil --check-signature 'build/AppStore/export-12/Folder In Bar.pkg'
-pkgutil --expand-full 'build/AppStore/export-12/Folder In Bar.pkg' \
-  build/AppStore/pkg-expanded-12
-find build/AppStore/pkg-expanded-12 -type d -name 'Folder In Bar.app'
+pkgutil --check-signature 'build/AppStore/export-13/Folder In Bar.pkg'
+pkgutil --expand-full 'build/AppStore/export-13/Folder In Bar.pkg' \
+  build/AppStore/pkg-expanded-13
+find build/AppStore/pkg-expanded-13 -type d -name 'Folder In Bar.app'
 ```
 
 마지막 명령이 출력한 앱 경로를 `verify_app_store.py`의 인자로 전달하고 `--release`를 붙입니다. 검증은 Universal 구성, 앱 서명·팀, 정확한 앱 ID의 배포 프로필, sandbox와 선택 폴더 읽기·쓰기 권한, 디버깅 권한 제거, 개인정보 manifest, Sparkle·이름 변경 helper 제외를 확인합니다. PKG 서명도 별도로 확인해야 합니다.
@@ -70,8 +70,8 @@ find build/AppStore/pkg-expanded-12 -type d -name 'Folder In Bar.app'
 
 ```sh
 xcodebuild -exportArchive \
-  -archivePath build/AppStore/FolderInBar-1.1.0-12.xcarchive \
-  -exportPath build/AppStore/upload-12 \
+  -archivePath build/AppStore/FolderInBar-1.1.0-13.xcarchive \
+  -exportPath build/AppStore/upload-13 \
   -exportOptionsPlist AppStore/ExportOptions-Upload.plist \
   -allowProvisioningUpdates
 ```

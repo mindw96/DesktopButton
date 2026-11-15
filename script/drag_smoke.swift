@@ -87,6 +87,37 @@ func dragFile(_ element: AXUIElement, to end: CGPoint, sourcePID: pid_t, cancel:
     }
 }
 
+func dragBlank(from start: CGPoint, to end: CGPoint, flags: CGEventFlags = [],
+               whilePressed: (_ move: (CGPoint) throws -> Void) throws -> Void = { _ in }) throws {
+    try requirePointOnDisplay(start)
+    try requirePointOnDisplay(end)
+    func post(_ type: CGEventType, _ point: CGPoint) throws {
+        guard let event = CGEvent(mouseEventSource: nil, mouseType: type,
+                                  mouseCursorPosition: point, mouseButton: .left) else {
+            throw SmokeFailure(description: "Could not create rectangle selection event")
+        }
+        event.flags = flags
+        event.post(tap: .cghidEventTap)
+        pumpRunLoop(0.05)
+    }
+    try post(.mouseMoved, start)
+    try post(.leftMouseDown, start)
+    var last = start
+    func move(_ point: CGPoint) throws {
+        try requirePointOnDisplay(point)
+        last = point
+        try post(.leftMouseDragged, point)
+    }
+    defer { try? post(.leftMouseUp, last) }
+    if start != end {
+        for step in 1...8 {
+            let t = CGFloat(step) / 8
+            try move(CGPoint(x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t))
+        }
+    }
+    try whilePressed(move)
+}
+
 func receiveState(_ app: AXUIElement) -> [String: Any]? {
     guard let label = identified("fixture.drop.result", in: app),
           let text = value(label, kAXValueAttribute) as? String,
@@ -169,8 +200,10 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
                 "Quit the existing Folder In Bar instance before running this isolated test")
     try requireSandboxed(sourceURL)
     try requireSandboxed(receiverURL, readOnly: true)
-    let folder = FileManager.default.temporaryDirectory.appendingPathComponent("FolderInBar-Drag-\(UUID().uuidString)")
-    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+    let testRoot = FileManager.default.temporaryDirectory.appendingPathComponent("FolderInBar-Drag-\(UUID().uuidString)")
+    let folder = testRoot.appendingPathComponent("작업 자료")
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: testRoot) }
     let image = folder.appendingPathComponent("01 사진 테스트.png")
     let document = folder.appendingPathComponent("02 문서 & notes.txt")
     let png = Data(base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jWZkAAAAASUVORK5CYII=")!
@@ -178,8 +211,8 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
     try Data("Folder In Bar drag fixture. Original content must remain unchanged.\n".utf8).write(to: document)
     let originals = try [image, document].reduce(into: [String: Data]()) { $0[$1.lastPathComponent] = try Data(contentsOf: $1) }
     let unique = UUID().uuidString
-    let trashFile = folder.appendingPathComponent("03-test-\(unique).txt")
-    let trashFolder = folder.appendingPathComponent("04-test-\(unique)", isDirectory: true)
+    let trashFile = folder.appendingPathComponent("03 메모 \(unique.prefix(8)).txt")
+    let trashFolder = folder.appendingPathComponent("04 보관 \(unique.prefix(8))", isDirectory: true)
     let nested = trashFolder.appendingPathComponent("inside.txt")
     let sentinel = Data(unique.utf8)
     try FileManager.default.createDirectory(at: trashFolder, withIntermediateDirectories: false)
@@ -189,7 +222,6 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
     defer {
         if openTestDocumentExists(document) { try? closeDragFixtureDocument(document) }
         launched.reversed().forEach(stopDragApp)
-        try? FileManager.default.removeItem(at: folder)
     }
     let receiver = try launchDragApp(receiverURL, arguments: ["--probe", image.path])
     launched.append(receiver)
@@ -244,14 +276,50 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
         return item
     }
     for mode in ["list", "grid"] {
-        for files in [[image], [document], [image, document]] {
+        for (index, files) in [[image], [document], [image, document], [image, document]].enumerated() {
             try showTestPanel(source, at: sourceURL, in: sourceAX)
             try press(identified("desktop.view.\(mode)", in: sourceAX), "\(mode) layout")
             let first = files[0]
             try require(until(5) { (try? item(first)) != nil }, "Source item missing")
-            try clickObserved(item(first))
-            if files.count > 1 {
-                try clickObserved(item(files[1]), flags: mode == "list" ? .maskCommand : .maskShift)
+            if index == 3 {
+                let a = try observedFrame(item(image)), b = try observedFrame(item(document))
+                let blank = mode == "list" ? CGPoint(x: a.minX - 3, y: a.midY)
+                                           : CGPoint(x: b.midX, y: b.minY - 5)
+                let end = mode == "list" ? CGPoint(x: b.midX, y: b.midY)
+                                         : CGPoint(x: a.midX, y: a.midY)
+                let last = try observedFrame(item(trashFolder))
+                let belowItems = CGPoint(x: last.midX, y: last.maxY + 8)
+                try dragBlank(from: belowItems, to: belowItems)
+                try require(until(2) {
+                    guard let trash = identified("desktop.trash", in: sourceAX) else { return false }
+                    return value(trash, kAXEnabledAttribute) as? Bool == false
+                }, "\(mode) clicking empty space below the items did not clear the selection at \(belowItems)")
+                try clickObserved(item(trashFile))
+                try dragBlank(from: blank, to: end, flags: .maskShift) { _ in
+                    try require(until(2) { labeled("3개 선택됨", in: sourceAX) != nil },
+                                "\(mode) additive rectangle did not select the original plus the two hits")
+                    try key(53, to: source.processIdentifier, system: true)
+                }
+                guard let trash = identified("desktop.trash", in: sourceAX) else {
+                    throw SmokeFailure(description: "\(mode) Escape closed the popup during rectangle selection")
+                }
+                try press(trash, "inspect restored selection")
+                try require(labeled("‘\(trashFile.lastPathComponent)’ 항목을 휴지통으로 옮길까요?", in: sourceAX) != nil,
+                            "\(mode) Escape did not restore the original single-file selection")
+                try press(identified("desktop.trash.cancel", in: sourceAX), "keep restored file")
+                try dragBlank(from: blank, to: end) { _ in
+                    try require(until(2) { labeled("2개 선택됨", in: sourceAX) != nil },
+                                "\(mode) rectangle did not select the two files before mouse-up")
+                    if mode == "grid" {
+                        screenshot(source.processIdentifier, to: root.appendingPathComponent(".test-artifacts/marquee-grid.png"))
+                    }
+                }
+                print("PASS: \(mode) empty-click clears, rectangle updates during dragging, Shift adds, Escape cancels")
+            } else {
+                try clickObserved(item(first))
+                if files.count > 1 {
+                    try clickObserved(item(files[1]), flags: mode == "list" ? .maskCommand : .maskShift)
+                }
             }
             guard let target = identified("fixture.dropzone", in: receiverAX) else {
                 throw SmokeFailure(description: "Drag receiver disappeared")
@@ -358,10 +426,43 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
         try require(try Data(contentsOf: folder.appendingPathComponent(name)) == bytes, "Trashing selected items changed an unselected original")
     }
     print("PASS: file and complete folder moved to macOS Trash; nested data remains readable and unselected files remain unchanged")
+    // More items than one viewport proves scrolling while the pointer remains stationary.
+    for number in 1...50 {
+        try Data().write(to: folder.appendingPathComponent(String(format: "scroll-%02d.txt", number)))
+    }
+    let totalLabel = "\(try FileManager.default.contentsOfDirectory(atPath: folder.path).count)개 항목"
+    try press(identified("desktop.view.list", in: sourceAX), "list layout for scrolling")
+    try press(identified("desktop.refresh", in: sourceAX), "load scrolling fixtures")
+    try require(until(5) { labeled(totalLabel, in: sourceAX) != nil },
+                "Scrolling fixtures did not finish loading")
+    guard let scroll = find(contentRoots(sourceAX), matching: { value($0, kAXRoleAttribute) as? String == kAXScrollAreaRole }) else {
+        throw SmokeFailure(description: "File list viewport unavailable")
+    }
+    let viewport = try observedFrame(scroll)
+    let first = try observedFrame(item(image))
+    let visibleRows = Int(ceil(viewport.height / first.height)) + 1
+    try dragBlank(from: CGPoint(x: first.minX - 3, y: first.midY),
+                  to: CGPoint(x: first.midX, y: viewport.maxY - 3)) { move in
+        try require(until(8) {
+            find(contentRoots(sourceAX), matching: { element in
+                let text = (value(element, kAXValueAttribute) as? String) ?? ""
+                guard text.hasSuffix("개 선택됨"), let count = Int(text.prefix(while: { $0.isNumber })) else { return false }
+                return count > visibleRows + 3
+            }) != nil
+        }, "Holding at the bottom edge did not select items past the original \(visibleRows) visible rows")
+        try move(CGPoint(x: first.midX, y: viewport.minY + 3))
+        try require(until(8) {
+            guard let restored = try? observedFrame(item(image)) else { return false }
+            return abs(restored.midY - first.midY) <= 2 && labeled(totalLabel, in: sourceAX) != nil
+        }, "Holding at the top edge did not return to the starting row and shrink the selection")
+    }
+    print("PASS: stationary bottom-edge drag selects offscreen rows; returning to the top edge scrolls back and shrinks the selection")
     let artifacts = root.appendingPathComponent(".test-artifacts")
     try FileManager.default.createDirectory(at: artifacts, withIntermediateDirectories: true)
     if var state = receiveState(receiverAX) {
         state["trash"] = ["cancelPreservedSelection": true, "fileAndFolderReachedTrash": true, "unselectedOriginalsPreserved": true]
+        state["marquee"] = ["listAndGridTwoFileDrops": true, "liveSelection": true, "escapeRestoresSelection": true,
+                             "plainClickClears": true, "stationaryEdgeScroll": true]
         try JSONSerialization.data(withJSONObject: state, options: [.prettyPrinted, .sortedKeys])
             .write(to: artifacts.appendingPathComponent("drag-smoke-result.json"))
     }

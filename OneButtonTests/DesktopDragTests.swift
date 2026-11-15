@@ -103,6 +103,50 @@ final class DesktopDragTests: XCTestCase {
         XCTAssertNotNil(selection.lead)
     }
 
+    func testMarqueeSelectionRecalculatesFromMouseDownWhenTheBoxShrinks() {
+        let items = ["A", "B", "C"].map {
+            DesktopItem(url: URL(fileURLWithPath: "/tmp/" + $0), name: $0, isDirectory: false)
+        }
+        let a = items[0].id, b = items[1].id, c = items[2].id
+        var original = DesktopSelection()
+        original.select(a, modifiers: [], in: items)
+        original.select(c, modifiers: .command, in: items)
+
+        XCTAssertEqual(original.marquee(hits: [b], modifiers: [], in: items).ids, [b])
+        XCTAssertTrue(original.marquee(hits: [], modifiers: [], in: items).ids.isEmpty)
+        XCTAssertEqual(original.marquee(hits: [a, b], modifiers: .shift, in: items).ids, [a, b, c])
+        XCTAssertEqual(original.marquee(hits: [a, b], modifiers: .command, in: items).ids, [b, c])
+        XCTAssertEqual(original.marquee(hits: [b], modifiers: .command, in: items).ids, [a, b, c])
+        XCTAssertEqual(original.marquee(hits: [], modifiers: .command, in: items).ids, [a, c])
+        XCTAssertEqual(original.ids, [a, c])
+    }
+
+    func testMarqueeInGridSelectsPartiallyCoveredTilesInEitherDirection() {
+        let grid = DesktopMarqueeLayout(layout: .grid, iconSize: .medium, columnCount: 3)
+        let start = CGPoint(x: 210, y: 165), end = CGPoint(x: 160, y: 80)
+        for (from, to) in [(start, end), (end, start)] {
+            let box = DesktopMarqueeLayout.rectangle(from: from, to: to)
+            XCTAssertEqual(grid.intersectingIndices(box, width: 320, itemCount: 5), [1, 4])
+        }
+        for empty in [CGRect(x: 108, y: 30, width: 2, height: 10),   // column gap
+                      CGRect(x: 40, y: 113, width: 10, height: 2),    // row gap
+                      CGRect(x: 250, y: 140, width: 10, height: 10),  // unfilled last cell
+                      CGRect(x: 40, y: 30, width: 0, height: 10)] {
+            XCTAssertTrue(grid.intersectingIndices(empty, width: 320, itemCount: 5).isEmpty)
+        }
+    }
+
+    func testListMarqueeCanStartInTheGutterAndReachRowsBelowTheViewport() {
+        let list = DesktopMarqueeLayout(layout: .list, iconSize: .large, columnCount: 1)
+        let gutter = CGRect(x: 3, y: 2545, width: 5, height: 45)
+        XCTAssertTrue(list.intersectingIndices(gutter, width: 300, itemCount: 100).isEmpty)
+        // At the large icon size, this crosses the left edge of rows 65 and 66.
+        let box = DesktopMarqueeLayout.rectangle(from: CGPoint(x: 25, y: 2590),
+                                                  to: CGPoint(x: 3, y: 2545))
+        XCTAssertEqual(list.intersectingIndices(box, width: 300, itemCount: 100), [65, 66])
+        XCTAssertTrue(list.intersectingIndices(box, width: 300, itemCount: 20).isEmpty)
+    }
+
     private func makeStore(load: @escaping () async throws -> DesktopSnapshot?) -> DesktopStore {
         let suite = "OneButton.DragTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
