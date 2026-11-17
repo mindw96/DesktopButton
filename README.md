@@ -1,6 +1,6 @@
 # 폴더인바 (Folder In Bar)
 
-**다음 업데이트 개발본:** `codex/sorting-update`에서 Store **1.1.0 (13)**을 준비합니다. 한국어·영어, 정렬과 아이콘 크기 조절을 지원하고, 여러 파일을 한 번에 다른 앱에 첨부하거나 선택한 파일·폴더를 휴지통으로 옮길 수 있습니다. 이번 작업은 다음 업데이트용 개발·패키지 준비까지이며 App Store에 업로드하거나 제출하지 않습니다. [다음 업데이트 준비 자료](docs/app-store/next-update.md)를 확인하세요.
+**Mac App Store 1.1.0 (13)**은 2026년 11월 17일 23:56 KST에 재제출되어 심사 대기 중입니다. 목록·격자에서 여러 파일을 사각형으로 선택해 다른 앱에 한 번에 첨부할 수 있습니다. 한국어·영어, 정렬, 아이콘 크기 조절과 휴지통 이동도 지원합니다. [버전별 변경 사항](docs/app-store/next-update.md) · [심사 접수 기록](docs/app-store/submission-status.json)
 
 ![Folder In Bar 앱 아이콘](docs/branding/icon-preview.png)
 
@@ -8,7 +8,7 @@
 
 앱 이름은 **폴더인바(Folder In Bar)**, 소스 저장소는 **mindw96/DesktopButton**입니다. 현재 공개 버전은 **0.4.0 (build 6)**입니다. 빌드·UI 검증 결과와 공증·배포 진행 상태는 [VALIDATION.md](VALIDATION.md)에 기록합니다.
 
-**Mac App Store판 1.0.0 (build 8)은 2026-11-11 재제출을 완료했고, 제출 직후 심사 대기를 확인했습니다.** 이번 개발 준비에서 실시간 심사·출시 상태는 확인하지 않습니다. 기존 build 7 제출을 취소하고 파일 드래그 기능을 포함한 build 8로 교체했습니다. 별도 `FolderInBarAppStore` scheme을 사용하며 업데이트는 App Store에서 받습니다. Store용 빌드·서명·업로드 절차는 [Mac App Store 빌드 안내](docs/app-store/BUILDING.md)를 참조하세요. 아래 Sparkle·공증·이름 변경 helper 설명은 GitHub 직접 배포판에 해당합니다.
+Mac App Store판은 별도 `FolderInBarAppStore` scheme을 사용하며 업데이트는 App Store에서 받습니다. [Mac App Store 빌드 안내](docs/app-store/BUILDING.md)를 참조하세요. 아래 Sparkle·공증·이름 변경 helper 설명은 GitHub 직접 배포판에 해당합니다.
 
 목록·격자에서 다른 앱으로 파일을 드래그하는 기능은 **Store build 8과 현재 소스**에 포함됩니다. 다운로드 가능한 **GitHub 0.4.0 배포본에는 아직 포함되지 않았습니다.**
 
