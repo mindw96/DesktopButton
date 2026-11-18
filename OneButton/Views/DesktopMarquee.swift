@@ -127,7 +127,7 @@ struct DesktopMarqueeSurface: NSViewRepresentable {
             guard rect != actions.rectangle else { return }
             actions.rectangle = rect
             let hits = actions.layout.intersectingIndices(rect, width: bounds.width, itemCount: actions.items.count)
-            actions.selection = original.marquee(hits: Set(hits.map { actions.items[$0].id }),
+            actions.selection = original.marquee(hits: Set(hits.compactMap { actions.items[$0].selectionKey }),
                                                  modifiers: modifiers, in: actions.items)
         }
 

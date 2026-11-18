@@ -9,6 +9,7 @@ final class PopoverSize: ObservableObject {
 
     @Published private(set) var size: CGSize
     @Published private(set) var resizesFromLeadingEdge = true
+    private var preferredSize: CGSize
     private var availableSize: CGSize
     private let defaults: UserDefaults
 
@@ -17,23 +18,30 @@ final class PopoverSize: ObservableObject {
         availableSize = Self.maximumSize
         let width = defaults.object(forKey: "popoverWidth") as? Double ?? Self.defaultSize.width
         let height = defaults.object(forKey: "popoverHeight") as? Double ?? Self.defaultSize.height
-        size = Self.clamped(CGSize(width: width, height: height), available: Self.maximumSize)
+        let restored = Self.clamped(CGSize(width: width, height: height), available: Self.maximumSize)
+        preferredSize = restored
+        size = restored
     }
 
     func fit(in available: CGSize, fromLeadingEdge: Bool) {
         availableSize = available
         resizesFromLeadingEdge = fromLeadingEdge
-        resize(to: size)
+        let fitted = Self.clamped(preferredSize, available: available)
+        if size != fitted { size = fitted }
     }
 
     func resize(to proposed: CGSize) {
         let next = Self.clamped(proposed, available: availableSize)
-        if next != size { size = next }
+        guard next != size else { return }
+        // Resizing one axis on a small screen preserves the preference for the other.
+        if next.width != size.width { preferredSize.width = next.width }
+        if next.height != size.height { preferredSize.height = next.height }
+        size = next
     }
 
     func save() {
-        defaults.set(size.width, forKey: "popoverWidth")
-        defaults.set(size.height, forKey: "popoverHeight")
+        defaults.set(preferredSize.width, forKey: "popoverWidth")
+        defaults.set(preferredSize.height, forKey: "popoverHeight")
     }
 
     static func draggedSize(from size: CGSize, start: CGPoint, current: CGPoint, fromLeadingEdge: Bool) -> CGSize {

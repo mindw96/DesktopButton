@@ -11,12 +11,7 @@ final class DesktopStore: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published private(set) var isTrashing = false
     @Published private(set) var openingURL: URL?
-    @Published var sortCriterion: DesktopSort {
-        didSet {
-            defaults.set(sortCriterion.rawValue, forKey: "desktopSort")
-            sortItems()
-        }
-    }
+    @Published private(set) var sortCriterion: DesktopSort
     @Published var sortDirection: DesktopSortDirection {
         didSet {
             defaults.set(sortDirection.rawValue, forKey: "desktopSortDirection")
@@ -26,13 +21,14 @@ final class DesktopStore: ObservableObject {
 
     private let defaults: UserDefaults
     private let access: DesktopAccess
-    private let loadFolder: () async throws -> DesktopSnapshot?
+    private let loadFolder: (DesktopSort) async throws -> DesktopSnapshot?
+    private var folderIdentity: String?
     private var generation = 0
     private var operationError: String?
 
     init(
         defaults: UserDefaults = .standard,
-        loadFolder: (() async throws -> DesktopSnapshot?)? = nil
+        loadFolder: ((DesktopSort) async throws -> DesktopSnapshot?)? = nil
     ) {
         let access = DesktopAccess(defaults: defaults)
         self.defaults = defaults
@@ -40,7 +36,7 @@ final class DesktopStore: ObservableObject {
         self.sortDirection = DesktopSortDirection(rawValue: defaults.string(forKey: "desktopSortDirection") ?? "") ?? .ascending
         self.access = access
         self.hasConnection = access.hasBookmark
-        self.loadFolder = loadFolder ?? { try await access.loadFolder() }
+        self.loadFolder = loadFolder ?? { try await access.loadFolder(for: $0) }
     }
 
     func refresh() async {
@@ -52,15 +48,14 @@ final class DesktopStore: ObservableObject {
             if request == generation { isLoading = false }
         }
         do {
-            let snapshot = try await loadFolder()
+            let snapshot = try await loadFolder(sortCriterion)
             guard request == generation else { return }
-            folderURL = snapshot?.url
-            items = sortCriterion.sorted(snapshot?.items ?? [], direction: sortDirection)
-            hasConnection = snapshot != nil || access.hasBookmark
+            apply(snapshot)
             errorMessage = operationError
         } catch {
             guard request == generation else { return }
             folderURL = nil
+            folderIdentity = nil
             items = []
             hasConnection = access.hasBookmark || hasConnection
             let loadError = String(localized: "Could not load the file list.\n\(error.localizedDescription)")
@@ -73,22 +68,42 @@ final class DesktopStore: ObservableObject {
         generation += 1
         isLoading = false
         isChoosingFolder = true
-        defer { isChoosingFolder = false }
+        let requestedSort = sortCriterion
         do {
-            guard let snapshot = try await access.chooseFolder() else { return }
-            folderURL = snapshot.url
-            items = sortCriterion.sorted(snapshot.items, direction: sortDirection)
-            hasConnection = true
-            operationError = nil
-            errorMessage = nil
+            if let snapshot = try await access.chooseFolder(for: requestedSort) {
+                apply(snapshot)
+                operationError = nil
+                errorMessage = nil
+            }
         } catch {
             errorMessage = String(localized: "Could not connect the folder.\n\(error.localizedDescription)")
+        }
+        isChoosingFolder = false
+        if sortCriterion != requestedSort && sortCriterion != .name && hasConnection { await refresh() }
+    }
+
+    private func apply(_ snapshot: DesktopSnapshot?) {
+        folderURL = snapshot?.url
+        // A real snapshot carries the identity checked during authorized enumeration.
+        folderIdentity = access.connectedFolderIdentity ?? folderURL.flatMap(DesktopAccess.folderIdentity(at:))
+        items = sortCriterion.sorted(snapshot?.items ?? [], direction: sortDirection)
+        hasConnection = snapshot != nil || access.hasBookmark
+    }
+
+    func setSortCriterion(_ criterion: DesktopSort) async {
+        guard sortCriterion != criterion else { return }
+        sortCriterion = criterion
+        defaults.set(criterion.rawValue, forKey: "desktopSort")
+        if criterion == .name {
+            sortItems()
+        } else if !isChoosingFolder && (hasConnection || isLoading) {
+            await refresh()
         }
     }
 
     func open(_ item: DesktopItem) async -> Bool {
         guard !isChoosingFolder, !isTrashing, openingURL == nil else { return false }
-        guard let folderURL, items.contains(item) else {
+        guard let folderURL, let key = item.selectionKey, items.contains(where: { $0.selectionKey == key }) else {
             operationError = DesktopAccess.AccessError.changedFolder.localizedDescription
             errorMessage = operationError
             return false
@@ -137,7 +152,8 @@ final class DesktopStore: ObservableObject {
 
     func dragURLs(for selection: [DesktopItem]) -> [URL] {
         guard !selection.isEmpty, !isChoosingFolder, !isTrashing, openingURL == nil else { return [] }
-        guard let folderURL, containsSelection(selection, in: folderURL) else {
+        guard let folderURL, let folderIdentity, folderIdentity == DesktopAccess.folderIdentity(at: folderURL),
+              containsSelection(selection, in: folderURL) else {
             errorMessage = DesktopAccess.AccessError.changedFolder.localizedDescription
             return []
         }
@@ -153,8 +169,10 @@ final class DesktopStore: ObservableObject {
     }
 
     private func containsSelection(_ selection: [DesktopItem], in folder: URL) -> Bool {
-        let current = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
-        return Set(selection.map(\.id)).count == selection.count
-            && selection.allSatisfy { $0.isChild(of: folder) && current[$0.id] == $0 }
+        var current = Set(items.compactMap(\.selectionKey))
+        return selection.allSatisfy { item in
+            guard item.isChild(of: folder), let key = item.selectionKey else { return false }
+            return current.remove(key) != nil
+        }
     }
 }

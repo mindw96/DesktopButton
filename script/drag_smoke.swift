@@ -22,6 +22,18 @@ func requireSandboxed(_ app: URL, readOnly: Bool = false) throws {
                 "Unexpected sandbox or user-selected file access for \(app.lastPathComponent)")
 }
 
+func requireStoreTestApp(_ sourceURL: URL) throws {
+    guard sourceURL.pathComponents.contains("Debug"), let bundleID = Bundle(url: sourceURL)?.bundleIdentifier,
+          ["com.onebutton.desktop", "com.onebutton.desktop.dragtest"].contains(bundleID) else {
+        throw SmokeFailure(description: "Use the Store Debug app so test-only preferences are active")
+    }
+    try require(Bundle(url: sourceURL)?.object(forInfoDictionaryKey: "SUFeedURL") == nil,
+                "Expected the Store build without Sparkle")
+    try require(NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty,
+                "Use the dragtest bundle ID while another instance is running")
+    try requireSandboxed(sourceURL)
+}
+
 func launchDragApp(_ url: URL, arguments: [String]) throws -> NSRunningApplication {
     let configuration = NSWorkspace.OpenConfiguration()
     let useKoreanUI = arguments.contains("--ui-testing") && !arguments.contains("-AppleLanguages")
@@ -192,13 +204,7 @@ func showTestPanel(_ process: NSRunningApplication, at sourceURL: URL, in app: A
 func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
     try require(AXIsProcessTrusted(), "Accessibility permission is unavailable")
     try require(NSWorkspace.shared.frontmostApplication?.bundleIdentifier != "com.apple.loginwindow", "The Mac is locked")
-    try require(sourceURL.pathComponents.contains("Debug") && Bundle(url: sourceURL)?.bundleIdentifier == "com.onebutton.desktop",
-                "Use the Store Debug app so test-only preferences are active")
-    try require(Bundle(url: sourceURL)?.object(forInfoDictionaryKey: "SUFeedURL") == nil,
-                "Expected the Store build without Sparkle")
-    try require(NSRunningApplication.runningApplications(withBundleIdentifier: "com.onebutton.desktop").isEmpty,
-                "Quit the existing Folder In Bar instance before running this isolated test")
-    try requireSandboxed(sourceURL)
+    try requireStoreTestApp(sourceURL)
     try requireSandboxed(receiverURL, readOnly: true)
     let testRoot = FileManager.default.temporaryDirectory.appendingPathComponent("FolderInBar-Drag-\(UUID().uuidString)")
     let folder = testRoot.appendingPathComponent("작업 자료")
@@ -275,6 +281,39 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
         }
         return item
     }
+    func verifyDrop(_ files: [URL], mode: String, expectedBytes: [String: Data]) throws {
+        guard let target = identified("fixture.dropzone", in: receiverAX) else {
+            throw SmokeFailure(description: "Drag receiver disappeared")
+        }
+        let dropFrame = try observedFrame(target)
+        let popup = try observedWindowFrame(source.processIdentifier)
+        let points = [CGPoint(x: dropFrame.midX, y: dropFrame.midY),
+                      CGPoint(x: dropFrame.minX + 30, y: dropFrame.maxY - 30)]
+        guard let targetPoint = points.first(where: { !popup.contains($0) }) else {
+            throw SmokeFailure(description: "Popover covers the receiver; adjust fixture window position")
+        }
+        try dragFile(item(files[0]), to: targetPoint, sourcePID: source.processIdentifier)
+        count += files.count
+        gestures += 1
+        try require(until(8) { (receiveState(receiverAX)?["drops"] as? [[String: Any]])?.count == count },
+                    "\(mode) \(files.map(\.lastPathComponent)) drop failed: \(receiveState(receiverAX) ?? [:])")
+        guard let state = receiveState(receiverAX), let drops = state["drops"] as? [[String: Any]],
+              let masks = state["sourceMasks"] as? [UInt] else { throw SmokeFailure(description: "Missing drop evidence") }
+        let batch = drops.suffix(files.count)
+        try require(Set(batch.compactMap { $0["name"] as? String }) == Set(files.map(\.lastPathComponent)),
+                    "Receiver did not obtain each selected file exactly once")
+        for received in batch {
+            guard let name = received["name"] as? String, let expected = expectedBytes[name] else {
+                throw SmokeFailure(description: "Invalid filename")
+            }
+            try require(received["sha256"] as? String == hash(expected) && received["byteCount"] as? Int == expected.count,
+                        "Receiver did not obtain the original bytes for \(name)")
+        }
+        try require(masks.count == gestures && masks.allSatisfy { $0 & NSDragOperation.copy.rawValue != 0 && $0 & NSDragOperation.move.rawValue == 0 },
+                    "Each gesture must produce exactly one copy-only drop")
+        try require(!openTestDocumentExists(document), "Dragging triggered the file's click-open action")
+        print("PASS: \(mode) one cross-sandbox drop delivered \(files.count) selected file(s) with original names and bytes")
+    }
     for mode in ["list", "grid"] {
         for (index, files) in [[image], [document], [image, document], [image, document]].enumerated() {
             try showTestPanel(source, at: sourceURL, in: sourceAX)
@@ -321,37 +360,7 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
                     try clickObserved(item(files[1]), flags: mode == "list" ? .maskCommand : .maskShift)
                 }
             }
-            guard let target = identified("fixture.dropzone", in: receiverAX) else {
-                throw SmokeFailure(description: "Drag receiver disappeared")
-            }
-            let dropFrame = try observedFrame(target)
-            let popup = try observedWindowFrame(source.processIdentifier)
-            let points = [CGPoint(x: dropFrame.midX, y: dropFrame.midY),
-                          CGPoint(x: dropFrame.minX + 30, y: dropFrame.maxY - 30)]
-            guard let targetPoint = points.first(where: { !popup.contains($0) }) else {
-                throw SmokeFailure(description: "Popover covers the receiver; adjust fixture window position")
-            }
-            try dragFile(item(first), to: targetPoint, sourcePID: source.processIdentifier)
-            count += files.count
-            gestures += 1
-            try require(until(8) { (receiveState(receiverAX)?["drops"] as? [[String: Any]])?.count == count },
-                        "\(mode) \(files.map(\.lastPathComponent)) drop failed: \(receiveState(receiverAX) ?? [:])")
-            guard let state = receiveState(receiverAX), let drops = state["drops"] as? [[String: Any]],
-                  let masks = state["sourceMasks"] as? [UInt] else { throw SmokeFailure(description: "Missing drop evidence") }
-            let batch = drops.suffix(files.count)
-            try require(Set(batch.compactMap { $0["name"] as? String }) == Set(files.map(\.lastPathComponent)),
-                        "Receiver did not obtain each selected file exactly once")
-            for received in batch {
-                guard let name = received["name"] as? String, let expected = originals[name] else {
-                    throw SmokeFailure(description: "Invalid filename")
-                }
-                try require(received["sha256"] as? String == hash(expected) && received["byteCount"] as? Int == expected.count,
-                            "Receiver did not obtain the original bytes for \(name)")
-            }
-            try require(masks.count == gestures && masks.allSatisfy { $0 & NSDragOperation.copy.rawValue != 0 && $0 & NSDragOperation.move.rawValue == 0 },
-                        "Each gesture must produce exactly one copy-only drop")
-            try require(!openTestDocumentExists(document), "Dragging triggered the file's click-open action")
-            print("PASS: \(mode) one cross-sandbox drop delivered \(files.count) selected file(s) with original names and bytes")
+            try verifyDrop(files, mode: mode, expectedBytes: originals)
         }
     }
     if identified("desktop.item.\(document.lastPathComponent)", in: sourceAX) == nil { try showTestPanel(source, at: sourceURL, in: sourceAX) }
@@ -457,9 +466,43 @@ func runDragChecks(root: URL, sourceURL: URL, receiverURL: URL) throws {
         }, "Holding at the top edge did not return to the starting row and shrink the selection")
     }
     print("PASS: stationary bottom-edge drag selects offscreen rows; returning to the top edge scrolls back and shrinks the selection")
+    let extra = [folder.appendingPathComponent("scroll-01.txt"), folder.appendingPathComponent("scroll-02.txt")]
+    let four = [image, document] + extra
+    try clickObserved(item(image))
+    for file in four.dropFirst() { try clickObserved(item(file), flags: .maskCommand) }
+    try require(until(4) { labeled("4개 선택됨", in: sourceAX) != nil }, "Could not select four files")
+    var expectedBytes = originals
+    for file in extra { expectedBytes[file.lastPathComponent] = try Data(contentsOf: file) }
+    try verifyDrop(four, mode: "list", expectedBytes: expectedBytes)
+    try showTestPanel(source, at: sourceURL, in: sourceAX)
+    try clickObserved(item(image))
+    try require(until(3) {
+        guard let trash = identified("desktop.trash", in: sourceAX) else { return false }
+        return value(trash, kAXEnabledAttribute) as? Bool == true
+    }, "The original file must be selected before replacement")
+    try png.write(to: image, options: .atomic)
+    try press(identified("desktop.refresh", in: sourceAX), "refresh after same-name file replacement")
+    try require(until(5) {
+        guard let trash = identified("desktop.trash", in: sourceAX) else { return false }
+        return (try? item(image)) != nil && value(trash, kAXEnabledAttribute) as? Bool == false
+    }, "Selection transferred to a different file at the same path")
+
+    let renamed = testRoot.appendingPathComponent("Renamed", isDirectory: true)
+    try FileManager.default.moveItem(at: folder, to: renamed)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+    let decoy = folder.appendingPathComponent("replacement-only.txt")
+    try sentinel.write(to: decoy)
+    try press(identified("desktop.refresh", in: sourceAX), "refresh after folder path reuse")
+    try require(until(5) {
+        labeled(renamed.lastPathComponent, in: sourceAX) != nil || identified("desktop.error", in: sourceAX) != nil
+    }, "The app neither followed the original folder nor requested reconnection")
+    try require((try? item(decoy)) == nil, "The replacement folder was displayed")
+    print("PASS: refreshing clears same-name replacement selection and never lists the replacement folder")
     let artifacts = root.appendingPathComponent(".test-artifacts")
     try FileManager.default.createDirectory(at: artifacts, withIntermediateDirectories: true)
     if var state = receiveState(receiverAX) {
+        state["replacementFileDeselected"] = true
+        state["replacementFolderExcluded"] = true
         state["trash"] = ["cancelPreservedSelection": true, "fileAndFolderReachedTrash": true, "unselectedOriginalsPreserved": true]
         state["marquee"] = ["listAndGridTwoFileDrops": true, "liveSelection": true, "escapeRestoresSelection": true,
                              "plainClickClears": true, "stationaryEdgeScroll": true]

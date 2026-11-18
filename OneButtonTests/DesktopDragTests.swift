@@ -15,7 +15,7 @@ final class DesktopDragTests: XCTestCase {
         let store = makeStore { (folder, items) }
         await store.refresh()
 
-        let draggingItems = FilePointerSurface.draggingItems(for: store.dragURLs(for: items), at: .zero)
+        let draggingItems = FilePointerSurface.draggingItems(for: store.dragURLs(for: store.items), at: .zero)
         let pasteboard = NSPasteboard.withUniqueName()
         defer { pasteboard.releaseGlobally() }
         let writers = try draggingItems.map { try XCTUnwrap($0.item as? NSPasteboardWriting) }
@@ -83,34 +83,54 @@ final class DesktopDragTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: nested), Data("keep".utf8))
     }
 
-    func testCommandShiftAndRefreshPreserveSelectionByFileIdentityAndDisplayOrder() {
-        let items = ["A", "B", "C", "D"].map { DesktopItem(url: URL(fileURLWithPath: "/tmp/" + $0),
-                                                           name: $0, isDirectory: false) }
+    func testCommandShiftAndRefreshPreserveSelectionByFileIdentityAndDisplayOrder() throws {
+        let items = try makeItems(["A", "B", "C", "D"])
+        let keys = try items.map { try XCTUnwrap($0.selectionKey) }
         var selection = DesktopSelection()
-        selection.select(items[0].id, modifiers: [], in: items)
-        selection.select(items[2].id, modifiers: .command, in: items)
-        XCTAssertEqual(selection.ids, [items[0].id, items[2].id])
-        selection.select(items[0].id, modifiers: .command, in: items)
-        XCTAssertEqual(selection.ids, [items[2].id])
-        selection.select(items[0].id, modifiers: .shift, in: items)
-        XCTAssertEqual(selection.ids, Set(items.prefix(3).map(\.id)))
-        selection.select(items[3].id, modifiers: .shift, in: items.reversed())
-        XCTAssertEqual(selection.ids, [items[2].id, items[3].id])
+        selection.select(items[0], modifiers: [], in: items)
+        selection.select(items[2], modifiers: .command, in: items)
+        XCTAssertEqual(selection.ids, [keys[0], keys[2]])
+        selection.select(items[0], modifiers: .command, in: items)
+        XCTAssertEqual(selection.ids, [keys[2]])
+        selection.select(items[0], modifiers: .shift, in: items)
+        XCTAssertEqual(selection.ids, Set(keys.prefix(3)))
+        selection.select(items[3], modifiers: .shift, in: items.reversed())
+        XCTAssertEqual(selection.ids, [keys[2], keys[3]])
         selection.selectAll(in: items)
-        XCTAssertEqual(selection.ids, Set(items.map(\.id)))
+        XCTAssertEqual(selection.ids, Set(keys))
         selection.reconcile(with: Array(items.prefix(2)))
-        XCTAssertEqual(selection.ids, Set(items.prefix(2).map(\.id)))
+        XCTAssertEqual(selection.ids, Set(keys.prefix(2)))
         XCTAssertNotNil(selection.lead)
     }
 
-    func testMarqueeSelectionRecalculatesFromMouseDownWhenTheBoxShrinks() {
-        let items = ["A", "B", "C"].map {
-            DesktopItem(url: URL(fileURLWithPath: "/tmp/" + $0), name: $0, isDirectory: false)
-        }
-        let a = items[0].id, b = items[1].id, c = items[2].id
+    func testRefreshDropsReplacedFileAndPreservesInPlaceEditsAndRangeAnchor() throws {
+        let original = try makeItems(["A", "B", "C"])
+        let folder = original[0].url.deletingLastPathComponent()
+        var selection = DesktopSelection()
+        selection.select(original[0], modifiers: [], in: original)
+        selection.select(original[1], modifiers: .command, in: original)
+
+        try Data("edited".utf8).write(to: original[0].url)
+        try Data("replacement".utf8).write(to: original[1].url, options: .atomic)
+        let updated = try DesktopItem.contents(of: folder).sorted { $0.name < $1.name }
+        XCTAssertEqual(original[0].fileIdentity, updated[0].fileIdentity)
+        XCTAssertNotEqual(original[1].fileIdentity, updated[1].fileIdentity)
+        XCTAssertFalse(selection.contains(updated[1]))
+        selection.reconcile(with: updated)
+        XCTAssertEqual(updated.filter(selection.contains).map(\.url), [original[0].url])
+        XCTAssertEqual(selection.lead, updated[0].selectionKey)
+
+        selection.select(updated[2], modifiers: .shift, in: updated)
+        XCTAssertEqual(selection.ids, Set(updated.compactMap(\.selectionKey)))
+    }
+
+    func testMarqueeSelectionRecalculatesFromMouseDownWhenTheBoxShrinks() throws {
+        let items = try makeItems(["A", "B", "C"])
+        let keys = try items.map { try XCTUnwrap($0.selectionKey) }
+        let a = keys[0], b = keys[1], c = keys[2]
         var original = DesktopSelection()
-        original.select(a, modifiers: [], in: items)
-        original.select(c, modifiers: .command, in: items)
+        original.select(items[0], modifiers: [], in: items)
+        original.select(items[2], modifiers: .command, in: items)
 
         XCTAssertEqual(original.marquee(hits: [b], modifiers: [], in: items).ids, [b])
         XCTAssertTrue(original.marquee(hits: [], modifiers: [], in: items).ids.isEmpty)
@@ -119,6 +139,36 @@ final class DesktopDragTests: XCTestCase {
         XCTAssertEqual(original.marquee(hits: [b], modifiers: .command, in: items).ids, [a, b, c])
         XCTAssertEqual(original.marquee(hits: [], modifiers: .command, in: items).ids, [a, c])
         XCTAssertEqual(original.ids, [a, c])
+    }
+
+    func testRemovedRowDiscardsPendingClickAndContextMenuAction() throws {
+        let frame = NSRect(x: 0, y: 0, width: 100, height: 40)
+        let window = NSWindow(contentRect: frame, styleMask: .borderless, backing: .buffered, defer: true)
+        let row = FilePointerSurface.PointerView(frame: frame)
+        var clicks = 0
+        var trashRequests = 0
+        row.actions = FilePointerSurface(clicked: { _, _ in clicks += 1 }, dragURLs: { _ in [] },
+                                         showContext: {}, requestTrash: { trashRequests += 1 })
+        window.contentView?.addSubview(row)
+        let down = try XCTUnwrap(NSEvent.mouseEvent(with: .leftMouseDown, location: NSPoint(x: 10, y: 10),
+                                                   modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber,
+                                                   context: nil, eventNumber: 1, clickCount: 1, pressure: 1))
+        row.mouseDown(with: down)
+        let menuItem = try XCTUnwrap(row.menu(for: down)?.items.first)
+        row.removeFromSuperview()
+        row.mouseUp(with: down)
+        NSApp.sendAction(try XCTUnwrap(menuItem.action), to: menuItem.target, from: menuItem)
+        XCTAssertEqual(clicks, 0)
+        XCTAssertEqual(trashRequests, 0)
+    }
+
+    func testBulkDragLimitsPileArtworkAndKeepsAllFileURLsInOrder() throws {
+        let items = try makeItems((0..<20).map { "document-\($0).txt" })
+        let urls = items.map(\.url)
+        let drag = FilePointerSurface.draggingItems(for: urls, at: .zero)
+        XCTAssertEqual(drag.compactMap { $0.item as? URL }, urls)
+        let visible = drag.filter { item in item.imageComponents?.contains { $0.contents != nil } == true }
+        XCTAssertEqual(visible.count, 3)
     }
 
     func testMarqueeInGridSelectsPartiallyCoveredTilesInEitherDirection() {
@@ -151,7 +201,14 @@ final class DesktopDragTests: XCTestCase {
         let suite = "OneButton.DragTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         addTeardownBlock { UserDefaults(suiteName: suite)?.removePersistentDomain(forName: suite) }
-        return DesktopStore(defaults: defaults, loadFolder: load)
+        return DesktopStore(defaults: defaults, loadFolder: { _ in try await load() })
+    }
+
+    private func makeItems(_ names: [String]) throws -> [DesktopItem] {
+        let folder = try makeFolder()
+        addTeardownBlock { try FileManager.default.removeItem(at: folder) }
+        for name in names { try Data().write(to: folder.appendingPathComponent(name)) }
+        return try DesktopItem.contents(of: folder).sorted { $0.name < $1.name }
     }
 
     private func makeFolder() throws -> URL {

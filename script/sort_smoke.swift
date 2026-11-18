@@ -3,13 +3,7 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
     try require(AXIsProcessTrusted(), "Accessibility permission is unavailable")
     try require(NSWorkspace.shared.frontmostApplication?.bundleIdentifier != "com.apple.loginwindow",
                 "The Mac is locked; no UI input was sent")
-    try require(sourceURL.pathComponents.contains("Debug")
-                && Bundle(url: sourceURL)?.bundleIdentifier == "com.onebutton.desktop"
-                && Bundle(url: sourceURL)?.object(forInfoDictionaryKey: "SUFeedURL") == nil,
-                "Use the Store Debug app with isolated test preferences")
-    try require(NSRunningApplication.runningApplications(withBundleIdentifier: "com.onebutton.desktop").isEmpty,
-                "Quit the existing Folder In Bar instance before this isolated test")
-    try requireSandboxed(sourceURL)
+    try requireStoreTestApp(sourceURL)
 
     let folder = FileManager.default.temporaryDirectory.appendingPathComponent("FolderInBar-Sort-\(UUID().uuidString)")
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
@@ -37,7 +31,7 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
     process.activate(options: [])
     pumpRunLoop(1)
     var app = AXUIElementCreateApplication(process.processIdentifier)
-    try openMenu(app)
+    try showTestPanel(process, at: sourceURL, in: app)
     try require(until(5) { identified("desktop.connect", in: app) != nil }, "Connect control missing")
     try press(identified("desktop.connect", in: app), "connect test folder")
     try require(until(5) { labeled("연결", in: app) != nil }, "Folder picker missing")
@@ -61,7 +55,7 @@ func runSortChecks(root: URL, sourceURL: URL) throws {
     try require(until(5) { labeled("연결", in: app) == nil }, "Folder picker did not close")
 
     func showFiles() throws {
-        if identified("desktop.sort", in: app) == nil { try openMenu(app) }
+        if identified("desktop.sort", in: app) == nil { try showTestPanel(process, at: sourceURL, in: app) }
         try require(until(5) { identified("desktop.item.\(names[0])", in: app) != nil }, "Fixture file missing")
     }
     func choose(_ option: String, date: Bool = false) throws {

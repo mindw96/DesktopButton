@@ -101,7 +101,7 @@ struct DesktopMenuView: View {
         }
         .onChange(of: store.folderURL) { _ in
             selection = DesktopSelection()
-            if let first = store.items.first { selection.select(first.id, modifiers: [], in: store.items) }
+            if let first = store.items.first { selection.select(first, modifiers: [], in: store.items) }
         }
         .onChange(of: store.items) { selection.reconcile(with: $0) }
         .onDisappear { pendingTrash = [] }
@@ -215,7 +215,7 @@ struct DesktopMenuView: View {
     private func sortOption(_ criterion: DesktopSort) -> some View {
         Toggle(criterion.title, isOn: Binding(
             get: { store.sortCriterion == criterion },
-            set: { if $0 { store.sortCriterion = criterion } }
+            set: { if $0 { Task { await store.setSortCriterion(criterion) } } }
         ))
         .accessibilityIdentifier("desktop.sort.\(criterion.rawValue)")
     }
@@ -296,14 +296,14 @@ struct DesktopMenuView: View {
                     .focused($filesAreFocused)
                     .onMoveCommand { moveSelection($0) }
                     .onAppear { filesAreFocused = true }
-                    .onChange(of: selection.lead) { url in
+                    .onChange(of: selection.lead?.url) { url in
                         if marqueeRect == nil, let url { scroll.scrollTo(url) }
                     }
                     .onChange(of: layout) { _ in
-                        if let lead = selection.lead { scroll.scrollTo(lead) }
+                        if let url = selection.lead?.url { scroll.scrollTo(url) }
                     }
                     .onChange(of: gridColumnCount) { _ in
-                        if let lead = selection.lead { scroll.scrollTo(lead) }
+                        if let url = selection.lead?.url { scroll.scrollTo(url) }
                     }
                 }
             }
@@ -324,7 +324,7 @@ struct DesktopMenuView: View {
     }
 
     private func itemButton(_ item: DesktopItem) -> some View {
-        let selected = selection.ids.contains(item.id)
+        let selected = selection.contains(item)
         return Button {
             select(item, modifiers: [])
         } label: {
@@ -348,17 +348,19 @@ struct DesktopMenuView: View {
                     if count == 2 && modifiers.intersection([.command, .shift]).isEmpty { open(item) }
                 },
                 dragURLs: { modifiers in
-                    if !selection.ids.contains(item.id) { select(item, modifiers: modifiers) }
+                    if !selection.contains(item) { select(item, modifiers: modifiers) }
+                    guard selection.contains(item) else { return [] }
                     return store.dragURLs(for: selectedItems)
                 },
                 showContext: {
-                    if !selection.ids.contains(item.id) { select(item, modifiers: []) }
+                    if !selection.contains(item) { select(item, modifiers: []) }
                 },
-                requestTrash: { requestTrash() }
+                requestTrash: { if selection.contains(item) { requestTrash() } }
             )
+            .id(item.selectionKey)
             .accessibilityHidden(true)
         }
-        .disabled(!canInteract)
+        .disabled(!canInteract || item.selectionKey == nil)
         .id(item.id)
         .help(String(localized: "\(item.name)\nDrag from empty space to select items. Drag selected items to another app."))
         .accessibilityIdentifier("desktop.item.\(item.name)")
@@ -378,13 +380,14 @@ struct DesktopMenuView: View {
     }
 
     private var selectedItems: [DesktopItem] {
-        store.items.filter { selection.ids.contains($0.id) }
+        let current = store.items.filter(selection.contains)
+        return current.count == selection.ids.count ? current : []
     }
 
     private func select(_ item: DesktopItem, modifiers: NSEvent.ModifierFlags) {
         guard canInteract else { return }
         filesAreFocused = true
-        selection.select(item.id, modifiers: modifiers, in: store.items)
+        selection.select(item, modifiers: modifiers, in: store.items)
     }
 
     private func requestTrash() {
@@ -593,7 +596,7 @@ struct DesktopMenuView: View {
 
     private func moveSelection(_ direction: MoveCommandDirection) {
         guard canInteract, pendingTrash.isEmpty, marqueeRect == nil else { return }
-        let current = store.items.firstIndex(where: { $0.id == selection.lead })
+        let current = selection.lead.flatMap { lead in store.items.firstIndex { $0.selectionKey == lead } }
         guard let next = layout.selectionIndex(from: current, direction: direction,
                                                itemCount: store.items.count,
                                                columnCount: gridColumnCount) else { return }
@@ -675,19 +678,24 @@ private struct DesktopFileIcon: View {
 }
 
 struct DesktopSelection {
-    private(set) var ids: Set<URL> = []
-    private(set) var lead: URL?
-    private var anchor: URL?
+    private(set) var ids: Set<FileSelectionKey> = []
+    private(set) var lead: FileSelectionKey?
+    private var anchor: FileSelectionKey?
 
-    mutating func select(_ id: URL, modifiers: NSEvent.ModifierFlags, in items: [DesktopItem]) {
+    func contains(_ item: DesktopItem) -> Bool {
+        item.selectionKey.map(ids.contains) == true
+    }
+
+    mutating func select(_ item: DesktopItem, modifiers: NSEvent.ModifierFlags, in items: [DesktopItem]) {
+        guard let id = item.selectionKey else { return }
         if modifiers.contains(.shift), let anchor,
-           let start = items.firstIndex(where: { $0.id == anchor }),
-           let end = items.firstIndex(where: { $0.id == id }) {
-            let range = items[min(start, end)...max(start, end)].map(\.id)
+           let start = items.firstIndex(where: { $0.selectionKey == anchor }),
+           let end = items.firstIndex(where: { $0.selectionKey == id }) {
+            let range = items[min(start, end)...max(start, end)].compactMap(\.selectionKey)
             if modifiers.contains(.command) { ids.formUnion(range) } else { ids = Set(range) }
             lead = id
         } else if modifiers.contains(.command), ids.remove(id) != nil {
-            lead = items.first(where: { ids.contains($0.id) })?.id
+            lead = items.first(where: contains)?.selectionKey
             anchor = lead
         } else {
             if modifiers.contains(.command) { ids.insert(id) } else { ids = [id] }
@@ -696,28 +704,28 @@ struct DesktopSelection {
         }
     }
 
-    func marquee(hits: Set<URL>, modifiers: NSEvent.ModifierFlags, in items: [DesktopItem]) -> DesktopSelection {
+    func marquee(hits: Set<FileSelectionKey>, modifiers: NSEvent.ModifierFlags, in items: [DesktopItem]) -> DesktopSelection {
         var result = self
         if modifiers.contains(.command) { result.ids.formSymmetricDifference(hits) }
         else if modifiers.contains(.shift) { result.ids.formUnion(hits) }
         else { result.ids = hits }
-        if result.ids.isEmpty { return DesktopSelection() }
-        if result.lead.map(result.ids.contains) != true {
-            result.lead = items.first(where: { result.ids.contains($0.id) })?.id
-        }
-        if result.anchor.map(result.ids.contains) != true { result.anchor = result.lead }
+        result.restoreLeadAndAnchor(in: items)
         return result
     }
 
     mutating func selectAll(in items: [DesktopItem]) {
-        ids = Set(items.map(\.id))
-        if lead == nil { lead = items.first?.id }
+        ids = Set(items.compactMap(\.selectionKey))
+        restoreLeadAndAnchor(in: items)
         anchor = lead
     }
 
     mutating func reconcile(with items: [DesktopItem]) {
-        ids.formIntersection(items.map(\.id))
-        if lead.map(ids.contains) != true { lead = items.first(where: { ids.contains($0.id) })?.id }
+        ids.formIntersection(items.compactMap(\.selectionKey))
+        restoreLeadAndAnchor(in: items)
+    }
+
+    private mutating func restoreLeadAndAnchor(in items: [DesktopItem]) {
+        if lead.map(ids.contains) != true { lead = ids.isEmpty ? nil : items.first(where: contains)?.selectionKey }
         if anchor.map(ids.contains) != true { anchor = lead }
     }
 }
@@ -734,9 +742,11 @@ struct FilePointerSurface: NSViewRepresentable {
 
     static func draggingItems(for urls: [URL], at point: NSPoint) -> [NSDraggingItem] {
         let frame = NSRect(x: point.x - 16, y: point.y - 16, width: 32, height: 32)
-        return urls.map { url in
+        return urls.enumerated().map { index, url in
             let item = NSDraggingItem(pasteboardWriter: url as NSURL)
-            item.setDraggingFrame(frame, contents: NSWorkspace.shared.icon(forFile: url.path))
+            // Show three icons in the pile while publishing a file URL for every item.
+            let image = index < 3 ? NSWorkspace.shared.icon(forFile: url.path) : nil
+            item.setDraggingFrame(frame, contents: image)
             return item
         }
     }
@@ -748,6 +758,11 @@ struct FilePointerSurface: NSViewRepresentable {
         override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
         override func mouseDown(with event: NSEvent) { press = event }
+
+        override func viewWillMove(toWindow newWindow: NSWindow?) {
+            if newWindow == nil { press = nil }
+            super.viewWillMove(toWindow: newWindow)
+        }
 
         override func mouseUp(with event: NSEvent) {
             guard let press else { return }
@@ -784,6 +799,9 @@ struct FilePointerSurface: NSViewRepresentable {
             return menu
         }
 
-        @objc private func requestTrash() { actions?.requestTrash() }
+        @objc private func requestTrash() {
+            guard window != nil else { return }
+            actions?.requestTrash()
+        }
     }
 }

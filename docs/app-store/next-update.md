@@ -1,4 +1,22 @@
-# Mac App Store 1.1.0 (13)
+# Mac App Store 1.1.1 (14) 업데이트 준비
+
+로컬 실행 앱은 `build/Preview-1.1.1-build14/Folder In Bar.app`, Store용 패키지는 `build/AppStore/export-14/Folder In Bar.pkg`입니다. [빌드 검증 기록](../../VALIDATION.md)
+
+### 한국어 업데이트 설명
+
+- 연결한 폴더나 선택한 파일이 같은 경로의 다른 항목으로 교체되면 이를 감지합니다. 새로고침하면 교체된 파일의 선택이 해제되고, 원래 폴더를 확인할 수 없는 경우 다시 연결하도록 안내합니다.
+- 이름순 목록은 파일을 여는 앱이나 최근 사용일을 조회하지 않아 더 빠르게 표시됩니다. 해당 정보는 그 기준으로 정렬할 때 읽습니다.
+- 많은 파일을 드래그할 때 미리보기 아이콘을 최대 세 개 표시합니다. 선택한 파일은 모두 전달합니다.
+- 작은 화면에 맞춰 줄어든 팝업은 큰 화면으로 돌아오면 사용자가 설정한 크기로 복원됩니다.
+
+### English release notes
+
+- Folder In Bar detects when another folder or file takes the place of the one you selected. Refreshing clears the selection for replaced files. If the original folder cannot be verified, you can reconnect it.
+- Folders load faster when sorted by name. Default apps and last-opened dates are looked up when you sort by those fields.
+- Dragging many files starts faster. The preview shows up to three icons and includes every selected file in the drop.
+- When you switch back to a larger display, the panel returns to your preferred size.
+
+## Mac App Store 1.1.0 (13)
 
 2026년 11월 17일 23:56 KST에 기존 1.0.0 (8) 심사 건을 1.1.0 (13)으로 재제출했습니다. App Store Connect에서 **심사 대기 중**을 확인했습니다. [접수 기록](submission-status.json)
 

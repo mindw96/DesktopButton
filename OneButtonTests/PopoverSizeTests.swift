@@ -14,6 +14,31 @@ final class PopoverSizeTests: XCTestCase {
         XCTAssertEqual(PopoverSize(defaults: defaults).size, CGSize(width: 500, height: 540))
     }
 
+    func testMovingBetweenScreensRestoresPreferredDimensions() {
+        let suite = "OneButton.SizeTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let popover = PopoverSize(defaults: defaults)
+        let large = CGSize(width: 1200, height: 1040)
+        let small = CGSize(width: 800, height: 620)
+        let preferred = CGSize(width: 900, height: 850)
+        popover.resize(to: preferred)
+        popover.save()
+
+        popover.fit(in: small, fromLeadingEdge: false)
+        XCTAssertEqual(popover.size, small)
+        popover.fit(in: large, fromLeadingEdge: true)
+        XCTAssertEqual(popover.size, preferred)
+
+        popover.fit(in: small, fromLeadingEdge: false)
+        popover.resize(to: CGSize(width: 700, height: small.height))
+        popover.save()
+        popover.fit(in: large, fromLeadingEdge: true)
+        let resized = CGSize(width: 700, height: preferred.height)
+        XCTAssertEqual(popover.size, resized)
+        XCTAssertEqual(PopoverSize(defaults: defaults).size, resized)
+    }
+
     func testMinimumMaximumAndScreenBounds() {
         let screen = CGSize(width: 800, height: 600)
         XCTAssertEqual(PopoverSize.clamped(CGSize(width: 100, height: 100), available: screen),

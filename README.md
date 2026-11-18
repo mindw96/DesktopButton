@@ -1,6 +1,6 @@
 # 폴더인바 (Folder In Bar)
 
-**Mac App Store 1.1.0 (13)**은 2026년 11월 17일 23:56 KST에 재제출되어 심사 대기 중입니다. 목록·격자에서 여러 파일을 사각형으로 선택해 다른 앱에 한 번에 첨부할 수 있습니다. 한국어·영어, 정렬, 아이콘 크기 조절과 휴지통 이동도 지원합니다. [버전별 변경 사항](docs/app-store/next-update.md) · [심사 접수 기록](docs/app-store/submission-status.json)
+**다음 Mac App Store 업데이트는 1.1.1 (14)입니다.** 연결한 폴더와 선택한 파일의 교체를 감지하고, 이름순 목록과 다중 드래그를 빠르게 준비합니다. 화면 크기가 바뀌면 팝업을 사용자가 지정한 크기로 복원합니다. [버전별 변경 사항](docs/app-store/next-update.md) · [1.1.0 (13) 심사 접수 기록](docs/app-store/submission-status.json)
 
 ![Folder In Bar 앱 아이콘](docs/branding/icon-preview.png)
 

@@ -17,54 +17,71 @@ struct DesktopItem: Identifiable, Equatable, Sendable {
 
     var id: URL { url }
 
+    var selectionKey: FileSelectionKey? {
+        fileIdentity.map { FileSelectionKey(url: url, identity: $0) }
+    }
+
     func isChild(of folder: URL) -> Bool {
         url.isFileURL && !["", "/", ".", ".."].contains(url.lastPathComponent)
             && url.deletingLastPathComponent().standardizedFileURL == folder.standardizedFileURL
     }
 
-    static func contents(of folder: URL) throws -> [DesktopItem] {
-        let keys: Set<URLResourceKey> = [
-            .localizedNameKey, .isDirectoryKey, .isPackageKey, .isRegularFileKey,
-            .fileSizeKey, .localizedTypeDescriptionKey, .addedToDirectoryDateKey,
-            .contentModificationDateKey, .creationDateKey, .tagNamesKey
-        ]
-        let items = try FileManager.default.contentsOfDirectory(
+    static func contents(of folder: URL, for sort: DesktopSort = .name) throws -> [DesktopItem] {
+        var keys: Set<URLResourceKey> = [.localizedNameKey, .isDirectoryKey, .isPackageKey]
+        switch sort {
+        case .name, .application, .lastUsed: break
+        case .size: keys.formUnion([.isRegularFileKey, .fileSizeKey])
+        case .kind: keys.insert(.localizedTypeDescriptionKey)
+        case .added: keys.insert(.addedToDirectoryDateKey)
+        case .modified: keys.insert(.contentModificationDateKey)
+        case .created: keys.insert(.creationDateKey)
+        case .tags: keys.insert(.tagNamesKey)
+        }
+        return try FileManager.default.contentsOfDirectory(
             at: folder,
             includingPropertiesForKeys: Array(keys),
             options: .skipsHiddenFiles
         ).map { url in
             // A disappearing item must not prevent the other files from being listed.
             let values = try? url.resourceValues(forKeys: keys)
-            let applicationName = NSWorkspace.shared.urlForApplication(toOpen: url).map {
-                FileManager.default.displayName(atPath: $0.path)
-            }
-            return DesktopItem(
+            var item = DesktopItem(
                 url: url,
                 name: values?.localizedName ?? url.lastPathComponent,
                 isDirectory: values?.isDirectory == true && values?.isPackage != true,
                 size: values?.isRegularFile == true ? values?.fileSize : nil,
                 kind: values?.localizedTypeDescription,
-                lastUsedDate: NSMetadataItem(url: url)?.value(forAttribute: NSMetadataItemLastUsedDateKey) as? Date,
                 addedDate: values?.addedToDirectoryDate,
                 modifiedDate: values?.contentModificationDate,
                 createdDate: values?.creationDate,
                 tags: values?.tagNames ?? [],
-                applicationName: applicationName,
                 fileIdentity: FileIdentity(url)
             )
+            if sort == .application {
+                item.applicationName = NSWorkspace.shared.urlForApplication(toOpen: url).map {
+                    FileManager.default.displayName(atPath: $0.path)
+                }
+            } else if sort == .lastUsed {
+                item.lastUsedDate = NSMetadataItem(url: url)?.value(forAttribute: NSMetadataItemLastUsedDateKey) as? Date
+            }
+            return item
         }
-        return DesktopSort.name.sorted(items, direction: .ascending)
     }
 }
 
-struct FileIdentity: Equatable, Sendable {
+struct FileSelectionKey: Hashable, Sendable {
+    let url: URL
+    let identity: FileIdentity
+}
+
+struct FileIdentity: Hashable, Sendable {
     private let volume: dev_t
     private let inode: ino_t
 
-    init?(_ url: URL) {
+    init?(_ url: URL, followingSymlinks: Bool = false) {
         var info = stat()
-        // Identify the directory entry itself, including a symlink whose target is elsewhere.
-        guard lstat(url.path, &info) == 0 else { return nil }
+        // Selected items refer to the entry; a connected folder refers to its contents.
+        let result = followingSymlinks ? stat(url.path, &info) : lstat(url.path, &info)
+        guard result == 0 else { return nil }
         volume = info.st_dev
         inode = info.st_ino
     }

@@ -119,13 +119,25 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
 
     private func showPopover() {
         guard !popover.isShown, let button = statusItem?.button else { return }
-        if let window = button.window, let screen = window.screen {
-            let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
-            let visible = screen.visibleFrame
-            popoverSize.fit(in: CGSize(width: visible.width - 24, height: visible.height - 60),
-                            fromLeadingEdge: anchor.midX >= visible.midX)
-        }
+        fitPopover(to: button.window?.screen)
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    }
+
+    private func fitPopover(to screen: NSScreen?) {
+        guard let screen, let button = statusItem?.button, let window = button.window else { return }
+        let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
+        let visible = screen.visibleFrame
+        popoverSize.fit(in: CGSize(width: visible.width - 24, height: visible.height - 60),
+                        fromLeadingEdge: anchor.midX >= visible.midX)
+    }
+
+    @objc private func popoverScreenChanged(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow else { return }
+        fitPopover(to: window.screen)
+    }
+
+    func applicationDidChangeScreenParameters(_ notification: Notification) {
+        if popover.isShown { fitPopover(to: popover.contentViewController?.view.window?.screen) }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -144,6 +156,8 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
         }
         loginItemController.refresh()
         if let window = popover.contentViewController?.view.window {
+            NotificationCenter.default.addObserver(self, selector: #selector(popoverScreenChanged(_:)),
+                                                   name: NSWindow.didChangeScreenNotification, object: window)
             // Keep the popover available above other apps' fullscreen windows after Dock policy changes.
             window.collectionBehavior.subtract([.moveToActiveSpace, .primary, .auxiliary,
                                                 .fullScreenPrimary, .fullScreenNone])
@@ -154,6 +168,7 @@ final class MenuBarController: NSObject, NSApplicationDelegate, NSPopoverDelegat
     }
 
     func popoverDidClose(_ notification: Notification) {
+        NotificationCenter.default.removeObserver(self, name: NSWindow.didChangeScreenNotification, object: nil)
         stopOutsideClickMonitor()
     }
 
